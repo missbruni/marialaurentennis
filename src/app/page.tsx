@@ -12,7 +12,7 @@ export default function HomePage() {
   };
 
   return (
-    <main className="relative min-h-screen w-full flex flex-col items-center justify-start text-white">
+    <main className="relative min-h-screen w-full flex flex-col items-center justify-start">
       <Hero onBookLesson={handleScrollToBooking} />
       <div className="bg-gray-50 flex items-center w-full">
         <BookingForm bookingRef={bookingRef} />

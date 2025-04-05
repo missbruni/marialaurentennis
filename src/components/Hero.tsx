@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Button } from "./ui/button";
 
 type HeroProps = {
   onBookLesson: () => void;
@@ -6,7 +6,8 @@ type HeroProps = {
 const Hero: React.FC<HeroProps> = ({ onBookLesson }) => {
   return (
     <section className="relative h-screen w-full flex items-center justify-center text-white">
-      <div className="absolute inset-0 bg-[url('/tennis-hero1.jpg')] bg-cover bg-center opacity-80"></div>
+      <div className="absolute inset-0 bg-[url('/tennis-hero1.jpg')] bg-cover bg-center bg-fixed opacity-80"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/30 z-0"></div>
       <div className="relative z-10 text-center px-4">
         <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
           Maria Lauren Tennis
@@ -15,12 +16,14 @@ const Hero: React.FC<HeroProps> = ({ onBookLesson }) => {
           Personalized coaching, convenient scheduling, and world-class support
           to level up your game.
         </p>
-        <button
+        <Button
           onClick={onBookLesson}
-          className="bg-white text-black font-semibold px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition"
+          size="lg"
+          variant="secondary"
+          className="bg-white text-black font-semibold px-6 py-3 no-border"
         >
           Book a Lesson
-        </button>
+        </Button>
       </div>
     </section>
   );
