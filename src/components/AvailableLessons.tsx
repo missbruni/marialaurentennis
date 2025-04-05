@@ -1,22 +1,20 @@
-import { format } from "date-fns/format";
-import { Availability } from "../graphql/availabilities";
-import Lesson from "./Lesson";
-import { DATE_FORMAT } from "./BookingForm";
+import { format } from 'date-fns/format';
+import { Availability } from '../graphql/availabilities';
+import Lesson from './Lesson';
+import { DATE_FORMAT } from './BookingForm';
 
 type AvailableLessonsProps = {
-  availabilities: Availability[];
+  availableLessons: Availability[];
   date: Date;
 };
-const AvailableLessons: React.FC<AvailableLessonsProps> = ({
-  availabilities,
-  date,
-}) => {
+
+const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, date }) => {
   if (!date) return null;
   const formattedDate = format(date, DATE_FORMAT);
 
-  if (availabilities.length === 0) {
+  if (availableLessons.length === 0) {
     return (
-      <p className="text-center text-gray-800 px-24">
+      <p className="text-center text-gray-800 px-24 animate-fade-in">
         No lessons available on {formattedDate}
       </p>
     );
@@ -28,15 +26,16 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({
         Available Lessons on {formattedDate}
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {availabilities.map((availability, index) => (
+        {availableLessons.map((availability, index) => (
           <Lesson
             key={index}
             lesson={availability}
-            onLessonSelected={() => console.log("lesson selected")}
+            onLessonSelected={() => console.log('lesson selected')}
           />
         ))}
       </div>
     </div>
   );
 };
+
 export default AvailableLessons;

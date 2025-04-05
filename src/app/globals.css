@@ -1,10 +1,10 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  --font-family: 'Montserrat', Arial, Helvetica, sans-serif;
   --font-weight: 500;
 
   /* Shadcn/UI variables can be added here */

@@ -1,35 +1,47 @@
-import React from "react";
+import React from 'react';
 
-import { FieldValues } from "react-hook-form";
+import { FieldValues } from 'react-hook-form';
 import {
   Form,
   FormControl,
   FormDescription,
   FormItem,
   FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "./ui/button";
-import { cn } from "../lib/utils";
-import { CalendarIcon } from "lucide-react";
-import { format, isBefore } from "date-fns";
+  FormMessage
+} from '@/components/ui/form';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from './ui/button';
+import { cn } from '../lib/utils';
+import { CalendarIcon, Loader2 } from 'lucide-react';
+import { format, isBefore, isEqual, isAfter, endOfMonth, addMonths, subMonths } from 'date-fns';
 
 type DatePickerProps = {
   field: FieldValues;
+  availableDates?: Date[];
+  isLoading: boolean;
 };
 
-const DatePicker: React.FC<DatePickerProps> = ({ field }) => {
+const DatePicker: React.FC<DatePickerProps> = ({ field, availableDates = [], isLoading }) => {
   const [open, setOpen] = React.useState(false);
+  const [currentMonth, setCurrentMonth] = React.useState<Date>(new Date());
+
+  const lastAvailableMonth = addMonths(endOfMonth(availableDates[availableDates.length - 1]), 1);
 
   const onDateChange = (date?: Date) => {
     field.onChange(date);
     setOpen(false);
+  };
+
+  const isDayDisabled = (date: Date) => {
+    if (isBefore(date, new Date())) return true;
+
+    if (availableDates.length > 0) {
+      return !availableDates.some((availableDate) =>
+        isEqual(new Date(availableDate.setHours(0, 0, 0, 0)), new Date(date.setHours(0, 0, 0, 0)))
+      );
+    }
+    return false;
   };
 
   return (
@@ -41,12 +53,16 @@ const DatePicker: React.FC<DatePickerProps> = ({ field }) => {
             <Button
               variant="outline"
               className={cn(
-                "w-full pl-3 text-left font-normal",
-                !field.value && "text-muted-foreground"
+                'w-full pl-3 text-left font-normal',
+                !field.value && 'text-muted-foreground'
               )}
             >
-              {field.value ? format(field.value, "PPP") : "Pick a lesson date"}
-              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+              {field.value ? format(field.value, 'PPP') : 'Pick a date'}
+              {isLoading ? (
+                <Loader2 className="ml-auto h-4 w-4 animate-spin" />
+              ) : (
+                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+              )}
             </Button>
           </FormControl>
         </PopoverTrigger>
@@ -54,9 +70,14 @@ const DatePicker: React.FC<DatePickerProps> = ({ field }) => {
           <Calendar
             mode="single"
             initialFocus
+            numberOfMonths={2}
+            month={currentMonth}
             selected={field.value}
-            disabled={(date) => isBefore(date, new Date())}
+            disabled={isDayDisabled}
             onSelect={onDateChange}
+            toMonth={lastAvailableMonth}
+            onMonthChange={setCurrentMonth}
+            fromMonth={subMonths(availableDates[0], 1)}
           />
         </PopoverContent>
       </Popover>
