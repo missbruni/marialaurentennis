@@ -1,36 +1,37 @@
-import React from "react";
+import React from 'react';
 
-import { Availability } from "@/graphql/availabilities";
-import { formatCurrency } from "@/lib/currency";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { LessonAvailability } from '@/graphql/availabilities';
+import { Card, CardContent } from './ui/card';
+import { formatTime } from '../lib/date';
+import { Typography } from './ui/typography';
+import PriceTag from './PriceTag';
+import { formatCurrency } from '../lib/currency';
+import { format } from 'date-fns';
 
 type LessonProps = {
-  lesson: Availability;
-  onLessonSelected: (lesson: Availability) => void;
+  lesson: LessonAvailability;
+  onLessonSelected: (lesson: LessonAvailability) => void;
 };
 
 const Lesson: React.FC<LessonProps> = ({ lesson, onLessonSelected }) => {
   return (
     <Card
-      title={lesson.title}
-      className="transition-transform hover:translate-y-[-4px] hover:shadow-md cursor-pointer bg-[#eef2ee]"
+      className="relative transition-transform hover:translate-y-[-4px] shadow-md hover:shadow-lg cursor-pointer"
       onClick={() => onLessonSelected(lesson)}
     >
-      <CardHeader>
-        <CardTitle>{lesson.title}</CardTitle>
-        <CardDescription>
-          Time: {lesson.lessonAvailability.availabilityStartTime} -{" "}
-          {lesson.lessonAvailability.availabilityEndTime}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p className="text-gray-700 font-medium">
-          Price: {formatCurrency(lesson.lessonAvailability.price)}
-        </p>
+      <CardContent className="flex flex-col align-center justify-center gap-1">
+        <Typography.Small className="text-gray-700 whitespace-nowrap">
+          {format(lesson.availabilityDate, 'EEEE, MMMM d')}
+        </Typography.Small>
+        <Typography.Large className="text-gray-700 whitespace-nowrap">
+          {formatTime(lesson.availabilityStartTime)} - {formatTime(lesson.availabilityEndTime)}
+        </Typography.Large>
+        <Typography.P className="text-lime-600 font-bold">
+          {formatCurrency(lesson.price)}
+        </Typography.P>
       </CardContent>
     </Card>
   );
 };
 
 export default Lesson;
-

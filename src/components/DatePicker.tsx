@@ -2,7 +2,6 @@ import React from 'react';
 
 import { FieldValues } from 'react-hook-form';
 import {
-  Form,
   FormControl,
   FormDescription,
   FormItem,
@@ -14,15 +13,22 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from './ui/button';
 import { cn } from '../lib/utils';
 import { CalendarIcon, Loader2 } from 'lucide-react';
-import { format, isBefore, isEqual, isAfter, endOfMonth, addMonths, subMonths } from 'date-fns';
+import { format, isEqual, endOfMonth, addMonths, subMonths } from 'date-fns';
 
 type DatePickerProps = {
   field: FieldValues;
   availableDates?: Date[];
   isLoading: boolean;
+  disabled: boolean;
 };
 
-const DatePicker: React.FC<DatePickerProps> = ({ field, availableDates = [], isLoading }) => {
+const DatePicker: React.FC<DatePickerProps> = ({
+  field,
+  availableDates = [],
+  isLoading,
+  disabled
+}) => {
+  console.log('🚀 ~ availableDates:', availableDates);
   const [open, setOpen] = React.useState(false);
   const [currentMonth, setCurrentMonth] = React.useState<Date>(new Date());
 
@@ -34,14 +40,12 @@ const DatePicker: React.FC<DatePickerProps> = ({ field, availableDates = [], isL
   };
 
   const isDayDisabled = (date: Date) => {
-    if (isBefore(date, new Date())) return true;
-
     if (availableDates.length > 0) {
       return !availableDates.some((availableDate) =>
         isEqual(new Date(availableDate.setHours(0, 0, 0, 0)), new Date(date.setHours(0, 0, 0, 0)))
       );
     }
-    return false;
+    return true;
   };
 
   return (
@@ -51,6 +55,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ field, availableDates = [], isL
         <PopoverTrigger asChild>
           <FormControl>
             <Button
+              disabled={disabled}
               variant="outline"
               className={cn(
                 'w-full pl-3 text-left font-normal',

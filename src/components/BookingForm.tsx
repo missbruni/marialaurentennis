@@ -7,24 +7,41 @@ import { parseISO, format } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import AvailableLessons from './AvailableLessons';
 import { z } from 'zod';
-import { Form, FormField } from './ui/form';
+import { Form, FormDescription, FormField, FormItem, FormLabel } from './ui/form';
+import TennisBall from './TennisBall';
+import { Typography } from './ui/typography';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue
+} from './ui/select';
 
 type BookingFormProps = {
   bookingRef: React.RefObject<HTMLDivElement | null>;
 };
 
+export const DATE_FORMAT = 'yyyy-MM-dd';
 const BookingFormSchema = z.object({
-  date: z.date({
-    required_error: 'Please select a date.'
-  })
+  location: z.string({
+    required_error: 'Please select a location.'
+  }),
+  date: z
+    .date({
+      required_error: 'Please select a date.'
+    })
+    .optional()
 });
 
-export const DATE_FORMAT = 'yyyy-MM-dd';
 const BookingForm: React.FC<BookingFormProps> = ({ bookingRef }) => {
   const form = useForm<z.infer<typeof BookingFormSchema>>({
     resolver: zodResolver(BookingFormSchema),
     defaultValues: {
-      date: undefined
+      date: undefined,
+      location: undefined
     }
   });
 
@@ -34,51 +51,92 @@ const BookingForm: React.FC<BookingFormProps> = ({ bookingRef }) => {
   });
 
   const selectedDate = form.watch('date');
+  const selectedLocation = form.watch('location');
 
-  const availableDates = React.useMemo(() => {
-    if (!data) return [];
+  const datesByLocation = React.useMemo(() => {
+    if (!data || !selectedLocation) return;
+
+    return data.filter((lesson) => lesson.location.toLowerCase().includes(selectedLocation));
+  }, [data, selectedLocation]);
+
+  const availableLessons = React.useMemo(() => {
+    if (!datesByLocation || !selectedDate) return [];
+
+    return datesByLocation.filter((lesson) => {
+      return lesson.availabilityDate.split('T')[0] === format(selectedDate, DATE_FORMAT);
+    });
+  }, [data, selectedDate, selectedLocation]);
+
+  const availableUniqueDates = React.useMemo(() => {
+    if (!datesByLocation) return [];
 
     const uniqueDates = new Set<string>();
-    data.forEach((availability) => {
-      uniqueDates.add(availability.lessonAvailability.availabilityDate);
+    datesByLocation.forEach((availability) => {
+      uniqueDates.add(availability.availabilityDate);
     });
 
     return Array.from(uniqueDates).map((dateString) => parseISO(dateString));
-  }, [data]);
+  }, [datesByLocation]);
 
-  const availableLessonSlots = React.useMemo(() => {
-    if (!data || !selectedDate) return [];
-
-    return data.filter((availability) => {
-      const availabilityDate = format(
-        parseISO(availability.lessonAvailability.availabilityDate),
-        DATE_FORMAT
-      );
-      return availabilityDate === format(selectedDate, DATE_FORMAT);
-    });
-  }, [data, selectedDate]);
+  React.useEffect(() => {
+    form.setValue('date', undefined);
+  }, [selectedLocation, form]);
 
   return (
-    <section ref={bookingRef} className="bg-gray-50 min-h-screen w-full">
-      <div className="flex w-full p-24">
+    <section ref={bookingRef} className="bg-gray-50 min-h-screen w-full relative overflow-hidden">
+      <TennisBall />
+
+      {/* SECTION MESSAGE */}
+      <div className="flex flex-col lg:flex-row w-full p-24 relative z-1 gap-2">
         <div className="flex-1 p-2">
-          <h2 className="text-2xl md:text-4xl mb-6 text-gray-800">
+          <Typography.H2 className="mb-6 text-gray-800">
             <span className="font-bold text-lime-500">Lessons:</span> Improve your game
-          </h2>
-          <h6 className="text-sm md:text-base text-gray-800">
+          </Typography.H2>
+          <Typography.P className="text-sm md:text-base text-gray-800">
             Whether you're picking up a racket for the first time or looking to refine your
             technique, our private tennis lessons are tailored to your level and goals. Book a
             session today and take the next step in your tennis journey.
-          </h6>
+          </Typography.P>
         </div>
-        <div className="p-2 flex flex-1 justify-center items-start">
+
+        {/* TODO: show date only after location is selected, with animation and human language, from bottom to top */}
+
+        {/* FORM */}
+        <div className="p-2 flex flex-1 items-start">
           <Form {...form}>
-            <div className="flex flex-col gap-2 w-96">
+            <div className="flex flex-col gap-6 w-96">
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger className="w-full bg-white">
+                        <SelectValue placeholder="Select a location" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Locations</SelectLabel>
+                          <SelectItem value="sundridge">Sundridge Park</SelectItem>
+                          <SelectItem value="muswell">Muswell Hill Methodist (LTC)</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>Choose a tennis club.</FormDescription>
+                  </FormItem>
+                )}
+              ></FormField>
               <FormField
                 control={form.control}
                 name="date"
                 render={({ field }) => (
-                  <DatePicker field={field} availableDates={availableDates} isLoading={isLoading} />
+                  <DatePicker
+                    field={field}
+                    availableDates={availableUniqueDates}
+                    isLoading={isLoading}
+                    disabled={!selectedLocation}
+                  />
                 )}
               />
             </div>
@@ -86,10 +144,20 @@ const BookingForm: React.FC<BookingFormProps> = ({ bookingRef }) => {
         </div>
       </div>
 
-      {isLoading && <p className="text-center text-gray-800">Loading...</p>}
-      {error && <p className="text-center text-red-500">Error loading lessons</p>}
+      {isLoading && (
+        <Typography.P className="text-center text-gray-800 relative z-10">Loading...</Typography.P>
+      )}
+      {error && (
+        <Typography.P className="text-center text-red-500 relative z-10">
+          Error loading lessons
+        </Typography.P>
+      )}
 
-      <AvailableLessons availableLessons={availableLessonSlots} date={selectedDate} />
+      {selectedDate && (
+        <div className="ml-[180px] relative z-10">
+          <AvailableLessons availableLessons={availableLessons} date={selectedDate} />
+        </div>
+      )}
     </section>
   );
 };
