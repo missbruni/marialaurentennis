@@ -83,16 +83,19 @@ const BookingForm: React.FC<BookingFormProps> = ({ bookingRef }) => {
   }, [selectedLocation, form]);
 
   return (
-    <section ref={bookingRef} className="bg-gray-50 min-h-screen w-full relative overflow-hidden">
+    <section
+      ref={bookingRef}
+      className="bg-gray-100 dark:bg-background min-h-screen w-full relative overflow-hidden"
+    >
       <TennisBall />
 
       {/* SECTION MESSAGE */}
       <div className="flex flex-col lg:flex-row w-full p-24 relative z-1 gap-2">
         <div className="flex-1 p-2">
-          <Typography.H2 className="mb-6 text-gray-800">
+          <Typography.H2 className="mb-6 text-foreground">
             <span className="font-bold text-lime-500">Lessons:</span> Improve your game
           </Typography.H2>
-          <Typography.P className="text-sm md:text-base text-gray-800">
+          <Typography.P className="text-sm md:text-base text-foreground">
             Whether you're picking up a racket for the first time or looking to refine your
             technique, our private tennis lessons are tailored to your level and goals. Book a
             session today and take the next step in your tennis journey.
@@ -102,7 +105,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ bookingRef }) => {
         {/* TODO: show date only after location is selected, with animation and human language, from bottom to top */}
 
         {/* FORM */}
-        <div className="p-2 flex flex-1 items-start">
+        <div className="p-2 flex flex-1 items-start justify-start lg:justify-center">
           <Form {...form}>
             <div className="flex flex-col gap-6 w-96">
               <FormField
@@ -145,7 +148,9 @@ const BookingForm: React.FC<BookingFormProps> = ({ bookingRef }) => {
       </div>
 
       {isLoading && (
-        <Typography.P className="text-center text-gray-800 relative z-10">Loading...</Typography.P>
+        <Typography.P className="text-center text-foreground relative z-10">
+          Loading...
+        </Typography.P>
       )}
       {error && (
         <Typography.P className="text-center text-red-500 relative z-10">

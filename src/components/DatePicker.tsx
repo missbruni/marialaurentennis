@@ -58,7 +58,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
               disabled={disabled}
               variant="outline"
               className={cn(
-                'w-full pl-3 text-left font-normal',
+                'w-full pl-3 text-left font-normal border border-input',
                 !field.value && 'text-muted-foreground'
               )}
             >
