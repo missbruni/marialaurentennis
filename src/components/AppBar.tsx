@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ModeToggle } from './ThemeToggle';
+import { ThemeToggle } from './ThemeToggle';
 import { Menu, X } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -60,7 +60,7 @@ const AppBar = ({ onBookLesson }: { onBookLesson: () => void }) => {
         </nav>
 
         <div className="flex items-center gap-4">
-          <ModeToggle />
+          <ThemeToggle />
           <Link
             href="#"
             className="hidden md:inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-white/20 text-foreground h-9 px-4"
