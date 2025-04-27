@@ -1,5 +1,11 @@
 import type { User } from 'firebase/auth';
-import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import {
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut
+} from 'firebase/auth';
 import React from 'react';
 import { auth } from '../../lib/firebase';
 
@@ -7,6 +13,7 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithFacebook: () => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -22,6 +29,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await signInWithPopup(auth, provider);
     } catch (error) {
       console.error('Error signing in with Google:', error);
+    }
+  }, []);
+
+  const signInWithFacebook = React.useCallback(async () => {
+    const provider = new FacebookAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error('Error signing in with Facebook:', error);
     }
   }, []);
 
@@ -46,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     loading,
     signInWithGoogle,
+    signInWithFacebook,
     logout
   };
 

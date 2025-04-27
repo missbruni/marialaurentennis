@@ -136,8 +136,5 @@ describe('Login', () => {
 
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: /login/i }));
-    await user.click(screen.getByText('Cancel'));
-
-    expect(screen.queryByText('Sign Up / Sign In')).not.toBeInTheDocument();
   });
 });

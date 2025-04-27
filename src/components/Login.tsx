@@ -1,12 +1,14 @@
 'use client';
 
 import { useAuth } from './hooks/useAuth';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from './ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from './ui/dialog';
 
 import React from 'react';
 
 import GoogleIcon from '@/lib/icons/Google';
 import LoginIndicator from './LoginIndicator';
+import { Button } from './ui/button';
+import FacebookIcon from '../lib/icons/Facebook';
 
 type LoginProps = {
   className?: string;
@@ -14,7 +16,7 @@ type LoginProps = {
 };
 
 export default function Login({ onClick }: LoginProps) {
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, signInWithFacebook } = useAuth();
   const [isOpen, setIsOpen] = React.useState(false);
 
   function openModal() {
@@ -41,27 +43,29 @@ export default function Login({ onClick }: LoginProps) {
           <DialogDescription>Please sign in to continue.</DialogDescription>
 
           <div className="flex flex-col gap-4">
-            <button
+            <Button
+              className="w-full py-2 border border-gray-300 rounded flex items-center justify-center gap-2"
               onClick={async () => {
                 await signInWithGoogle();
                 closeModal();
               }}
-              className="w-full py-2 border border-gray-300 rounded flex items-center justify-center gap-2"
             >
               <GoogleIcon />
               Continue with Google
-            </button>
+            </Button>
+            <Button
+              className="w-full py-2 border border-gray-300 rounded flex items-center justify-center gap-2"
+              onClick={async () => {
+                await signInWithFacebook();
+                closeModal();
+              }}
+            >
+              <FacebookIcon />
+              Continue with Facebook
+            </Button>
 
             {/* TODO: add other providers */}
           </div>
-          <DialogFooter>
-            <button
-              onClick={closeModal}
-              className="mt-4 text-blue-600 hover:underline w-full text-center"
-            >
-              Cancel
-            </button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
