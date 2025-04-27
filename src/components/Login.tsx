@@ -53,17 +53,20 @@ export default function Login({ onClick }: LoginProps) {
               <GoogleIcon />
               Continue with Google
             </Button>
-            <Button
-              className="w-full py-2 border border-gray-300 rounded flex items-center justify-center gap-2"
-              onClick={async () => {
-                await signInWithFacebook();
-                closeModal();
-              }}
-            >
-              <FacebookIcon />
-              Continue with Facebook
-            </Button>
 
+            {/* Needs business verification */}
+            {process.env.NODE_ENV !== 'production' && (
+              <Button
+                className="w-full py-2 border border-gray-300 rounded flex items-center justify-center gap-2"
+                onClick={async () => {
+                  await signInWithFacebook();
+                  closeModal();
+                }}
+              >
+                <FacebookIcon />
+                Continue with Facebook
+              </Button>
+            )}
             {/* TODO: add other providers */}
           </div>
         </DialogContent>
