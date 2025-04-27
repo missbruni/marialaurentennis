@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from './ui/button';
 import { cn } from '../lib/utils';
 import { CalendarIcon, Loader2 } from 'lucide-react';
-import { format, isEqual, endOfMonth, addMonths, subMonths } from 'date-fns';
+import { format, isEqual, endOfMonth, addMonths, startOfDay, isBefore } from 'date-fns';
 
 type DatePickerProps = {
   field: FieldValues;
@@ -29,14 +29,14 @@ const DatePicker: React.FC<DatePickerProps> = ({
   helperText,
   isLoading,
   disabled,
-  availableDates = [],
+  availableDates,
   numberOfMonths = 2
 }) => {
   const [open, setOpen] = React.useState(false);
   const [currentMonth, setCurrentMonth] = React.useState<Date>(new Date());
 
   const lastAvailableMonth =
-    availableDates.length > 0
+    availableDates && availableDates.length > 0
       ? addMonths(endOfMonth(availableDates[availableDates.length - 1]), 1)
       : addMonths(new Date(), 12);
 
@@ -46,16 +46,17 @@ const DatePicker: React.FC<DatePickerProps> = ({
   };
 
   const isDayDisabled = (date: Date) => {
-    if (availableDates.length === 0) {
-      return true;
+    const dateToCheck = startOfDay(date);
+    const today = startOfDay(new Date());
+
+    if (!availableDates) {
+      return isBefore(dateToCheck, today);
     }
 
-    return !availableDates.some((availableDate) =>
-      isEqual(new Date(availableDate.setHours(0, 0, 0, 0)), new Date(date.setHours(0, 0, 0, 0)))
-    );
+    return !availableDates.some((availableDate) => isEqual(startOfDay(availableDate), dateToCheck));
   };
 
-  const fromMonth = availableDates.length > 0 ? subMonths(availableDates[0], 1) : new Date();
+  const fromMonth = availableDates && availableDates.length > 0 ? availableDates[0] : new Date();
 
   return (
     <FormItem className="flex flex-col">
@@ -67,7 +68,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
               disabled={disabled}
               variant="outline"
               className={cn(
-                'w-full pl-3 text-left font-normal border border-input dark:bg-transparent bg-white',
+                'w-full pl-3 text-left font-normal border border-input bg-transparent',
                 !field.value && 'text-muted-foreground'
               )}
             >
