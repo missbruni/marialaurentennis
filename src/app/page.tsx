@@ -1,0 +1,16 @@
+'use client';
+
+import Hero from '@/components/Hero';
+import BookingForm from '@/components/BookingForm';
+import React from 'react';
+
+export default function HomePage() {
+  return (
+    <main className="relative w-full flex flex-col items-center justify-start">
+      <Hero />
+      <div className="bg-background flex items-center w-full">
+        <BookingForm />
+      </div>
+    </main>
+  );
+}
