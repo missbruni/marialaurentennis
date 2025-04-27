@@ -14,15 +14,17 @@ const LoginIndicator: React.FC<LoginIndicatorProps> = ({ onLoginClick }) => {
   return user ? (
     <Popover>
       <PopoverTrigger asChild>
-        <div className="relative w-10 h-10 rounded-full overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
+        <Avatar className="object-cover relative w-10 h-10 rounded-full overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
           {user.photoURL ? (
-            <Avatar className="w-full h-full object-cover">
-              <AvatarImage src={user.photoURL} alt={`${user.displayName || 'User'}'s profile`} />
-            </Avatar>
+            <AvatarImage
+              data-testid="avatar-image"
+              src={user.photoURL}
+              alt={`${user.displayName || 'User'}'s profile`}
+            />
           ) : (
             <AvatarFallback>{user.displayName?.charAt(0)}</AvatarFallback>
           )}
-        </div>
+        </Avatar>
       </PopoverTrigger>
       <PopoverContent className="w-56 p-2">
         <div className="flex flex-col gap-2">

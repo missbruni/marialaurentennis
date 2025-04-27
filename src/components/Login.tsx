@@ -2,13 +2,10 @@
 
 import { useAuth } from './hooks/useAuth';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from './ui/dialog';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 import React from 'react';
 
 import GoogleIcon from '@/lib/icons/Google';
-import { Button } from './ui/button';
 import LoginIndicator from './LoginIndicator';
 
 type LoginProps = {
@@ -17,7 +14,7 @@ type LoginProps = {
 };
 
 export default function Login({ onClick }: LoginProps) {
-  const { signInWithGoogle, user } = useAuth();
+  const { signInWithGoogle } = useAuth();
   const [isOpen, setIsOpen] = React.useState(false);
 
   function openModal() {

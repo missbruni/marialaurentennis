@@ -47,12 +47,8 @@ describe('Login', () => {
     render(<Login />);
 
     expect(screen.queryByRole('button', { name: /login/i })).not.toBeInTheDocument();
-
-    const avatarContainer = screen.getByText('T');
-    expect(avatarContainer).toBeInTheDocument();
-
-    const avatarElement = document.querySelector('[data-slot="avatar"]');
-    expect(avatarElement).toBeInTheDocument();
+    const avatarPopover = document.querySelector('[data-slot="popover-trigger"]');
+    expect(avatarPopover).toBeInTheDocument();
   });
 
   test('should render avatar with fallback when user has no photo', () => {
