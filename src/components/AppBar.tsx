@@ -26,11 +26,11 @@ const AppBar = () => {
   const logoSrc = theme === 'dark' ? '/fullname-white.svg' : '/fullname.svg';
 
   return (
-    <header className="sticky top-0 z-50 w-full h-20 px-4 md:px-8 dark:bg-[#181818] bg-white">
-      <div className="max-w-screen-2xl mx-auto flex h-20 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full h-18 px-4 md:px-8 dark:bg-[#181818] bg-white">
+      <div className="max-w-screen-2xl mx-auto flex h-18 items-center justify-between">
         <div className="flex items-center gap-2">
           <Link href="/" className="font-bold text-xl text-foreground">
-            <Image src={logoSrc} alt="Maria Lauren Tennis" width={80} height={64} />
+            <Image src={logoSrc} alt="Maria Lauren Tennis" width={70} height={50} />
           </Link>
         </div>
 
