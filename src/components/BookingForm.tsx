@@ -61,7 +61,7 @@ const BookingForm: React.FC = () => {
   const selectedLocation = form.watch('location');
 
   const datesByLocation = React.useMemo(() => {
-    if (!availabilities || !selectedLocation) return;
+    if (!availabilities || !selectedLocation) return [];
 
     return availabilities.filter((availability) =>
       availability.location.toLowerCase().includes(selectedLocation)
@@ -80,7 +80,7 @@ const BookingForm: React.FC = () => {
   }, [datesByLocation, selectedDate]);
 
   const availableUniqueDates = React.useMemo(() => {
-    if (!datesByLocation) return [];
+    if (!datesByLocation || datesByLocation.length === 0) return [];
 
     const uniqueDates = new Set<string>();
     datesByLocation.forEach((availability) => {

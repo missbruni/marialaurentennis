@@ -1,15 +1,21 @@
 import { useBookingForm } from './hooks/useBookingForm';
 import { Button } from './ui/button';
-
+import Image from 'next/image';
 const Hero: React.FC = () => {
   const { scrollToBookingForm } = useBookingForm();
 
   return (
     <section className="relative h-screen w-full flex items-center justify-center text-white bg-white">
-      <div className="absolute inset-0 bg-[url('/tennis-hero1.jpg')] bg-cover bg-center bg-fixed opacity-80"></div>
+      <div className="absolute inset-0 bg-[url('/tennis-hero-3.jpeg')] bg-cover bg-center bg-fixed opacity-80"></div>
       <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/30 z-0"></div>
-      <div className="relative z-10 text-center px-4">
-        <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">Maria Lauren Tennis</h1>
+      <div className="relative z-10 text-center mx-auto flex items-center justify-center flex-col">
+        <Image
+          src="/fullname-white.svg"
+          alt="Maria Lauren Tennis"
+          width={300}
+          height={50}
+          className="mb-8"
+        />
         <p className="text-lg md:text-xl max-w-xl mx-auto mb-6 drop-shadow-md">
           Personalized coaching, convenient scheduling, and world-class support to level up your
           game.

@@ -83,7 +83,7 @@ describe('Login', () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: /login/i }));
 
-    expect(screen.getByText('Sign Up / Sign In')).toBeInTheDocument();
+    expect(screen.getByText('Sign Up Sign In')).toBeInTheDocument();
     expect(screen.getByText('Please sign in to continue.')).toBeInTheDocument();
     expect(screen.getByText('Continue with Google')).toBeInTheDocument();
   });

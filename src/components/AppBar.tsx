@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ThemeToggle } from './ThemeToggle';
@@ -7,12 +7,15 @@ import { Button } from './ui/button';
 import Login from './Login';
 import { useBookingForm } from './hooks/useBookingForm';
 import { useTheme } from 'next-themes';
+import { useAuth } from './hooks/useAuth';
 
 const AppBar = () => {
   const { theme } = useTheme();
+  const { user } = useAuth();
   const { scrollToBookingForm } = useBookingForm();
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [logoSrc, setLogoSrc] = React.useState('');
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -23,7 +26,9 @@ const AppBar = () => {
     setMobileMenuOpen(false);
   };
 
-  const logoSrc = theme === 'dark' ? '/fullname-white.svg' : '/fullname.svg';
+  React.useEffect(() => {
+    setLogoSrc(theme === 'dark' ? '/fullname-white.svg' : '/fullname.svg');
+  }, [theme]);
 
   return (
     <header className="sticky top-0 z-50 w-full h-18 px-4 md:px-8 dark:bg-[#181818] bg-white">
@@ -54,12 +59,16 @@ const AppBar = () => {
           >
             Coaches
           </Link>
-          <Link
-            href="/admin"
-            className="font-medium text-foreground hover:text-primary hover:font-bold transition-all duration-200"
-          >
-            Admin
-          </Link>
+
+          {/* TODO: add this to admin role users only */}
+          {user?.email === 'brunalima@me.com' && (
+            <Link
+              href="/admin"
+              className="font-medium text-foreground hover:text-primary hover:font-bold transition-all duration-200"
+            >
+              Admin
+            </Link>
+          )}
           <Link
             href="#"
             className="font-medium text-foreground hover:text-primary hover:font-bold transition-all duration-200"

@@ -4,16 +4,21 @@ import {
   FacebookAuthProvider,
   onAuthStateChanged,
   signInWithPopup,
-  signOut
+  signOut,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword
 } from 'firebase/auth';
 import React from 'react';
 import { auth } from '../../lib/firebase';
 
-type AuthContextType = {
+type AuthEmailPassword = (email: string, password: string) => Promise<void>;
+export type AuthContextType = {
   user: User | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithFacebook: () => Promise<void>;
+  signInWithEmail: AuthEmailPassword;
+  signUpWithEmail: AuthEmailPassword;
   logout: () => Promise<void>;
 };
 
@@ -41,6 +46,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const signInWithEmail = React.useCallback(async (email: string, password: string) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      console.error('Error signing in with email/password:', error);
+      throw error;
+    }
+  }, []);
+
+  const signUpWithEmail = React.useCallback(async (email: string, password: string) => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      console.error('Error signing up with email/password:', error);
+      throw error;
+    }
+  }, []);
+
   const logout = React.useCallback(async () => {
     try {
       await signOut(auth);
@@ -63,6 +86,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     signInWithGoogle,
     signInWithFacebook,
+    signInWithEmail,
+    signUpWithEmail,
     logout
   };
 

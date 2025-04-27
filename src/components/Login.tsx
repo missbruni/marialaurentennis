@@ -9,6 +9,7 @@ import GoogleIcon from '@/lib/icons/Google';
 import LoginIndicator from './LoginIndicator';
 import { Button } from './ui/button';
 import FacebookIcon from '../lib/icons/Facebook';
+import { EmailPassword } from './EmailPassword';
 
 type LoginProps = {
   className?: string;
@@ -17,6 +18,7 @@ type LoginProps = {
 
 export default function Login({ onClick }: LoginProps) {
   const { signInWithGoogle, signInWithFacebook } = useAuth();
+
   const [isOpen, setIsOpen] = React.useState(false);
 
   function openModal() {
@@ -31,28 +33,18 @@ export default function Login({ onClick }: LoginProps) {
   return (
     <>
       <LoginIndicator onLoginClick={openModal} />
-
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="mx-auto max-w-sm rounded bg-background text-foreground p-6 shadow">
           <DialogTitle
             aria-description="sign up or login"
             className="text-xl font-bold mb-6 text-center"
           >
-            Sign Up / Sign In
+            Sign Up <span className="mx-2 text-muted-foreground font-extralight">|</span> Sign In
           </DialogTitle>
           <DialogDescription>Please sign in to continue.</DialogDescription>
 
           <div className="flex flex-col gap-4">
-            <Button
-              className="w-full py-2 border border-gray-300 rounded flex items-center justify-center gap-2"
-              onClick={async () => {
-                await signInWithGoogle();
-                closeModal();
-              }}
-            >
-              <GoogleIcon />
-              Continue with Google
-            </Button>
+            <EmailPassword onClose={closeModal} />
 
             {/* Needs business verification */}
             {process.env.NODE_ENV !== 'production' && (
@@ -68,6 +60,17 @@ export default function Login({ onClick }: LoginProps) {
               </Button>
             )}
             {/* TODO: add other providers */}
+
+            <Button
+              className="w-full py-2 border border-gray-300 rounded flex items-center justify-center gap-2"
+              onClick={async () => {
+                await signInWithGoogle();
+                closeModal();
+              }}
+            >
+              <GoogleIcon />
+              Continue with Google
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

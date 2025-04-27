@@ -47,10 +47,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
   const isDayDisabled = (date: Date) => {
     if (availableDates.length === 0) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      date.setHours(0, 0, 0, 0);
-      return date < today;
+      return true;
     }
 
     return !availableDates.some((availableDate) =>
@@ -70,7 +67,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
               disabled={disabled}
               variant="outline"
               className={cn(
-                'w-full pl-3 text-left font-normal border border-input bg-input',
+                'w-full pl-3 text-left font-normal border border-input dark:bg-transparent bg-white',
                 !field.value && 'text-muted-foreground'
               )}
             >

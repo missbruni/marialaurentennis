@@ -1,3 +1,4 @@
+import { User } from 'firebase/auth';
 import { useAuth } from './hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Button } from './ui/button';
@@ -8,6 +9,10 @@ type LoginIndicatorProps = {
 };
 const LoginIndicator: React.FC<LoginIndicatorProps> = ({ onLoginClick }) => {
   const { user, logout, loading } = useAuth();
+
+  const getInitials = (user: User) => {
+    return user.displayName?.charAt(0) || user.email?.charAt(0).toUpperCase();
+  };
 
   if (loading) return null;
 
@@ -22,7 +27,7 @@ const LoginIndicator: React.FC<LoginIndicatorProps> = ({ onLoginClick }) => {
               alt={`${user.displayName || 'User'}'s profile`}
             />
           ) : (
-            <AvatarFallback>{user.displayName?.charAt(0)}</AvatarFallback>
+            <AvatarFallback>{getInitials(user)}</AvatarFallback>
           )}
         </Avatar>
       </PopoverTrigger>

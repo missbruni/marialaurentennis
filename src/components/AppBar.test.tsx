@@ -33,7 +33,6 @@ describe('AppBar', () => {
 
     expect(screen.getByText('Home')).toBeInTheDocument();
     expect(screen.getByText('Coaches')).toBeInTheDocument();
-    expect(screen.getByText('Admin')).toBeInTheDocument();
     expect(screen.getByText('Contact')).toBeInTheDocument();
   });
 

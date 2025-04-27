@@ -13,7 +13,6 @@ describe('Hero', () => {
   test('renders correctly', () => {
     render(<Hero />);
 
-    expect(screen.getByText('Maria Lauren Tennis')).toBeInTheDocument();
     expect(screen.getByText(/Personalized coaching/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Book Lesson' })).toBeInTheDocument();
   });
