@@ -9,7 +9,7 @@ import {
   signInWithEmailAndPassword
 } from 'firebase/auth';
 import React from 'react';
-import { auth } from '../../lib/firebase';
+import { auth } from '@/lib/firebase';
 
 type AuthEmailPassword = (email: string, password: string) => Promise<void>;
 export type AuthContextType = {

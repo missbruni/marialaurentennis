@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from './hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from './ui/dialog';
 
 import React from 'react';

@@ -1,8 +1,8 @@
 import React from 'react';
 import AnimatedLogo from './AnimatedLogo';
-import { useBookingForm } from './hooks/useBookingForm';
+import { useBookingForm } from '@/hooks/useBookingForm';
 import { Button } from './ui/button';
-import { useMediaQuery } from './hooks/useMediaQuery';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const Hero: React.FC = () => {
   const { scrollToBookingForm } = useBookingForm();

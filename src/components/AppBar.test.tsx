@@ -2,7 +2,7 @@ import { describe, expect, vi, beforeEach, test } from 'vitest';
 
 import AppBar from './AppBar';
 import { screen, render } from '../lib/test-utils';
-import * as useBookingFormModule from './hooks/useBookingForm';
+import * as useBookingFormModule from '../app/hooks/useBookingForm';
 
 vi.mock('next/link', () => {
   return {

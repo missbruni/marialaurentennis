@@ -9,7 +9,7 @@ vi.mock('@/components/hooks/useAuth', () => ({
   useAuth: vi.fn()
 }));
 
-import { useAuth } from '@/components/hooks/useAuth';
+import { useAuth } from '@/app/hooks/useAuth';
 
 describe('Login', () => {
   const mockSignInWithGoogle = vi.fn();

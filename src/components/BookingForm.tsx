@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue
 } from './ui/select';
-import { useBookingForm } from '@/components/hooks/useBookingForm';
+import { useBookingForm } from '@/hooks/useBookingForm';
 
 const DATE_FORMAT = 'yyyy-MM-dd';
 
@@ -103,7 +103,7 @@ const BookingForm: React.FC = () => {
         <TennisBall />
       </div>
 
-      <div className="flex flex-col lg:flex-row w-full p-24 relative z-1 gap-6">
+      <div className="flex flex-col lg:flex-row w-full lg:p-24 p-12 relative z-1 gap-6 container mx-auto">
         <div className="flex-1 p-2">
           <Typography.H2 className="mb-6 text-foreground">
             <span className="font-bold text-lime-500">Lessons:</span> Improve your game
@@ -117,7 +117,7 @@ const BookingForm: React.FC = () => {
 
         {/* TODO: show date only after location is selected, with animation and human language, from bottom to top */}
 
-        <div className="p-2 flex flex-1 items-start justify-start md:justify-end">
+        <div className="p-2 flex flex-1 items-start justify-center lg:justify-end">
           <Form {...form}>
             <div className="flex flex-col gap-6 w-96">
               <FormField

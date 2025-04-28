@@ -2,8 +2,8 @@
 
 import AppBar from '../components/AppBar';
 import React from 'react';
-import { BookingFormProvider } from '../components/hooks/useBookingForm';
-import { AuthProvider } from '../components/hooks/useAuth';
+import { BookingFormProvider } from '@/hooks/useBookingForm';
+import { AuthProvider } from '@/hooks/useAuth';
 
 type ClientLayoutProps = {
   children: React.ReactNode;

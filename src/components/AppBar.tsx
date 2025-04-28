@@ -5,9 +5,9 @@ import { ThemeToggle } from './ThemeToggle';
 import { Menu, X } from 'lucide-react';
 import { Button } from './ui/button';
 import Login from './Login';
-import { useBookingForm } from './hooks/useBookingForm';
+import { useBookingForm } from '@/hooks/useBookingForm';
 import { useTheme } from 'next-themes';
-import { useAuth } from './hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 const AppBar = () => {
   const { theme } = useTheme();

@@ -9,8 +9,8 @@ vi.mock('./hooks/useAuth', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
 }));
 
-import type { AuthContextType } from './hooks/useAuth';
-import { useAuth } from './hooks/useAuth';
+import type { AuthContextType } from '../app/hooks/useAuth';
+import { useAuth } from '../app/hooks/useAuth';
 
 describe('EmailPassword', () => {
   const mockSignInWithEmail = vi.fn();
