@@ -141,7 +141,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
               variant="outline"
               onClick={() => setOpen(true)}
               className={cn(
-                'w-full pl-3 text-left font-normal border border-input bg-transparent',
+                'w-full pl-3 text-left font-normal border border-input bg-white dark:bg-transparent',
                 !field.value && 'text-muted-foreground'
               )}
             >
@@ -172,7 +172,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 disabled={disabled}
                 variant="outline"
                 className={cn(
-                  'w-full pl-3 text-left font-normal border border-input bg-transparent',
+                  'w-full pl-3 text-left font-normal border border-input bg-white dark:bg-transparent',
                   !field.value && 'text-muted-foreground'
                 )}
               >

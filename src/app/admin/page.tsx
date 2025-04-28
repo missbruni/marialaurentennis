@@ -103,7 +103,7 @@ export default function AdminPage() {
 
   return (
     <div className="container mx-auto py-10 px-4">
-      <Typography.H1 className="mb-6">Hi Maria,</Typography.H1>
+      <Typography.H2 className="mb-6">Hi Maria,</Typography.H2>
 
       {message && (
         <div

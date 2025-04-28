@@ -172,7 +172,7 @@ const BookingForm: React.FC = () => {
       )}
 
       {selectedDate && (
-        <div className="ml-[180px] relative z-10">
+        <div className="lg:ml-[180px] relative z-10">
           <AvailableLessons availableLessons={availableLessons} date={selectedDate} />
         </div>
       )}

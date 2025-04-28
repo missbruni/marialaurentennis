@@ -25,7 +25,7 @@ const Lesson: React.FC<LessonProps> = ({
 
   return (
     <Card
-      className={`relative transition-transform hover:translate-y-[-4px] shadow-md hover:shadow-lg cursor-pointer bg-white dark:bg-[#242423] ${
+      className={`py-3 md:py-4 relative transition-transform hover:translate-y-[-4px] shadow-md hover:shadow-lg cursor-pointer bg-white dark:bg-[#242423] ${
         isSelected ? 'ring-2 ring-lime-500 scale-[1.02]' : ''
       } ${isSelected && isLoading ? 'opacity-80' : ''}`}
       onClick={() => !isLoading && onLessonSelected(lesson)}
