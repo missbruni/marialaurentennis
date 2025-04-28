@@ -37,17 +37,30 @@ describe('useBookingForm', () => {
   test('scrollToBookingForm should call scrollIntoView when ref is available', () => {
     const { result } = renderHook(() => useBookingForm(), { wrapper });
 
-    const mockScrollIntoView = vi.fn();
+    const mockGetBoundingClientRect = vi.fn().mockReturnValue({ top: 100 });
+    const mockScrollTo = vi.fn();
+
+    const originalScrollTo = window.scrollTo;
+
+    window.scrollTo = mockScrollTo;
+    Object.defineProperty(window, 'pageYOffset', { value: 50, configurable: true });
+
     Object.defineProperty(result.current.bookingFormRef, 'current', {
       value: {
-        scrollIntoView: mockScrollIntoView
+        getBoundingClientRect: mockGetBoundingClientRect
       },
       writable: true
     });
 
     result.current.scrollToBookingForm();
 
-    expect(mockScrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' });
+    expect(mockGetBoundingClientRect).toHaveBeenCalled();
+    expect(mockScrollTo).toHaveBeenCalledWith({
+      top: expect.any(Number),
+      behavior: 'smooth'
+    });
+
+    window.scrollTo = originalScrollTo;
   });
 
   test('scrollToBookingForm should log warning when ref is not available', () => {

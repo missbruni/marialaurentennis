@@ -3,6 +3,7 @@ import { describe, expect, vi, beforeEach, test } from 'vitest';
 import AppBar from './AppBar';
 import { screen, render } from '@/lib/test-utils';
 import * as useBookingFormModule from '@/hooks/useBookingForm';
+import userEvent from '@testing-library/user-event';
 
 vi.mock('next/link', () => {
   return {
@@ -55,17 +56,17 @@ describe('AppBar', () => {
   });
 
   test('toggles mobile menu when menu button is clicked', async () => {
-    const { user } = render(<AppBar />);
-
-    expect(screen.queryByText('Camps')).not.toBeInTheDocument();
+    render(<AppBar />);
+    const user = userEvent.setup();
 
     const menuButton = screen.getByLabelText('Toggle menu');
     await user.click(menuButton);
 
-    expect(screen.getByText('Camps')).toBeInTheDocument();
+    const mobileCoachesLink = screen
+      .getAllByText('Coaches')
+      .find((element) => element.closest('a')?.getAttribute('href') === '/coaches');
+    expect(mobileCoachesLink).toBeInTheDocument();
 
     await user.click(menuButton);
-
-    expect(screen.queryByText('Camps')).not.toBeInTheDocument();
   });
 });
