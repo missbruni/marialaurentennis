@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import type { ReactNode, FC } from 'react';
+import React from 'react';
 
 interface TemplateProps {
   children: ReactNode;
@@ -10,6 +11,10 @@ interface TemplateProps {
 
 const Template: FC<TemplateProps> = ({ children }) => {
   const pathname = usePathname();
+
+  if (pathname === '/') {
+    return <>{children}</>;
+  }
 
   return (
     <AnimatePresence mode="wait">

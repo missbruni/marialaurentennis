@@ -32,7 +32,7 @@ const Lesson: React.FC<LessonProps> = ({
     >
       <CardContent className="flex flex-col align-center justify-center gap-1">
         <Typography.Small className="text-foreground dark:text-foreground whitespace-nowrap">
-          {format(lesson.startDateTime.toDate(), 'EEEE, MMMM d')}
+          {format(lesson.startDateTime.toDate(), 'EE, MMMM d')}
         </Typography.Small>
         <Typography.Large className="text-foreground dark:text-foreground whitespace-nowrap">
           {formatTime(lesson.startDateTime)} - {formatTime(lesson.endDateTime)}

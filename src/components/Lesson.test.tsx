@@ -25,7 +25,7 @@ describe('Lesson', () => {
   test('renders lesson details correctly', () => {
     render(<Lesson lesson={mockLesson} onLessonSelected={mockOnLessonSelected} />);
 
-    expect(screen.getByText('Saturday, July 15')).toBeInTheDocument();
+    expect(screen.getByText('Sat, July 15')).toBeInTheDocument();
     expect(screen.getByText('10:00 - 11:00')).toBeInTheDocument();
     expect(screen.getByText('£40')).toBeInTheDocument();
   });
@@ -33,7 +33,7 @@ describe('Lesson', () => {
   test('calls onLessonSelected when clicked', async () => {
     const { user } = render(<Lesson lesson={mockLesson} onLessonSelected={mockOnLessonSelected} />);
 
-    const lessonCard = screen.getByText('Saturday, July 15').closest('[data-slot="card"]');
+    const lessonCard = screen.getByText('Sat, July 15').closest('[data-slot="card"]');
     expect(lessonCard).toBeInTheDocument();
 
     await user.click(lessonCard as Element);
