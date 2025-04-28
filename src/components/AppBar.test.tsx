@@ -1,8 +1,8 @@
 import { describe, expect, vi, beforeEach, test } from 'vitest';
 
 import AppBar from './AppBar';
-import { screen, render } from '../lib/test-utils';
-import * as useBookingFormModule from '../app/hooks/useBookingForm';
+import { screen, render } from '@/lib/test-utils';
+import * as useBookingFormModule from '@/hooks/useBookingForm';
 
 vi.mock('next/link', () => {
   return {

@@ -4,8 +4,8 @@ import { ThemeProvider } from 'next-themes';
 import { ReactQueryProvider } from './react-query';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BookingFormProvider } from '../app/hooks/useBookingForm';
-import { AuthProvider } from '../app/hooks/useAuth';
+import { BookingFormProvider } from '@/hooks/useBookingForm';
+import { AuthProvider } from '@/hooks/useAuth';
 
 function customRender(ui: React.ReactElement) {
   return {

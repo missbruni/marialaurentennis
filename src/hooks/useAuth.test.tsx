@@ -1,10 +1,10 @@
 import { describe, expect, vi, beforeEach, test } from 'vitest';
 import React from 'react';
-import { render, screen } from '../../lib/test-utils';
+import { render, screen } from '@/lib/test-utils';
 import { render as originalRender } from '@testing-library/react';
 import { useAuth } from './useAuth';
 import * as firebaseAuth from 'firebase/auth';
-import { auth } from '../../lib/firebase';
+import { auth } from '@/lib/firebase';
 
 function TestComponent() {
   const { user, loading, signInWithGoogle, logout } = useAuth();

@@ -4,12 +4,11 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import Login from './Login';
 import type { User } from 'firebase/auth';
+import { useAuth } from '../hooks/useAuth';
 
-vi.mock('@/components/hooks/useAuth', () => ({
+vi.mock('@/hooks/useAuth', () => ({
   useAuth: vi.fn()
 }));
-
-import { useAuth } from '@/app/hooks/useAuth';
 
 describe('Login', () => {
   const mockSignInWithGoogle = vi.fn();

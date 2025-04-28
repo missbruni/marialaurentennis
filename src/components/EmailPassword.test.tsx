@@ -1,16 +1,16 @@
 import React from 'react';
 import { describe, expect, vi, beforeEach, test } from 'vitest';
-import { render, screen } from '../lib/test-utils';
+import { render, screen } from '@/lib/test-utils';
 
 import { EmailPassword } from './EmailPassword';
 
-vi.mock('./hooks/useAuth', () => ({
+vi.mock('@/hooks/useAuth', () => ({
   useAuth: vi.fn(),
   AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
 }));
 
-import type { AuthContextType } from '../app/hooks/useAuth';
-import { useAuth } from '../app/hooks/useAuth';
+import type { AuthContextType } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 describe('EmailPassword', () => {
   const mockSignInWithEmail = vi.fn();
