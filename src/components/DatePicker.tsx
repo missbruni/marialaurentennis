@@ -12,19 +12,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from './ui/button';
 import { cn } from '../lib/utils';
-import { CalendarIcon, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
-import {
-  format,
-  isEqual,
-  endOfMonth,
-  addMonths,
-  startOfDay,
-  isBefore,
-  subMonths,
-  isSameMonth,
-  startOfMonth,
-  isAfter
-} from 'date-fns';
+import { CalendarIcon, Loader2 } from 'lucide-react';
+import { format, isEqual, addMonths, startOfDay, isBefore, isSameMonth } from 'date-fns';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
@@ -49,6 +38,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
   const [currentMonth, setCurrentMonth] = React.useState<Date>(new Date());
   const isMobile = useMediaQuery('(max-width: 640px)');
   const calendarRef = React.useRef<HTMLDivElement>(null);
+  const [visibleMonths, setVisibleMonths] = React.useState<Date[]>([]);
+  const [loadedMonthsCount, setLoadedMonthsCount] = React.useState(6);
 
   const fromMonth = React.useMemo(() => {
     const currentDate = new Date();
@@ -60,14 +51,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
     return currentDate;
   }, [availableDates]);
-
-  const lastAvailableMonth = React.useMemo(
-    () =>
-      availableDates && availableDates.length > 0
-        ? addMonths(endOfMonth(availableDates[availableDates.length - 1]), 1)
-        : addMonths(new Date(), 12),
-    [availableDates]
-  );
 
   const onDateChange = (date?: Date) => {
     field.onChange(date);
@@ -85,92 +68,64 @@ const DatePicker: React.FC<DatePickerProps> = ({
     return !availableDates.some((availableDate) => isEqual(startOfDay(availableDate), dateToCheck));
   };
 
-  const handlePreviousMonth = () => {
-    setCurrentMonth((prev) => subMonths(prev, 1));
+  // array of months to display on mobile
+  React.useEffect(() => {
+    if (isMobile && open) {
+      const months: Date[] = [];
+      let currentDate = new Date(fromMonth);
+      const today = new Date();
+
+      // Generate only loadedMonthsCount months instead of 24
+      for (let i = 0; i < loadedMonthsCount; i++) {
+        months.push(new Date(currentDate));
+        currentDate = addMonths(currentDate, 1);
+      }
+
+      setVisibleMonths(months);
+    }
+  }, [isMobile, open, fromMonth, currentMonth, loadedMonthsCount]);
+
+  const handleLoadMoreMonths = () => {
+    setLoadedMonthsCount((prevCount) => prevCount + 6);
   };
-
-  const handleNextMonth = () => {
-    setCurrentMonth((prev) => addMonths(prev, 1));
-  };
-
-  const isPreviousMonthDisabled = React.useMemo(() => {
-    const prevMonth = startOfMonth(subMonths(currentMonth, 1));
-    const minMonth = startOfMonth(fromMonth);
-
-    return isBefore(prevMonth, minMonth) && !isSameMonth(prevMonth, minMonth);
-  }, [currentMonth, fromMonth]);
-
-  const isNextMonthDisabled = React.useMemo(() => {
-    const nextMonth = startOfMonth(addMonths(currentMonth, 1));
-    const maxMonth = startOfMonth(lastAvailableMonth);
-
-    return isAfter(nextMonth, maxMonth) && !isSameMonth(nextMonth, maxMonth);
-  }, [currentMonth, lastAvailableMonth]);
 
   const MobileCalendarComponent = (
-    <div className="flex flex-col">
-      <div className="flex justify-between items-center mb-2 px-2">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={handlePreviousMonth}
-          disabled={isPreviousMonthDisabled}
-          className="h-7 w-7"
-        >
-          <ChevronUp className="h-4 w-4" />
-          <span className="sr-only">Previous month</span>
+    <div className="flex flex-col h-full">
+      <div
+        ref={calendarRef}
+        className="overflow-y-auto flex-grow"
+        style={{ scrollBehavior: 'smooth' }}
+      >
+        {visibleMonths.map((monthDate, index) => (
+          <div key={index} className="mb-8">
+            <div className="text-sm font-medium text-center mb-2">
+              {format(monthDate, 'MMMM yyyy')}
+            </div>
+            <Calendar
+              mode="single"
+              month={monthDate}
+              selected={field.value}
+              disabled={isDayDisabled}
+              onSelect={onDateChange}
+              showOutsideDays={false}
+              className={cn('p-0')}
+              classNames={{
+                months: 'flex flex-col gap-4 justify-center',
+                month: 'space-y-4 mx-auto',
+                caption: 'hidden',
+                table: 'w-full border-collapse space-y-1',
+                head_row: 'flex',
+                head_cell: 'text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]',
+                row: 'flex w-full mt-2',
+                cell: 'relative p-0 text-center text-sm focus-within:relative focus-within:z-20'
+              }}
+            />
+          </div>
+        ))}
+
+        <Button variant="outline" className="w-full mb-4" onClick={handleLoadMoreMonths}>
+          Load more dates
         </Button>
-        <div className="text-sm font-medium">{format(currentMonth, 'MMMM yyyy')}</div>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={handleNextMonth}
-          disabled={isNextMonthDisabled}
-          className="h-7 w-7"
-        >
-          <ChevronDown className="h-4 w-4" />
-          <span className="sr-only">Next month</span>
-        </Button>
-      </div>
-      <div ref={calendarRef} className="overflow-y-auto">
-        <Calendar
-          mode="single"
-          initialFocus
-          numberOfMonths={numberOfMonths}
-          month={currentMonth}
-          selected={field.value}
-          disabled={isDayDisabled}
-          onSelect={onDateChange}
-          toMonth={lastAvailableMonth}
-          onMonthChange={setCurrentMonth}
-          fromMonth={fromMonth}
-          className={cn('p-0')}
-          classNames={{
-            months: 'flex flex-col gap-8 justify-center',
-            month: 'space-y-4 mx-auto',
-            caption: 'hidden',
-            caption_label: 'text-sm font-medium',
-            nav: 'hidden',
-            table: 'w-full border-collapse space-y-1',
-            head_row: 'flex',
-            head_cell: 'text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]',
-            row: 'flex w-full mt-2',
-            cell: 'relative p-0 text-center text-sm focus-within:relative focus-within:z-20'
-          }}
-          components={{
-            Caption: ({ displayMonth }) => {
-              if (isSameMonth(displayMonth, currentMonth)) {
-                return null;
-              }
-              return (
-                <div className="flex justify-center pt-1 relative items-center w-full">
-                  <span className="text-sm font-medium">{format(displayMonth, 'MMMM yyyy')}</span>
-                </div>
-              );
-            }
-          }}
-          showOutsideDays={false}
-        />
       </div>
     </div>
   );
@@ -239,7 +194,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
               selected={field.value}
               disabled={isDayDisabled}
               onSelect={onDateChange}
-              toMonth={lastAvailableMonth}
               onMonthChange={setCurrentMonth}
               fromMonth={fromMonth}
             />

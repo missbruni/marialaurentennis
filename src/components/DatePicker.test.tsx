@@ -199,39 +199,6 @@ describe('DatePicker', () => {
     expect(screen.getByText(format(pastDate, 'MMMM yyyy'))).toBeInTheDocument();
   });
 
-  test('calculates lastAvailableMonth correctly with available dates', async () => {
-    const futureDate = new Date();
-    futureDate.setMonth(futureDate.getMonth() + 3);
-
-    const availableDates = [new Date(), futureDate];
-
-    const { user } = render(
-      <DatePickerWithFormContext
-        field={mockField}
-        isLoading={false}
-        disabled={false}
-        availableDates={availableDates}
-      />
-    );
-
-    // open the calendar
-    const button = screen.getByText(format(mockField.value, 'PPP')).closest('button');
-    await user.click(button as HTMLElement);
-
-    // navigate to future months
-    const nextMonthButton = screen.getByLabelText('Go to next month');
-    await user.click(nextMonthButton);
-    await user.click(nextMonthButton);
-    await user.click(nextMonthButton);
-
-    // verify we can see the month of the latest available date
-    expect(screen.getByText(format(futureDate, 'MMMM yyyy'))).toBeInTheDocument();
-
-    // verify we can't navigate past the last available month
-    await user.click(nextMonthButton);
-    expect(screen.getByText(format(futureDate, 'MMMM yyyy'))).toBeInTheDocument();
-  });
-
   test('calls field.onChange when a date is selected', async () => {
     const { user } = render(
       <DatePickerWithFormContext
@@ -251,5 +218,90 @@ describe('DatePicker', () => {
       await user.click(dateButtons[15] as HTMLElement);
       expect(mockField.onChange).toHaveBeenCalled();
     }
+  });
+
+  test('renders mobile calendar with initial months when dialog is opened', async () => {
+    vi.mocked(useMediaQuery).mockReturnValue(true); // Set to mobile view
+
+    const { user } = render(
+      <DatePickerWithFormContext
+        field={mockField}
+        isLoading={false}
+        disabled={false}
+        availableDates={mockAvailableDates}
+      />
+    );
+
+    // open the dialog
+    const button = screen.getByText(format(mockField.value, 'PPP')).closest('button');
+    await user.click(button as HTMLElement);
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toBeInTheDocument();
+
+    const loadMoreButton = screen.getByText('Load more dates');
+    expect(loadMoreButton).toBeInTheDocument();
+
+    const monthHeaders = screen.getAllByText(
+      /^(January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/
+    );
+    expect(monthHeaders.length).toBe(12);
+  });
+
+  test('loads more months when "Load more dates" button is clicked', async () => {
+    vi.mocked(useMediaQuery).mockReturnValue(true); // Set to mobile view
+
+    const { user } = render(
+      <DatePickerWithFormContext
+        field={mockField}
+        isLoading={false}
+        disabled={false}
+        availableDates={mockAvailableDates}
+      />
+    );
+
+    const button = screen.getByText(format(mockField.value, 'PPP')).closest('button');
+    await user.click(button as HTMLElement);
+
+    const initialMonthHeaders = screen.getAllByText(
+      /^(January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/
+    );
+    const initialCount = initialMonthHeaders.length;
+
+    const loadMoreButton = screen.getByText('Load more dates');
+    await user.click(loadMoreButton);
+
+    // adding 12 more months instead of 6
+    const updatedMonthHeaders = screen.getAllByText(
+      /^(January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/
+    );
+    expect(updatedMonthHeaders.length).toBe(initialCount + 12);
+  });
+
+  test('generates correct months starting from fromMonth', async () => {
+    vi.mocked(useMediaQuery).mockReturnValue(true); // Set to mobile view
+
+    const pastDate = new Date();
+    pastDate.setMonth(pastDate.getMonth() - 3);
+
+    const availableDates = [pastDate, new Date()];
+
+    const { user } = render(
+      <DatePickerWithFormContext
+        field={mockField}
+        isLoading={false}
+        disabled={false}
+        availableDates={availableDates}
+      />
+    );
+
+    const button = screen.getByText(format(mockField.value, 'PPP')).closest('button');
+    await user.click(button as HTMLElement);
+
+    // first month displayed is the month of the earliest available date
+    const firstMonthHeader = screen.getAllByText(
+      /^(January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/
+    )[0];
+    expect(firstMonthHeader).toHaveTextContent(format(pastDate, 'MMMM yyyy'));
   });
 });
