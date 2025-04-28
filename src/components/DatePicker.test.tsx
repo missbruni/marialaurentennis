@@ -3,7 +3,7 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@/lib/test-utils';
 import DatePicker from './DatePicker';
 import type { FieldValues } from 'react-hook-form';
-import { addDays, format } from 'date-fns';
+import { format } from 'date-fns';
 import { FormProvider, useForm } from 'react-hook-form';
 
 vi.mock('@/hooks/useMediaQuery', () => ({

@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from './ui/button';
 import { cn } from '../lib/utils';
 import { CalendarIcon, Loader2 } from 'lucide-react';
-import { format, isEqual, addMonths, startOfDay, isBefore, isSameMonth } from 'date-fns';
+import { format, isEqual, addMonths, startOfDay, isBefore } from 'date-fns';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
@@ -73,9 +73,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
     if (isMobile && open) {
       const months: Date[] = [];
       let currentDate = new Date(fromMonth);
-      const today = new Date();
 
-      // Generate only loadedMonthsCount months instead of 24
+      // generate only loadedMonthsCount months instead of 24
       for (let i = 0; i < loadedMonthsCount; i++) {
         months.push(new Date(currentDate));
         currentDate = addMonths(currentDate, 1);
