@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import AdminRoute from '@/components/AdminRoute';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Typography } from '@/components/ui/typography';
@@ -102,178 +103,180 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="container mx-auto py-10 px-4">
-      <Typography.H2 className="mb-6">Hi Maria,</Typography.H2>
+    <AdminRoute>
+      <div className="container mx-auto py-10 px-4">
+        <Typography.H2 className="mb-6">Hi Maria,</Typography.H2>
 
-      {message && (
-        <div
-          className={`mb-6 p-4 rounded ${
-            messageType === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}
-        >
-          {message}
-        </div>
-      )}
+        {message && (
+          <div
+            className={`mb-6 p-4 rounded ${
+              messageType === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}
+          >
+            {message}
+          </div>
+        )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>When are you available for lessons?</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="type"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>Type of lesson</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+        <Card>
+          <CardHeader>
+            <CardTitle>When are you available for lessons?</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>Type of lesson</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select lesson type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="private">Private Lesson</SelectItem>
+                            <SelectItem value="group">Group Session</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="availabilityDate"
+                    render={({ field }) => (
+                      <DatePicker field={field} isLoading={isLoading} disabled={false} />
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="availabilityStartTime"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Start Time</FormLabel>
                         <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select lesson type" />
-                          </SelectTrigger>
+                          <Input type="time" {...field} />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="private">Private Lesson</SelectItem>
-                          <SelectItem value="group">Group Session</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="availabilityDate"
-                  render={({ field }) => (
-                    <DatePicker field={field} isLoading={isLoading} disabled={false} />
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="availabilityStartTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Start Time</FormLabel>
-                      <FormControl>
-                        <Input type="time" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="availabilityEndTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>End Time</FormLabel>
-                      <FormControl>
-                        <Input type="time" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="players"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Max Players</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min="1"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Price (£)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min="0"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2 w-full">
-                      <FormLabel>Location</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormField
+                    control={form.control}
+                    name="availabilityEndTime"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>End Time</FormLabel>
                         <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select a location" />
-                          </SelectTrigger>
+                          <Input type="time" {...field} />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="sundridge">Sundridge Park</SelectItem>
-                          <SelectItem value="muswell">Muswell Hill Methodist (LTC)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="createHourlySlots"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2 flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                      <FormControl>
-                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Create hourly slots between start and end time</FormLabel>
-                        <FormDescription>
-                          If checked, multiple 1-hour slots will be created between the start and
-                          end times
-                        </FormDescription>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-              </div>
+                  <FormField
+                    control={form.control}
+                    name="players"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Max Players</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="1"
+                            {...field}
+                            onChange={(e) => field.onChange(parseInt(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <div className="pt-4">
-                <Button
-                  type="submit"
-                  disabled={form.formState.isSubmitting}
-                  className="w-full md:w-auto"
-                >
-                  {form.formState.isSubmitting ? 'Adding...' : 'Add Availability'}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Price (£)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="0"
+                            {...field}
+                            onChange={(e) => field.onChange(parseInt(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2 w-full">
+                        <FormLabel>Location</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select a location" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="sundridge">Sundridge Park</SelectItem>
+                            <SelectItem value="muswell">Muswell Hill Methodist (LTC)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="createHourlySlots"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2 flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Create hourly slots between start and end time</FormLabel>
+                          <FormDescription>
+                            If checked, multiple 1-hour slots will be created between the start and
+                            end times
+                          </FormDescription>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="pt-4">
+                  <Button
+                    type="submit"
+                    disabled={form.formState.isSubmitting}
+                    className="w-full md:w-auto"
+                  >
+                    {form.formState.isSubmitting ? 'Adding...' : 'Add Availability'}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    </AdminRoute>
   );
 }

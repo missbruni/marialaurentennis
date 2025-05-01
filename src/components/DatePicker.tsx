@@ -97,7 +97,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
       >
         {visibleMonths.map((monthDate, index) => (
           <div key={index} className="mb-8">
-            <div className="text-sm font-medium text-center mb-2">
+            <div className="text-base font-medium text-center mb-2">
               {format(monthDate, 'MMMM yyyy')}
             </div>
             <Calendar
@@ -114,9 +114,10 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 caption: 'hidden',
                 table: 'w-full border-collapse space-y-1',
                 head_row: 'flex',
-                head_cell: 'text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]',
+                head_cell: 'text-muted-foreground rounded-md w-10 font-normal text-[0.95rem]',
                 row: 'flex w-full mt-2',
-                cell: 'relative p-0 text-center text-sm focus-within:relative focus-within:z-20'
+                cell: 'relative p-0 text-center text-base focus-within:relative focus-within:z-20',
+                day: 'h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground'
               }}
             />
           </div>

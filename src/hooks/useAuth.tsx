@@ -15,6 +15,7 @@ type AuthEmailPassword = (email: string, password: string) => Promise<void>;
 export type AuthContextType = {
   user: User | null;
   loading: boolean;
+  isAdmin: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithFacebook: () => Promise<void>;
   signInWithEmail: AuthEmailPassword;
@@ -27,6 +28,7 @@ const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [isAdmin, setIsAdmin] = React.useState(false);
 
   const signInWithGoogle = React.useCallback(async () => {
     const provider = new GoogleAuthProvider();
@@ -73,8 +75,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+
+      if (user) {
+        try {
+          const idTokenResult = await user.getIdTokenResult();
+          const hasAdminRole = idTokenResult.claims.role === 'admin';
+          setIsAdmin(hasAdminRole);
+        } catch (error) {
+          console.error('Error getting token claims:', error);
+        }
+      } else {
+        setIsAdmin(false);
+      }
+
       setLoading(false);
     });
 
@@ -84,6 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     loading,
+    isAdmin,
     signInWithGoogle,
     signInWithFacebook,
     signInWithEmail,

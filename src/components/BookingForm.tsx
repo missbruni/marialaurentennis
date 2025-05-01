@@ -97,10 +97,10 @@ const BookingForm: React.FC = () => {
   return (
     <section
       ref={bookingFormRef}
-      className="dark:bg-background min-h-screen w-full relative overflow-hidden"
+      className="dark:bg-background h-[calc(100vh-72px)] w-full relative overflow-hidden"
     >
       <div className="hidden md:block">
-        <TennisBall />
+        <TennisBall left="-100px" />
       </div>
 
       <div className="flex flex-col lg:flex-row w-full lg:p-24 p-12 relative z-1 gap-6 container mx-auto">
@@ -160,11 +160,6 @@ const BookingForm: React.FC = () => {
         </div>
       </div>
 
-      {isLoading && (
-        <Typography.P className="text-center text-foreground relative z-10">
-          Loading...
-        </Typography.P>
-      )}
       {error && (
         <Typography.P className="text-center text-red-500 relative z-10">
           Error loading lessons
@@ -176,6 +171,10 @@ const BookingForm: React.FC = () => {
           <AvailableLessons availableLessons={availableLessons} date={selectedDate} />
         </div>
       )}
+
+      <div className="hidden md:block">
+        <TennisBall right="-20px" width="100px" topPercent={120} bottomPercent={0} />
+      </div>
     </section>
   );
 };

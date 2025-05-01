@@ -12,7 +12,7 @@ const Hero: React.FC = () => {
   const logoWidth = isMobile ? 280 : isTablet ? 400 : 500;
 
   return (
-    <section className="relative h-screen w-full flex items-center justify-center text-white bg-white">
+    <section className="relative h-[calc(100vh-72px)] w-full flex items-center justify-center text-white bg-white">
       <div className="absolute inset-0 bg-[url('/tennis-hero-3.jpeg')] bg-cover bg-center bg-fixed opacity-80"></div>
       <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/30 z-0"></div>
       <div className="relative z-10 text-center mx-auto flex items-center justify-center flex-col">

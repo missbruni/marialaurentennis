@@ -17,7 +17,7 @@ import { useBookingForm } from '../hooks/useBookingForm';
 export const HEADER_HEIGHT = 72;
 const AppBar = () => {
   const router = useRouter();
-  const { user } = useAuth();
+  const { isAdmin } = useAuth();
   const { theme } = useTheme();
   const pathname = usePathname();
 
@@ -86,7 +86,7 @@ const AppBar = () => {
             </Link>
 
             {/* TODO: add this to admin role users only */}
-            {user?.email === 'brunalima@me.com' && (
+            {isAdmin && (
               <Link
                 href="/admin"
                 className="font-medium text-foreground hover:text-primary hover:font-bold transition-all duration-200"
@@ -155,7 +155,7 @@ const AppBar = () => {
                     >
                       Coaches
                     </Link>
-                    {user?.email === 'brunalima@me.com' && (
+                    {isAdmin && (
                       <Link
                         href="/admin"
                         className="py-3 text-lg font-medium border-b border-border transition-colors hover:text-primary"
