@@ -3,12 +3,10 @@
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
+import { AppSidebar } from '@/components/AppSidebar';
+import { SidebarProvider } from '../../components/ui/sidebar';
 
-type AdminRouteProps = {
-  children: React.ReactNode;
-};
-
-export default function AdminRoute({ children }: AdminRouteProps) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, isAdmin } = useAuth();
   const router = useRouter();
 
@@ -26,5 +24,10 @@ export default function AdminRoute({ children }: AdminRouteProps) {
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <SidebarProvider defaultOpen={true} className="min-h-[calc(100vh-72px)]">
+      <AppSidebar />
+      <main className="w-full max-h-[calc(100vh-72px)] p-8">{children}</main>
+    </SidebarProvider>
+  );
 }

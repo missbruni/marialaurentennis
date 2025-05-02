@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 export default function AdminUserManagement() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
 
   const [userId, setUserId] = React.useState('');
   const [role, setRole] = React.useState('user');
@@ -25,10 +25,12 @@ export default function AdminUserManagement() {
     setMessage('');
 
     try {
+      const idToken = await user?.getIdToken();
       const response = await fetch('/api/admin/set-role', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`
         },
         body: JSON.stringify({ uid: userId, role })
       });
@@ -36,7 +38,7 @@ export default function AdminUserManagement() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(`Successfully set role to ${role} for user ${userId}`);
+        setMessage(`Successfully set role to ${role}.`);
         setUserId('');
         setRole('user');
       } else {
@@ -50,11 +52,11 @@ export default function AdminUserManagement() {
   };
 
   if (!isAdmin) {
-    return <div>You don't have permission to access this page.</div>;
+    return <div>You don&apos;t have permission to access this page.</div>;
   }
 
   return (
-    <Card>
+    <Card className="border-1 max-w-4xl">
       <CardHeader>
         <CardTitle>User Role Management</CardTitle>
       </CardHeader>

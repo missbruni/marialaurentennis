@@ -13,6 +13,7 @@ import { useTheme } from 'next-themes';
 import { useAuth } from '@/hooks/useAuth';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { useBookingForm } from '../hooks/useBookingForm';
+import { Separator } from './ui/separator';
 
 export const HEADER_HEIGHT = 72;
 const AppBar = () => {
@@ -23,7 +24,7 @@ const AppBar = () => {
 
   const { scrollToBookingForm } = useBookingForm();
 
-  const [logoSrc, setLogoSrc] = React.useState('');
+  const [logoSrc, setLogoSrc] = React.useState('/fullname.svg');
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const handleBookLesson = () => {
@@ -60,7 +61,7 @@ const AppBar = () => {
         <div className="max-w-screen-2xl mx-auto flex h-18 items-center justify-between">
           <div className="flex items-center gap-2">
             <Link href="/" className="font-bold text-xl text-foreground">
-              <Image src={logoSrc} alt="Maria Lauren Tennis" width={70} height={50} />
+              {logoSrc && <Image src={logoSrc} alt="Maria Lauren Tennis" width={70} height={50} />}
             </Link>
           </div>
 
@@ -190,6 +191,7 @@ const AppBar = () => {
           </div>
         </div>
       </header>
+      <Separator />
     </>
   );
 };

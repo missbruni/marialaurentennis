@@ -12,7 +12,8 @@ interface TemplateProps {
 const Template: FC<TemplateProps> = ({ children }) => {
   const pathname = usePathname();
 
-  if (pathname === '/') {
+  // Skip animation for root path and transitions between admin routes
+  if (pathname === '/' || pathname.startsWith('/admin')) {
     return <>{children}</>;
   }
 
