@@ -42,7 +42,7 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar className="max-h-[calc(100vh-72px)] relative">
+    <Sidebar className="max-h-[calc(100vh-72px)] relative border-r-[var(--sidebar-border)]">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Admin Panel</SidebarGroupLabel>

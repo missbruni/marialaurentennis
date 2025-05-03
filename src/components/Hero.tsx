@@ -19,7 +19,7 @@ const Hero: React.FC = () => {
         <div className="mb-10">
           <AnimatedLogo width={logoWidth} />
         </div>
-        <p className="text-lg md:text-xl max-w-xl mx-auto mb-6 drop-shadow-md">
+        <p className="text-lg md:text-xl max-w-sm md:max-w-xl mx-auto mb-6 drop-shadow-md">
           Personalized coaching, convenient scheduling, and world-class support to level up your
           game.
         </p>
