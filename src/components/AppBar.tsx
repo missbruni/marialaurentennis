@@ -80,13 +80,12 @@ const AppBar = () => {
               Lessons
             </button>
             <Link
-              href="#"
+              href="/coaches"
               className="font-medium text-foreground hover:text-primary hover:font-bold transition-all duration-200"
             >
               Coaches
             </Link>
 
-            {/* TODO: add this to admin role users only */}
             {isAdmin && (
               <Link
                 href="/admin"
@@ -96,7 +95,7 @@ const AppBar = () => {
               </Link>
             )}
             <Link
-              href="#"
+              href="/contact"
               className="font-medium text-foreground hover:text-primary hover:font-bold transition-all duration-200"
             >
               Contact
@@ -166,7 +165,7 @@ const AppBar = () => {
                       </Link>
                     )}
                     <Link
-                      href="#"
+                      href="/contact"
                       className="py-3 text-lg font-medium border-b border-border transition-colors hover:text-primary"
                       onClick={handleMobileMenuItemClick}
                     >
@@ -183,6 +182,9 @@ const AppBar = () => {
                     >
                       Book Now
                     </Button>
+                    <div className="flex justify-center mt-2">
+                      <Login />
+                    </div>
                   </div>
                 </div>
               </PopoverContent>
