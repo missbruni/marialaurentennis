@@ -25,7 +25,6 @@ const items = [
     url: '/admin/availability',
     icon: Calendar
   },
-  // TODO: put in footer
   {
     title: 'Settings',
     url: '/admin/settings',

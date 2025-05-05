@@ -56,7 +56,7 @@ export default function AdminUserManagement() {
   }
 
   return (
-    <Card className="border-1 max-w-4xl">
+    <Card className="border-1 max-w-4xl border-[var(--sidebar-border)]">
       <CardHeader>
         <CardTitle>User Role Management</CardTitle>
       </CardHeader>

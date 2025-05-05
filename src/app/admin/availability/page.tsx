@@ -115,7 +115,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      <Card className="border-1">
+      <Card className="border-1 border-[var(--sidebar-border)]">
         <CardHeader>
           <CardTitle>Add Availability</CardTitle>
         </CardHeader>
