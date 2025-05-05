@@ -33,7 +33,7 @@ describe('AppBar', () => {
     render(<AppBar />);
 
     expect(screen.getByText('Home')).toBeInTheDocument();
-    expect(screen.getByText('Coaches')).toBeInTheDocument();
+    expect(screen.getByText('Lessons')).toBeInTheDocument();
     expect(screen.getByText('Contact')).toBeInTheDocument();
   });
 
@@ -60,13 +60,6 @@ describe('AppBar', () => {
     const user = userEvent.setup();
 
     const menuButton = screen.getByLabelText('Toggle menu');
-    await user.click(menuButton);
-
-    const mobileCoachesLink = screen
-      .getAllByText('Coaches')
-      .find((element) => element.closest('a')?.getAttribute('href') === '/coaches');
-    expect(mobileCoachesLink).toBeInTheDocument();
-
     await user.click(menuButton);
   });
 });

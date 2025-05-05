@@ -68,6 +68,17 @@ const DatePicker: React.FC<DatePickerProps> = ({
     return !availableDates.some((availableDate) => isEqual(startOfDay(availableDate), dateToCheck));
   };
 
+  const isDateAvailable = React.useCallback(
+    (date: Date) => {
+      if (!availableDates) return false;
+      const dateToCheck = startOfDay(date);
+      return availableDates.some((availableDate) =>
+        isEqual(startOfDay(availableDate), dateToCheck)
+      );
+    },
+    [availableDates]
+  );
+
   // array of months to display on mobile
   React.useEffect(() => {
     if (isMobile && open) {
@@ -108,6 +119,13 @@ const DatePicker: React.FC<DatePickerProps> = ({
               onSelect={onDateChange}
               showOutsideDays={false}
               className={cn('p-0')}
+              modifiers={{
+                available: (date) => isDateAvailable(date)
+              }}
+              modifiersClassNames={{
+                available:
+                  '!font-bold text-lime-600 rounded-sm bg-[#e4ece4] hover:text-lime-600 cursor-pointer'
+              }}
               classNames={{
                 months: 'flex flex-col gap-4 justify-center',
                 month: 'space-y-4 mx-auto',
@@ -117,7 +135,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 head_cell: 'text-muted-foreground rounded-md w-10 font-normal text-[0.95rem]',
                 row: 'flex w-full mt-2',
                 cell: 'relative p-0 text-center text-base focus-within:relative focus-within:z-20',
-                day: 'h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground'
+                day: 'h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground',
+                day_disabled: 'cursor-not-allowed'
               }}
             />
           </div>
@@ -154,7 +173,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             </Button>
           </FormControl>
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="sm:max-w-[425px] p-0 h-[80vh] flex flex-col">
+            <DialogContent className="sm:max-w-[425px] p-0 h-[80vh] flex flex-col custom-dialog-close">
               <div className="p-4 flex items-center justify-between border-b">
                 <h2 className="text-lg font-semibold">Select Date</h2>
               </div>
@@ -196,6 +215,16 @@ const DatePicker: React.FC<DatePickerProps> = ({
               onSelect={onDateChange}
               onMonthChange={setCurrentMonth}
               fromMonth={fromMonth}
+              modifiers={{
+                available: (date) => isDateAvailable(date)
+              }}
+              modifiersClassNames={{
+                available:
+                  '!font-bold text-lime-600 rounded-sm bg-[#e4ece4] hover:text-lime-600 cursor-pointer'
+              }}
+              classNames={{
+                day_disabled: 'cursor-not-allowed'
+              }}
             />
           </PopoverContent>
         </Popover>

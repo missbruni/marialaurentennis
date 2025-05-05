@@ -80,12 +80,11 @@ const AppBar = () => {
               Lessons
             </button>
             <Link
-              href="/coaches"
+              href="/contact"
               className="font-medium text-foreground hover:text-primary hover:font-bold transition-all duration-200"
             >
-              Coaches
+              Contact
             </Link>
-
             {isAdmin && (
               <Link
                 href="/admin"
@@ -94,12 +93,6 @@ const AppBar = () => {
                 Admin
               </Link>
             )}
-            <Link
-              href="/contact"
-              className="font-medium text-foreground hover:text-primary hover:font-bold transition-all duration-200"
-            >
-              Contact
-            </Link>
           </nav>
 
           <div className="flex items-center gap-4">
@@ -149,11 +142,11 @@ const AppBar = () => {
                       Lessons
                     </button>
                     <Link
-                      href="/coaches"
+                      href="/contact"
                       className="py-3 text-lg font-medium border-b border-border transition-colors hover:text-primary"
                       onClick={handleMobileMenuItemClick}
                     >
-                      Coaches
+                      Contact
                     </Link>
                     {isAdmin && (
                       <Link
@@ -164,13 +157,6 @@ const AppBar = () => {
                         Admin
                       </Link>
                     )}
-                    <Link
-                      href="/contact"
-                      className="py-3 text-lg font-medium border-b border-border transition-colors hover:text-primary"
-                      onClick={handleMobileMenuItemClick}
-                    >
-                      Contact
-                    </Link>
                   </nav>
                   <div className="mt-4 px-6 space-y-4">
                     <Button

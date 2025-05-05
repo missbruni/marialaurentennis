@@ -97,13 +97,13 @@ const BookingForm: React.FC = () => {
   return (
     <section
       ref={bookingFormRef}
-      className="dark:bg-background h-[calc(100vh-72px)] w-full relative overflow-hidden"
+      className="p-8 md:p-16 lg:p-24 dark:bg-background min-h-[calc(100vh-72px)] w-full relative overflow-hidden flex flex-col gap-8"
     >
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         <TennisBall left="-100px" />
       </div>
 
-      <div className="flex flex-col lg:flex-row w-full lg:p-24 p-12 relative z-1 gap-6 container mx-auto">
+      <div className="flex flex-col lg:flex-row w-full relative z-1 gap-6 backdrop-blur-md rounded-lg">
         <div className="flex-1 p-2">
           <Typography.H2 className="mb-6 text-foreground">
             <span className="font-bold text-lime-500">Lessons:</span> Improve your game
@@ -117,7 +117,7 @@ const BookingForm: React.FC = () => {
 
         {/* TODO: show date only after location is selected, with animation and human language, from bottom to top */}
 
-        <div className="p-2 flex flex-1 items-start justify-center lg:justify-end">
+        <div className="p-2 flex flex-1 items-start lg:justify-end">
           <Form {...form}>
             <div className="flex flex-col gap-6 w-96">
               <FormField
@@ -126,8 +126,8 @@ const BookingForm: React.FC = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Location</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <SelectTrigger className="w-full bg-white">
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled>
+                      <SelectTrigger className="w-full bg-white/80 dark:bg-gray-800/80">
                         <SelectValue placeholder="Select a location" />
                       </SelectTrigger>
                       <SelectContent>
@@ -167,13 +167,13 @@ const BookingForm: React.FC = () => {
       )}
 
       {selectedDate && (
-        <div className="lg:ml-[180px] relative z-10">
+        <div className="lg:ml-auto relative z-10 mt-8">
           <AvailableLessons availableLessons={availableLessons} date={selectedDate} />
         </div>
       )}
 
       <div className="hidden md:block">
-        <TennisBall right="-20px" width="100px" topPercent={120} bottomPercent={0} />
+        <TennisBall right="-20px" width="100px" topPercent={130} bottomPercent={0} />
       </div>
     </section>
   );

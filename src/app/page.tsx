@@ -3,6 +3,7 @@
 import Hero from '@/components/Hero';
 import BookingForm from '@/components/BookingForm';
 import React from 'react';
+import ContactForm from '../components/ContactForm';
 
 export default function HomePage() {
   return (
@@ -10,6 +11,9 @@ export default function HomePage() {
       <Hero />
       <div className="bg-background flex items-center w-full">
         <BookingForm />
+      </div>
+      <div className="w-full">
+        <ContactForm />
       </div>
     </main>
   );

@@ -17,6 +17,15 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, d
 
   if (!date) return null;
 
+  const getGridClass = () => {
+    const count = availableLessons.length;
+
+    if (count <= 1) return 'grid-cols-1';
+    if (count === 2) return 'grid-cols-2 sm:grid-cols-3';
+    if (count === 3) return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4';
+    return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4';
+  };
+
   const handleCheckout = async (lesson: Availability) => {
     setIsLoading(true);
     setSelectedLessonId(lesson.id);
@@ -43,14 +52,14 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, d
   };
 
   return (
-    <div className="px-4 lg:px-24 pb-12 relative">
-      <Typography.H2 className="text-2xl md:text-3xl mb-6 text-foreground text-center md:text-right">
+    <div className="relative">
+      <Typography.H2 className="text-2xl md:text-3xl mb-6 text-foreground md:text-right">
         <span className="font-bold text-lime-500">Availability</span> on{' '}
-        {format(date, 'EEEE, MMMM d')}
+        {format(date, 'EEEE MMMM d')}
       </Typography.H2>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-        {availableLessons.map((availability, index) => (
+      <div className={`grid ${getGridClass()} gap-3 lg:max-w-[950px] ml-auto`}>
+        {[...availableLessons].map((availability, index) => (
           <Lesson
             key={index}
             lesson={availability}
@@ -63,7 +72,7 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, d
 
       {/* Full page overlay when loading */}
       {isLoading && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col items-center gap-4">
             <Loader2 className="h-8 w-8 animate-spin text-lime-600" />
             <Typography.P>Preparing your checkout...</Typography.P>
