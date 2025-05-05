@@ -103,74 +103,76 @@ const BookingForm: React.FC = () => {
         <TennisBall left="-100px" />
       </div>
 
-      <div className="flex flex-col lg:flex-row w-full relative z-1 gap-6 backdrop-blur-md rounded-lg">
-        <div className="flex-1 p-2">
-          <Typography.H2 className="mb-6 text-foreground">
-            <span className="font-bold text-lime-500">Lessons:</span> Improve your game
-          </Typography.H2>
-          <Typography.P className="text-sm md:text-base text-foreground">
-            {`Whether you're picking up a racket for the first time or looking to refine your
+      <div className="container">
+        <div className="flex flex-col lg:flex-row w-full relative z-1 gap-6 backdrop-blur-md rounded-lg container mx-auto">
+          <div className="flex-1 p-2">
+            <Typography.H2 className="mb-6 text-foreground">
+              <span className="font-bold text-lime-500">Lessons:</span> Improve your game
+            </Typography.H2>
+            <Typography.P className="text-sm md:text-base text-foreground">
+              {`Whether you're picking up a racket for the first time or looking to refine your
             technique, our private tennis lessons are tailored to your level and goals. Book a
             session today and take the next step in your tennis journey.`}
+            </Typography.P>
+          </div>
+
+          {/* TODO: show date only after location is selected, with animation and human language, from bottom to top */}
+
+          <div className="p-2 flex flex-1 items-start">
+            <Form {...form}>
+              <div className="flex flex-col gap-6 w-96">
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled>
+                        <SelectTrigger className="w-full bg-white/80 dark:bg-gray-800/80">
+                          <SelectValue placeholder="Select a location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Locations</SelectLabel>
+                            <SelectItem value="sundridge">Sundridge Park</SelectItem>
+                            <SelectItem value="muswell">Muswell Hill Methodist (LTC)</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>Choose a tennis club.</FormDescription>
+                    </FormItem>
+                  )}
+                ></FormField>
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <DatePicker
+                      field={field}
+                      availableDates={availableUniqueDates}
+                      isLoading={isLoading}
+                      disabled={!selectedLocation}
+                      helperText="Choose a date to see available lessons."
+                    />
+                  )}
+                />
+              </div>
+            </Form>
+          </div>
+        </div>
+
+        {error && (
+          <Typography.P className="text-center text-red-500 relative z-10">
+            Error loading lessons
           </Typography.P>
-        </div>
+        )}
 
-        {/* TODO: show date only after location is selected, with animation and human language, from bottom to top */}
-
-        <div className="p-2 flex flex-1 items-start lg:justify-end">
-          <Form {...form}>
-            <div className="flex flex-col gap-6 w-96">
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled>
-                      <SelectTrigger className="w-full bg-white/80 dark:bg-gray-800/80">
-                        <SelectValue placeholder="Select a location" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Locations</SelectLabel>
-                          <SelectItem value="sundridge">Sundridge Park</SelectItem>
-                          <SelectItem value="muswell">Muswell Hill Methodist (LTC)</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>Choose a tennis club.</FormDescription>
-                  </FormItem>
-                )}
-              ></FormField>
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <DatePicker
-                    field={field}
-                    availableDates={availableUniqueDates}
-                    isLoading={isLoading}
-                    disabled={!selectedLocation}
-                    helperText="Choose a date to see available lessons."
-                  />
-                )}
-              />
-            </div>
-          </Form>
-        </div>
+        {selectedDate && (
+          <div className="lg:ml-auto relative z-10 mt-8">
+            <AvailableLessons availableLessons={availableLessons} date={selectedDate} />
+          </div>
+        )}
       </div>
-
-      {error && (
-        <Typography.P className="text-center text-red-500 relative z-10">
-          Error loading lessons
-        </Typography.P>
-      )}
-
-      {selectedDate && (
-        <div className="lg:ml-auto relative z-10 mt-8">
-          <AvailableLessons availableLessons={availableLessons} date={selectedDate} />
-        </div>
-      )}
 
       <div className="hidden md:block">
         <TennisBall right="-20px" width="100px" topPercent={130} bottomPercent={0} />

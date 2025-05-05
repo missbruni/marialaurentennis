@@ -16,6 +16,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preload" href="/tennis-hero-3.jpeg" as="image" type="image/jpeg" />
+      </head>
       <body className="relative min-h-screen overflow-x-hidden" suppressHydrationWarning>
         <ReactQueryProvider>
           <ThemeProvider

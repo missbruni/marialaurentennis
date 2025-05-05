@@ -1,6 +1,6 @@
 import { describe, expect, vi, beforeEach, test } from 'vitest';
 
-import Hero from './Hero';
+import Hero from './HeroAnimated';
 import { render, screen } from '../lib/test-utils';
 
 describe('Hero', () => {
