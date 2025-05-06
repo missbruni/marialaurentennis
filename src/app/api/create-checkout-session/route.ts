@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
         source: 'mlt-tennis-app'
       },
       success_url: `${req.nextUrl.origin}/success?lesson=${encodedLesson}&sessionId={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.nextUrl.origin}/error`
+      cancel_url: `${req.nextUrl.origin}`
     });
 
     return NextResponse.json({ url: session.url });
