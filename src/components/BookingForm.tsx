@@ -106,24 +106,24 @@ const BookingForm: React.FC = () => {
       <div>
         <div className="flex flex-col xl:flex-row w-full relative z-1 gap-10 lg:gap-30">
           <div className="flex-1 p-2">
-            <Typography.H2 className="mb-10 text-foreground">
+            <Typography.H2 className="mb-5 lg:mb-10 text-foreground text-2xl lg:text-3xl">
               <span className="font-bold text-lime-500">Lessons:</span> Improve your game
             </Typography.H2>
 
             <div className="flex flex-col gap-5 lg:gap-10">
-              <Typography.H1 className="text-2xl lg:text-4xl text-foreground backdrop-blur-md rounded-lg p-3">
+              <Typography.H1 className="text-2xl lg:text-4xl text-foreground lg:backdrop-blur-md rounded-lg lg:p-3">
                 {`Whether you're picking up a racket for the first time or looking to refine your
                 technique, our private tennis lessons are tailored to your level and goals.`}
               </Typography.H1>
-              <Typography.H1 className="text-2xl lg:text-4xl text-foreground backdrop-blur-md rounded-lg p-3">
+              <Typography.H1 className="text-2xl lg:text-4xl text-foreground lg:backdrop-blur-md rounded-lg lg:p-3">
                 Book a session today and take the next step in your tennis journey.
               </Typography.H1>
             </div>
           </div>
 
-          <div className="p-2 flex-1  flex-col items-start">
+          <div className="p-2 flex-1 flex-col items-start">
             <Form {...form}>
-              <div className="flex flex-col gap-6 w-96 backdrop-blur-md rounded-lg p-4">
+              <div className="flex flex-col gap-6 w-full lg:w-96 backdrop-blur-md rounded-lg p-4">
                 <FormField
                   control={form.control}
                   name="location"
@@ -168,7 +168,7 @@ const BookingForm: React.FC = () => {
             )}
 
             {selectedDate && (
-              <div className="relative z-10 mt-20">
+              <div className="relative z-10 mt-10 lg:mt-20">
                 <AvailableLessons availableLessons={availableLessons} date={selectedDate} />
               </div>
             )}
