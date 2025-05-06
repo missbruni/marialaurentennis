@@ -20,7 +20,7 @@ function CancellationHandler() {
         router.replace('/');
       })();
     }
-  }, [releaseLessonId, router]);
+  }, [releaseLessonId, router, queryClient]);
 
   return null;
 }

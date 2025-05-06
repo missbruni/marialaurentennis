@@ -108,7 +108,7 @@ export default function SuccessContent({ onClose }: SuccessContentProps) {
     };
 
     createBookingRecord();
-  }, [lesson, sessionId, saveAttempted, user]);
+  }, [lesson, sessionId, saveAttempted, user, queryClient]);
 
   return (
     <>
