@@ -22,7 +22,7 @@ describe('useSectionRef', () => {
 
     expect(() => {
       renderHook(() => useSectionRef());
-    }).toThrow('useSectionRef must be used within a BookingFormProvider');
+    }).toThrow('useSectionRef must be used within a SectionRefProvider');
 
     console.error = originalError;
   });
@@ -73,6 +73,6 @@ describe('useSectionRef', () => {
 
     result.current.scrollToBookingForm();
 
-    expect(console.warn).toHaveBeenCalledWith('Booking form reference is not available');
+    expect(console.warn).toHaveBeenCalledWith('Section reference is not available');
   });
 });

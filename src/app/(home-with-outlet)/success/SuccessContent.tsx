@@ -11,6 +11,7 @@ import { formatTime } from '@/lib/date';
 import { format } from 'date-fns';
 import { Timestamp } from 'firebase/firestore';
 import { capitalizeWords } from '@/lib/string';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SuccessContentProps {
   onClose: () => void;
@@ -18,6 +19,7 @@ interface SuccessContentProps {
 
 export default function SuccessContent({ onClose }: SuccessContentProps) {
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const [saveAttempted, setSaveAttempted] = React.useState(false);
   const [isCreatingBooking, setIsCreatingBooking] = React.useState(false);
   const [bookingError, setBookingError] = React.useState<string | null>(null);
@@ -79,14 +81,20 @@ export default function SuccessContent({ onClose }: SuccessContentProps) {
 
   React.useEffect(() => {
     const createBookingRecord = async () => {
-      if (!lesson || !sessionId || saveAttempted) return;
+      if (!lesson || !sessionId || saveAttempted || !user) return;
 
       setSaveAttempted(true);
       setIsCreatingBooking(true);
 
       try {
-        // to replace with the user email from user
-        await createBooking(lesson, sessionId, 'bruna.comer@gmail.com');
+        const userEmail = user.email;
+        const userId = user.uid;
+
+        if (!userEmail || !userId) {
+          throw new Error('User email or ID is missing');
+        }
+
+        await createBooking(lesson, sessionId, userEmail, userId);
       } catch (error) {
         console.error('Error creating booking:', error);
         setBookingError(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -96,7 +104,7 @@ export default function SuccessContent({ onClose }: SuccessContentProps) {
     };
 
     createBookingRecord();
-  }, [lesson, sessionId, saveAttempted]);
+  }, [lesson, sessionId, saveAttempted, user]);
 
   return (
     <>

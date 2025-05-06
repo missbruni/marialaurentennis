@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
     const encodedLesson = encodeURIComponent(
       Buffer.from(JSON.stringify(lesson)).toString('base64')
     );
+    console.log('🚀 ~ lesson passed to stripe:', lesson.id);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],

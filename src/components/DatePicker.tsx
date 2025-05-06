@@ -123,8 +123,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 available: (date) => isDateAvailable(date)
               }}
               modifiersClassNames={{
-                available:
-                  '!font-bold text-lime-600 rounded-sm bg-[#e4ece4] hover:text-lime-600 cursor-pointer'
+                available: '!font-bold text-lime-600 rounded-sm hover:text-lime-600 cursor-pointer'
               }}
               classNames={{
                 months: 'flex flex-col gap-4 justify-center',
@@ -220,10 +219,10 @@ const DatePicker: React.FC<DatePickerProps> = ({
               }}
               modifiersClassNames={{
                 available:
-                  '!font-bold text-lime-600 rounded-sm bg-[#e4ece4] hover:text-lime-600 cursor-pointer'
+                  '!font-extrabold text-lime-600 rounded-sm hover:text-lime-600 cursor-pointer'
               }}
               classNames={{
-                day_disabled: 'cursor-not-allowed'
+                day_disabled: 'cursor-not-allowed text-muted-foreground'
               }}
             />
           </PopoverContent>

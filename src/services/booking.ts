@@ -1,9 +1,10 @@
-import { Availability } from './availabilities';
+import type { Availability } from './availabilities';
 
 export const createBooking = async (
   booking: Availability,
   sessionId: string,
-  userEmail: string
+  userEmail: string,
+  userId: string
 ) => {
   return fetch('/api/create-booking', {
     method: 'POST',
@@ -13,7 +14,8 @@ export const createBooking = async (
     body: JSON.stringify({
       booking,
       sessionId,
-      userEmail
+      userEmail,
+      userId
     })
   });
 };
