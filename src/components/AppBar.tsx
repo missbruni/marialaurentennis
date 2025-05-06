@@ -58,8 +58,8 @@ const AppBar = () => {
           aria-hidden="true"
         />
       )}
-      <header className="sticky top-0 z-50 w-full h-18 px-4 md:px-8 dark:bg-[#181818] bg-white border-b-[var(--sidebar-border)] border-b-1">
-        <div className="max-w-screen-2xl mx-auto flex h-18 items-center justify-between">
+      <header className="sticky top-0 z-50 w-full h-18 px-4 md:px-10 dark:bg-[#181818] bg-white border-b-[var(--sidebar-border)] border-b-1">
+        <div className="mx-auto flex h-18 items-center justify-between">
           <div className="flex items-center gap-2">
             <Link href="/" className="font-bold text-xl text-foreground">
               {logoSrc && <Image src={logoSrc} alt="Maria Lauren Tennis" width={70} height={50} />}

@@ -103,9 +103,9 @@ const BookingForm: React.FC = () => {
         <TennisBall left="-100px" />
       </div>
 
-      <div className="container">
-        <div className="flex flex-col lg:flex-row w-full relative z-1 gap-6 backdrop-blur-md rounded-lg container mx-auto">
-          <div className="flex-1 p-2">
+      <div>
+        <div className="flex flex-col xl:flex-row w-full relative z-1 gap-10">
+          <div className="flex-1 p-2 backdrop-blur-md rounded-lg">
             <Typography.H2 className="mb-6 text-foreground">
               <span className="font-bold text-lime-500">Lessons:</span> Improve your game
             </Typography.H2>
@@ -116,11 +116,9 @@ const BookingForm: React.FC = () => {
             </Typography.P>
           </div>
 
-          {/* TODO: show date only after location is selected, with animation and human language, from bottom to top */}
-
-          <div className="p-2 flex flex-1 items-start">
+          <div className="p-2 flex-1 flex-col items-start">
             <Form {...form}>
-              <div className="flex flex-col gap-6 w-96">
+              <div className="flex flex-col gap-6 w-96 backdrop-blur-md rounded-lg p-4">
                 <FormField
                   control={form.control}
                   name="location"
@@ -158,20 +156,19 @@ const BookingForm: React.FC = () => {
                 />
               </div>
             </Form>
+            {error && (
+              <Typography.P className="text-red-500 relative z-10 px-4">
+                Error loading lessons. Please try again later.
+              </Typography.P>
+            )}
+
+            {selectedDate && (
+              <div className="relative z-10 mt-20">
+                <AvailableLessons availableLessons={availableLessons} date={selectedDate} />
+              </div>
+            )}
           </div>
         </div>
-
-        {error && (
-          <Typography.P className="text-center text-red-500 relative z-10">
-            Error loading lessons
-          </Typography.P>
-        )}
-
-        {selectedDate && (
-          <div className="lg:ml-auto relative z-10 mt-8">
-            <AvailableLessons availableLessons={availableLessons} date={selectedDate} />
-          </div>
-        )}
       </div>
 
       <div className="hidden md:block">

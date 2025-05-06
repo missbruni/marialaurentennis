@@ -54,12 +54,12 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, d
 
   return (
     <div className="relative">
-      <Typography.H2 className="text-2xl md:text-3xl mb-6 text-foreground md:text-right">
+      <Typography.H2 className="text-2xl md:text-3xl mb-6 text-foreground">
         <span className="font-bold text-lime-500">Availability</span> on{' '}
         {format(date, 'EEEE MMMM d')}
       </Typography.H2>
 
-      <div className={`${getGridClass()} gap-3 ml-auto max-w-[950px]`}>
+      <div className={`${getGridClass()} gap-3 ml-auto`}>
         {[...availableLessons].map((availability, index) => (
           <Lesson
             key={index}
