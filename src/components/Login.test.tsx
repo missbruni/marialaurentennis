@@ -41,7 +41,7 @@ describe('Login', () => {
       logout: vi.fn()
     });
 
-    render(<Login />);
+    render(<Login open={false} />);
 
     expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
   });
@@ -59,7 +59,7 @@ describe('Login', () => {
       logout: vi.fn()
     });
 
-    render(<Login />);
+    render(<Login open={false} />);
 
     expect(screen.queryByRole('button', { name: /login/i })).not.toBeInTheDocument();
     const avatarPopover = document.querySelector('[data-slot="popover-trigger"]');
@@ -79,7 +79,7 @@ describe('Login', () => {
       logout: vi.fn()
     });
 
-    render(<Login />);
+    render(<Login open={false} />);
 
     const avatarFallback = screen.getByText('T');
     expect(avatarFallback).toBeInTheDocument();
@@ -93,7 +93,7 @@ describe('Login', () => {
       logout: vi.fn()
     });
 
-    render(<Login />);
+    render(<Login open={false} />);
 
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: /login/i }));
@@ -112,7 +112,7 @@ describe('Login', () => {
     });
 
     const mockOnClick = vi.fn();
-    render(<Login onClick={mockOnClick} />);
+    render(<Login open={false} onClick={mockOnClick} />);
 
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: /login/i }));
@@ -128,7 +128,7 @@ describe('Login', () => {
       logout: vi.fn()
     });
 
-    render(<Login />);
+    render(<Login open={false} />);
 
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: /login/i }));
@@ -147,7 +147,7 @@ describe('Login', () => {
       logout: vi.fn()
     });
 
-    render(<Login />);
+    render(<Login open={false} />);
 
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: /login/i }));
@@ -170,7 +170,7 @@ describe('Login', () => {
       logout: vi.fn()
     });
 
-    render(<Login />);
+    render(<Login open={false} />);
 
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: /login/i }));

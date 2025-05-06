@@ -32,15 +32,29 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('firebase/auth', () => {
+  const mockUser = {
+    uid: 'test-uid',
+    email: 'test@example.com',
+    getIdToken: vi.fn().mockResolvedValue('mock-id-token'),
+    getIdTokenResult: vi.fn().mockResolvedValue({ claims: { role: 'user' } })
+  };
+
   const auth = {
     currentUser: null,
     onAuthStateChanged: vi.fn((auth, callback) => {
       callback(null);
       return vi.fn();
     }),
-    signInWithPopup: vi.fn(() => Promise.resolve({ user: { uid: 'test-uid' } })),
+    signInWithPopup: vi.fn(() =>
+      Promise.resolve({
+        user: mockUser
+      })
+    ),
     signOut: vi.fn(() => Promise.resolve()),
-    GoogleAuthProvider: vi.fn(() => ({}))
+    GoogleAuthProvider: vi.fn(() => ({})),
+    FacebookAuthProvider: vi.fn(() => ({})),
+    signInWithEmailAndPassword: vi.fn(() => Promise.resolve({ user: mockUser })),
+    createUserWithEmailAndPassword: vi.fn(() => Promise.resolve({ user: mockUser }))
   };
 
   return {
@@ -48,7 +62,10 @@ vi.mock('firebase/auth', () => {
     onAuthStateChanged: auth.onAuthStateChanged,
     signInWithPopup: auth.signInWithPopup,
     signOut: auth.signOut,
-    GoogleAuthProvider: auth.GoogleAuthProvider
+    GoogleAuthProvider: auth.GoogleAuthProvider,
+    FacebookAuthProvider: auth.FacebookAuthProvider,
+    signInWithEmailAndPassword: auth.signInWithEmailAndPassword,
+    createUserWithEmailAndPassword: auth.createUserWithEmailAndPassword
   };
 });
 

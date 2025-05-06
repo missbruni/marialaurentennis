@@ -1,6 +1,6 @@
 import { describe, expect, vi, beforeEach, test } from 'vitest';
 import React from 'react';
-import { render, screen } from '@/lib/test-utils';
+import { render, screen, waitFor } from '@/lib/test-utils';
 import { render as originalRender } from '@testing-library/react';
 import { useAuth } from './useAuth';
 import * as firebaseAuth from 'firebase/auth';
@@ -36,8 +36,12 @@ describe('useAuth', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.spyOn(firebaseAuth, 'onAuthStateChanged').mockImplementation((auth, callback) => {
-      (callback as any)(null);
+    // Instead of using act, we'll use a more direct approach
+    vi.spyOn(firebaseAuth, 'onAuthStateChanged').mockImplementation((_auth, callback: any) => {
+      // Call the callback asynchronously
+      setTimeout(() => {
+        callback(null);
+      }, 0);
       return vi.fn();
     });
 
@@ -50,10 +54,13 @@ describe('useAuth', () => {
     );
   });
 
-  test('provides authentication context to children', () => {
+  test('provides authentication context to children', async () => {
     render(<TestComponent />);
 
-    expect(screen.getByTestId('loading-state')).toHaveTextContent('false');
+    // Wait for the loading state to be updated
+    await waitFor(() => {
+      expect(screen.getByTestId('loading-state')).toHaveTextContent('false');
+    });
     expect(screen.getByTestId('user-state')).toHaveTextContent('logged-out');
   });
 
@@ -65,15 +72,17 @@ describe('useAuth', () => {
       getIdTokenResult: vi.fn().mockResolvedValue({ claims: { role: 'user' } })
     };
 
-    vi.spyOn(firebaseAuth, 'onAuthStateChanged').mockImplementationOnce((auth, callback) => {
-      (callback as any)(mockUser as unknown as firebaseAuth.User);
+    vi.spyOn(firebaseAuth, 'onAuthStateChanged').mockImplementationOnce((_auth, callback: any) => {
+      setTimeout(() => {
+        callback(mockUser as unknown as firebaseAuth.User);
+      }, 0);
       return vi.fn();
     });
 
     render(<TestComponent />);
 
     // Wait for state updates to complete
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByTestId('loading-state')).toHaveTextContent('false');
       expect(screen.getByTestId('user-state')).toHaveTextContent('logged-in');
     });
@@ -83,8 +92,24 @@ describe('useAuth', () => {
     const googleProviderInstance = new firebaseAuth.GoogleAuthProvider();
     vi.spyOn(firebaseAuth, 'GoogleAuthProvider').mockImplementation(() => googleProviderInstance);
 
-    const signInWithPopupMock = vi.spyOn(firebaseAuth, 'signInWithPopup');
+    // Mock the user object properly for handleUserAuthentication
+    const mockUser = {
+      uid: 'test-uid',
+      email: 'test@example.com',
+      getIdToken: vi.fn().mockResolvedValue('mock-id-token'),
+      getIdTokenResult: vi.fn().mockResolvedValue({ claims: { role: 'user' } })
+    };
+
+    const signInWithPopupMock = vi.spyOn(firebaseAuth, 'signInWithPopup').mockResolvedValueOnce({
+      user: mockUser as unknown as firebaseAuth.User
+    } as any);
+
     const { user } = render(<TestComponent />);
+
+    // Wait for initial render to complete
+    await waitFor(() => {
+      expect(screen.getByTestId('loading-state')).toHaveTextContent('false');
+    });
 
     await user.click(screen.getByTestId('login-button'));
 
@@ -92,8 +117,14 @@ describe('useAuth', () => {
   });
 
   test('calls signOut when logout is called', async () => {
-    const signOutMock = vi.spyOn(firebaseAuth, 'signOut');
+    const signOutMock = vi.spyOn(firebaseAuth, 'signOut').mockResolvedValueOnce(undefined);
+
     const { user } = render(<TestComponent />);
+
+    // Wait for initial render to complete
+    await waitFor(() => {
+      expect(screen.getByTestId('loading-state')).toHaveTextContent('false');
+    });
 
     await user.click(screen.getByTestId('logout-button'));
 
@@ -105,6 +136,11 @@ describe('useAuth', () => {
     vi.spyOn(firebaseAuth, 'signInWithPopup').mockRejectedValueOnce(new Error('Auth error'));
 
     const { user } = render(<TestComponent />);
+
+    // Wait for initial render to complete
+    await waitFor(() => {
+      expect(screen.getByTestId('loading-state')).toHaveTextContent('false');
+    });
 
     await user.click(screen.getByTestId('login-button'));
 
@@ -121,6 +157,11 @@ describe('useAuth', () => {
     vi.spyOn(firebaseAuth, 'signOut').mockRejectedValueOnce(new Error('Logout error'));
 
     const { user } = render(<TestComponent />);
+
+    // Wait for initial render to complete
+    await waitFor(() => {
+      expect(screen.getByTestId('loading-state')).toHaveTextContent('false');
+    });
 
     await user.click(screen.getByTestId('logout-button'));
 
@@ -150,6 +191,7 @@ describe('useAuth', () => {
     } as any);
 
     const { user } = render(<TestComponent />);
+
     await user.click(screen.getByTestId('login-button'));
 
     expect(global.fetch).toHaveBeenCalledWith('/api/auth/session', {
@@ -167,8 +209,10 @@ describe('useAuth', () => {
       getIdTokenResult: vi.fn().mockResolvedValue({ claims: { role: 'admin' } })
     };
 
-    vi.spyOn(firebaseAuth, 'onAuthStateChanged').mockImplementationOnce((auth, callback) => {
-      (callback as any)(mockUser as unknown as firebaseAuth.User);
+    vi.spyOn(firebaseAuth, 'onAuthStateChanged').mockImplementationOnce((_auth, callback: any) => {
+      setTimeout(() => {
+        callback(mockUser as unknown as firebaseAuth.User);
+      }, 0);
       return vi.fn();
     });
 
@@ -180,7 +224,7 @@ describe('useAuth', () => {
     render(<TestAdminComponent />);
 
     // Wait for state updates to complete
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByTestId('admin-state')).toHaveTextContent('true');
     });
   });
@@ -218,6 +262,7 @@ describe('useAuth', () => {
     } as any);
 
     const { user } = render(<TestComponent />);
+
     await user.click(screen.getByTestId('login-button'));
 
     expect(consoleErrorSpy).toHaveBeenCalledWith('Error creating session:', expect.any(Error));
@@ -240,6 +285,7 @@ describe('useAuth', () => {
     } as any);
 
     const { user } = render(<TestComponent />);
+
     await user.click(screen.getByTestId('login-button'));
 
     expect(consoleErrorSpy).toHaveBeenCalledWith('Error getting token claims:', expect.any(Error));

@@ -14,8 +14,9 @@ import { Button } from './ui/button';
 import { cn } from '../lib/utils';
 import { CalendarIcon, Loader2 } from 'lucide-react';
 import { format, isEqual, addMonths, startOfDay, isBefore } from 'date-fns';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 type DatePickerProps = {
   field: FieldValues;
@@ -173,6 +174,12 @@ const DatePicker: React.FC<DatePickerProps> = ({
           </FormControl>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent className="sm:max-w-[425px] p-0 h-[80vh] flex flex-col custom-dialog-close">
+              <DialogTitle>
+                <VisuallyHidden>Select a date</VisuallyHidden>
+              </DialogTitle>
+              <DialogDescription>
+                <VisuallyHidden>Choose from available dates</VisuallyHidden>
+              </DialogDescription>
               <div className="p-4 flex items-center justify-between border-b">
                 <h2 className="text-lg font-semibold">Select Date</h2>
               </div>
