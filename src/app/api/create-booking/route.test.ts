@@ -21,6 +21,8 @@ vi.mock('firebase/firestore', () => {
     collection: vi.fn(),
     addDoc: vi.fn().mockResolvedValue({ id: 'mock-booking-id' }),
     deleteDoc: vi.fn().mockResolvedValue(undefined),
+    updateDoc: vi.fn().mockResolvedValue(undefined),
+    deleteField: vi.fn().mockReturnValue('deleted-field-value'),
     doc: vi.fn().mockReturnValue({
       /* mock document reference */
     }),
@@ -53,7 +55,7 @@ describe('POST /api/create-booking', () => {
     } as unknown as NextRequest;
   });
 
-  test('should create a booking and delete the availability', async () => {
+  test('should create a booking and update availability as booked', async () => {
     const response = await POST(mockRequest);
     const responseData = await response.json();
 
@@ -67,7 +69,10 @@ describe('POST /api/create-booking', () => {
       'availabilities',
       'mock-availability-id'
     );
-    expect(firestore.deleteDoc).toHaveBeenCalled();
+    expect(firestore.updateDoc).toHaveBeenCalledWith(expect.anything(), {
+      status: 'booked',
+      pendingUntil: firestore.deleteField()
+    });
   });
 
   test('should handle errors gracefully', async () => {
