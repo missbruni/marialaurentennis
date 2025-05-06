@@ -69,7 +69,7 @@ const dashboardItems: DashboardItem[] = [
   }
 ];
 
-export default function AdminDashboard() {
+export default function AdminPage() {
   const handleCardClick = (url: string) => {
     // You could use router.push here if you want to navigate programmatically
     window.location.href = url;

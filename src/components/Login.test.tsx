@@ -1,20 +1,36 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '@/lib/test-utils';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import Login from './Login';
 import type { User } from 'firebase/auth';
 import { useAuth } from '../hooks/useAuth';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: vi.fn()
+  useAuth: vi.fn(),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
+}));
+
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
+  useSearchParams: vi.fn()
 }));
 
 describe('Login', () => {
   const mockSignInWithGoogle = vi.fn();
+  const mockPush = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    (useRouter as any).mockReturnValue({
+      push: mockPush
+    });
+
+    (useSearchParams as any).mockReturnValue({
+      get: vi.fn().mockReturnValue('/')
+    });
   });
 
   test('should render login button when user is not logged in', () => {
@@ -135,5 +151,34 @@ describe('Login', () => {
 
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: /login/i }));
+  });
+
+  test('should redirect to specified path after successful authentication', async () => {
+    (useSearchParams as any).mockReturnValue({
+      get: vi.fn().mockImplementation((param) => {
+        if (param === 'from') return '/admin/availability';
+        return null;
+      })
+    });
+
+    mockSignInWithGoogle.mockResolvedValueOnce(undefined);
+
+    (useAuth as any).mockReturnValue({
+      signInWithGoogle: mockSignInWithGoogle,
+      user: null,
+      loading: false,
+      logout: vi.fn()
+    });
+
+    render(<Login />);
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: /login/i }));
+    await user.click(screen.getByText('Continue with Google'));
+
+    await vi.waitFor(() => {
+      expect(mockSignInWithGoogle).toHaveBeenCalledTimes(1);
+      expect(mockPush).toHaveBeenCalledWith('/admin/availability');
+    });
   });
 });

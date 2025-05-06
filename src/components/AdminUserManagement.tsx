@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 export default function AdminUserManagement() {
-  const { isAdmin, user } = useAuth();
+  const { user } = useAuth();
 
   const [userId, setUserId] = React.useState('');
   const [role, setRole] = React.useState('user');
@@ -50,10 +50,6 @@ export default function AdminUserManagement() {
       setIsLoading(false);
     }
   };
-
-  if (!isAdmin) {
-    return <div>You don&apos;t have permission to access this page.</div>;
-  }
 
   return (
     <Card className="border-1 max-w-4xl border-[var(--sidebar-border)]">

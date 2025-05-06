@@ -15,7 +15,7 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
       <BookingFormProvider>
         <div className="flex flex-col">
           <AppBar />
-          <div>{children}</div>
+          {children}
         </div>
       </BookingFormProvider>
     </AuthProvider>

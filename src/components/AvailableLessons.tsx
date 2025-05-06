@@ -2,9 +2,9 @@ import { format } from 'date-fns/format';
 import { Availability } from '../services/availabilities';
 import Lesson from './Lesson';
 import { Typography } from './ui/typography';
-import { Loader2 } from 'lucide-react';
 
 import React from 'react';
+import Loader from './Loader';
 
 type AvailableLessonsProps = {
   availableLessons: Availability[];
@@ -71,15 +71,7 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, d
         ))}
       </div>
 
-      {/* Full page overlay when loading */}
-      {isLoading && (
-        <div className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 animate-spin text-lime-600" />
-            <Typography.P>Preparing your checkout...</Typography.P>
-          </div>
-        </div>
-      )}
+      {isLoading && <Loader message="Preparing your checkout..." />}
     </div>
   );
 };

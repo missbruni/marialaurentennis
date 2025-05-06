@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { useBookingForm } from '../hooks/useBookingForm';
 import { Separator } from './ui/separator';
+import ClientPageWrapper from './ClientPageWrapper';
 
 export const HEADER_HEIGHT = 72;
 const AppBar = () => {
@@ -96,7 +97,9 @@ const AppBar = () => {
           </nav>
 
           <div className="flex items-center gap-4">
-            <Login />
+            <ClientPageWrapper>
+              <Login />
+            </ClientPageWrapper>
 
             <Button
               className="hidden md:inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-medium transition-colors hover:bg-primary/90 h-9 px-4"
