@@ -112,8 +112,8 @@ const BookingForm: React.FC = () => {
 
             <div className="flex flex-col gap-10 lg:gap-20">
               <Typography.H1 className="text-2xl lg:text-4xl text-foreground">
-                Whether you're picking up a racket for the first time or looking to refine your
-                technique, our private tennis lessons are tailored to your level and goals.
+                {`Whether you're picking up a racket for the first time or looking to refine your
+                technique, our private tennis lessons are tailored to your level and goals.`}
               </Typography.H1>
               <Typography.H1 className="text-2xl lg:text-4xl text-foreground">
                 Book a session today and take the next step in your tennis journey.
