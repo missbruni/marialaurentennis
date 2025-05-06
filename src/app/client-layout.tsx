@@ -2,7 +2,7 @@
 
 import AppBar from '../components/AppBar';
 import React from 'react';
-import { BookingFormProvider } from '@/hooks/useBookingForm';
+import { SectionRefProvider } from '@/hooks/useSectionRef';
 import { AuthProvider } from '@/hooks/useAuth';
 
 type ClientLayoutProps = {
@@ -12,12 +12,12 @@ type ClientLayoutProps = {
 const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   return (
     <AuthProvider>
-      <BookingFormProvider>
+      <SectionRefProvider>
         <div className="flex flex-col">
           <AppBar />
           {children}
         </div>
-      </BookingFormProvider>
+      </SectionRefProvider>
     </AuthProvider>
   );
 };

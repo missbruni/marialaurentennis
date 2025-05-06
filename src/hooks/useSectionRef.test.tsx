@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { BookingFormProvider, useBookingForm } from './useBookingForm';
+import { SectionRefProvider, useSectionRef } from './useSectionRef';
 import { beforeEach, afterEach, vi, describe, test, expect } from 'vitest';
 
 const originalConsoleWarn = console.warn;
@@ -12,30 +12,30 @@ afterEach(() => {
 });
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <BookingFormProvider>{children}</BookingFormProvider>
+  <SectionRefProvider>{children}</SectionRefProvider>
 );
 
-describe('useBookingForm', () => {
+describe('useSectionRef', () => {
   test('should throw error when used outside of BookingFormProvider', () => {
     const originalError = console.error;
     console.error = vi.fn();
 
     expect(() => {
-      renderHook(() => useBookingForm());
-    }).toThrow('useBookingForm must be used within a BookingFormProvider');
+      renderHook(() => useSectionRef());
+    }).toThrow('useSectionRef must be used within a BookingFormProvider');
 
     console.error = originalError;
   });
 
   test('should provide bookingFormRef and scrollToBookingForm', () => {
-    const { result } = renderHook(() => useBookingForm(), { wrapper });
+    const { result } = renderHook(() => useSectionRef(), { wrapper });
 
     expect(result.current.bookingFormRef).toBeDefined();
     expect(typeof result.current.scrollToBookingForm).toBe('function');
   });
 
   test('scrollToBookingForm should call scrollIntoView when ref is available', () => {
-    const { result } = renderHook(() => useBookingForm(), { wrapper });
+    const { result } = renderHook(() => useSectionRef(), { wrapper });
 
     const mockGetBoundingClientRect = vi.fn().mockReturnValue({ top: 100 });
     const mockScrollTo = vi.fn();
@@ -64,7 +64,7 @@ describe('useBookingForm', () => {
   });
 
   test('scrollToBookingForm should log warning when ref is not available', () => {
-    const { result } = renderHook(() => useBookingForm(), { wrapper });
+    const { result } = renderHook(() => useSectionRef(), { wrapper });
 
     Object.defineProperty(result.current.bookingFormRef, 'current', {
       value: null,

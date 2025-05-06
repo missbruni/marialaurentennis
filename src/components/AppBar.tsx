@@ -12,7 +12,7 @@ import Login from './Login';
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/hooks/useAuth';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { useBookingForm } from '../hooks/useBookingForm';
+import { useSectionRef } from '../hooks/useSectionRef';
 import { Separator } from './ui/separator';
 import ClientPageWrapper from './ClientPageWrapper';
 
@@ -23,7 +23,7 @@ const AppBar = () => {
   const { theme } = useTheme();
   const pathname = usePathname();
 
-  const { scrollToBookingForm } = useBookingForm();
+  const { scrollToBookingForm, scrollToContact } = useSectionRef();
 
   const [logoSrc, setLogoSrc] = React.useState('/fullname.svg');
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
@@ -38,6 +38,19 @@ const AppBar = () => {
       }, 300);
     } else {
       scrollToBookingForm();
+    }
+  };
+
+  const handleContactClick = () => {
+    setMobileMenuOpen(false);
+    if (pathname !== '/') {
+      router.push('/');
+
+      setTimeout(() => {
+        scrollToContact();
+      }, 300);
+    } else {
+      scrollToContact();
     }
   };
 
@@ -80,12 +93,12 @@ const AppBar = () => {
             >
               Lessons
             </button>
-            <Link
-              href="/contact"
-              className="font-medium text-foreground hover:text-primary hover:font-bold transition-all duration-200"
+            <button
+              className="font-medium text-foreground hover:text-primary hover:font-bold transition-all duration-200 bg-transparent border-none p-0 cursor-pointer"
+              onClick={handleContactClick}
             >
               Contact
-            </Link>
+            </button>
             {isAdmin && (
               <Link
                 href="/admin"
@@ -144,13 +157,15 @@ const AppBar = () => {
                     >
                       Lessons
                     </button>
-                    <Link
-                      href="/contact"
-                      className="py-3 text-lg font-medium border-b border-border transition-colors hover:text-primary"
-                      onClick={handleMobileMenuItemClick}
+                    <button
+                      onClick={() => {
+                        handleContactClick();
+                        handleMobileMenuItemClick();
+                      }}
+                      className="py-3 text-lg font-medium border-b border-border transition-colors hover:text-primary text-left bg-transparent"
                     >
                       Contact
-                    </Link>
+                    </button>
                     {isAdmin && (
                       <Link
                         href="/admin"

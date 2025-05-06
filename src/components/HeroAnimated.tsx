@@ -1,11 +1,11 @@
 import React from 'react';
 import AnimatedLogo from './AnimatedLogo';
-import { useBookingForm } from '@/hooks/useBookingForm';
+import { useSectionRef } from '@/hooks/useSectionRef';
 import { Button } from './ui/button';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const HeroAnimated: React.FC = () => {
-  const { scrollToBookingForm } = useBookingForm();
+  const { scrollToBookingForm } = useSectionRef();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const isTablet = useMediaQuery('(max-width: 1024px)');
 

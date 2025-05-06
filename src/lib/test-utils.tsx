@@ -4,7 +4,7 @@ import { ThemeProvider } from 'next-themes';
 import { ReactQueryProvider } from './react-query';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BookingFormProvider } from '@/hooks/useBookingForm';
+import { SectionRefProvider } from '@/hooks/useSectionRef';
 import { AuthProvider } from '@/hooks/useAuth';
 
 function customRender(ui: React.ReactElement) {
@@ -15,7 +15,7 @@ function customRender(ui: React.ReactElement) {
         <ReactQueryProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
             <AuthProvider>
-              <BookingFormProvider>{children}</BookingFormProvider>
+              <SectionRefProvider>{children}</SectionRefProvider>
             </AuthProvider>
           </ThemeProvider>
         </ReactQueryProvider>

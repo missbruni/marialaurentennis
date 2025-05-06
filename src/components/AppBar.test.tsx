@@ -2,7 +2,7 @@ import { describe, expect, vi, beforeEach, test } from 'vitest';
 
 import AppBar from './AppBar';
 import { screen, render } from '@/lib/test-utils';
-import * as useBookingFormModule from '@/hooks/useBookingForm';
+import * as useSectionRefModule from '@/hooks/useSectionRef';
 import userEvent from '@testing-library/user-event';
 
 vi.mock('next/link', () => {
@@ -20,12 +20,15 @@ vi.mock('next/link', () => {
 
 describe('AppBar', () => {
   const mockScrollToBookingForm = vi.fn();
+  const mockScrollToContact = vi.fn();
 
   beforeEach(() => {
     mockScrollToBookingForm.mockReset();
-    vi.spyOn(useBookingFormModule, 'useBookingForm').mockReturnValue({
+    vi.spyOn(useSectionRefModule, 'useSectionRef').mockReturnValue({
       scrollToBookingForm: mockScrollToBookingForm,
-      bookingFormRef: { current: null }
+      bookingFormRef: { current: null },
+      contactRef: { current: null },
+      scrollToContact: mockScrollToContact
     });
   });
 
