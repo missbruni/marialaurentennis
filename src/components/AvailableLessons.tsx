@@ -55,7 +55,7 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, d
   return (
     <div className="relative">
       <Typography.H2 className="text-2xl md:text-3xl mb-6 text-foreground">
-        <span className="font-bold text-lime-500">Availability</span> on{' '}
+        <span className="font-bold text-tennis-green">Availability</span> on{' '}
         {format(date, 'EEEE MMMM d')}
       </Typography.H2>
 

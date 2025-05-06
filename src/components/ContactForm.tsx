@@ -10,7 +10,7 @@ const ContactForm: React.FC = () => {
     <section ref={contactRef} className="w-full bg-[#040504] text-white">
       <div className="container mx-auto p-10">
         <div className="flex flex-col items-center text-center">
-          <Typography.H2>Contact us</Typography.H2>
+          <Typography.H2 className="text-tennis-green">Contact us</Typography.H2>
 
           <div className="mb-8">
             <Typography.Large className="mb-2">Maria Lauren Wisdom</Typography.Large>

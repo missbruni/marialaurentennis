@@ -25,9 +25,7 @@ const Lesson: React.FC<LessonProps> = ({
 
   return (
     <Card
-      className={`py-3 md:py-4 relative transition-transform hover:translate-y-[-4px] shadow-md hover:shadow-lg cursor-pointer bg-white dark:bg-[#242423] ${
-        isSelected ? 'ring-2 ring-lime-500 scale-[1.02]' : ''
-      } ${isSelected && isLoading ? 'opacity-80' : ''}`}
+      className={`py-3 md:py-4 relative transition-transform hover:translate-y-[-4px] shadow-md hover:shadow-lg cursor-pointer bg-white dark:bg-[#242423]`}
       onClick={() => !isLoading && onLessonSelected(lesson)}
     >
       <CardContent className="flex flex-col align-center justify-center gap-1">
@@ -37,13 +35,13 @@ const Lesson: React.FC<LessonProps> = ({
         <Typography.Large className="text-foreground dark:text-foreground whitespace-nowrap">
           {formatTime(lesson.startDateTime)} - {formatTime(lesson.endDateTime)}
         </Typography.Large>
-        <Typography.P className="text-lime-600 dark:text-lime-400 font-bold">
+        <Typography.P className="text-tennis-green font-bold">
           {formatCurrency(lesson.price)}
         </Typography.P>
 
         {isSelected && isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/30 backdrop-blur-sm rounded-md">
-            <Loader2 className="h-6 w-6 animate-spin text-lime-600" />
+            <Loader2 className="h-6 w-6 animate-spin text-tennis-green" />
           </div>
         )}
       </CardContent>

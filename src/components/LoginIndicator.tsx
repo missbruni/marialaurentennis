@@ -27,7 +27,9 @@ const LoginIndicator: React.FC<LoginIndicatorProps> = ({ onLoginClick }) => {
               alt={`${user.displayName || 'User'}'s profile`}
             />
           ) : (
-            <AvatarFallback>{getInitials(user)}</AvatarFallback>
+            <AvatarFallback className="bg-tennis-green text-white dark:text-black">
+              {getInitials(user)}
+            </AvatarFallback>
           )}
         </Avatar>
       </PopoverTrigger>

@@ -106,8 +106,8 @@ const BookingForm: React.FC = () => {
       <div>
         <div className="flex flex-col xl:flex-row w-full relative z-1 gap-10 lg:gap-30">
           <div className="flex-1 p-2">
-            <Typography.H2 className="mb-5 lg:mb-10 text-foreground text-2xl lg:text-3xl">
-              <span className="font-bold text-lime-500">Lessons:</span> Improve your game
+            <Typography.H2 className="mb-5 text-2xl lg:text-4xl text-tennis-green lg:px-3">
+              Improve your game
             </Typography.H2>
 
             <div className="flex flex-col gap-5 lg:gap-10">
@@ -121,7 +121,7 @@ const BookingForm: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-2 flex-1 flex-col items-start">
+          <div className="p-2 flex-2 flex-col items-start">
             <Form {...form}>
               <div className="flex flex-col gap-6 w-full lg:w-96 backdrop-blur-md rounded-lg p-4">
                 <FormField
