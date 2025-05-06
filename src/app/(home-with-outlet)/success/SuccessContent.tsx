@@ -12,14 +12,17 @@ import { format } from 'date-fns';
 import { Timestamp } from 'firebase/firestore';
 import { capitalizeWords } from '@/lib/string';
 import { useAuth } from '@/hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface SuccessContentProps {
   onClose: () => void;
 }
 
 export default function SuccessContent({ onClose }: SuccessContentProps) {
-  const searchParams = useSearchParams();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
+
   const [saveAttempted, setSaveAttempted] = React.useState(false);
   const [isCreatingBooking, setIsCreatingBooking] = React.useState(false);
   const [bookingError, setBookingError] = React.useState<string | null>(null);
@@ -95,6 +98,7 @@ export default function SuccessContent({ onClose }: SuccessContentProps) {
         }
 
         await createBooking(lesson, sessionId, userEmail, userId);
+        queryClient.invalidateQueries({ queryKey: ['availabilities'] });
       } catch (error) {
         console.error('Error creating booking:', error);
         setBookingError(error instanceof Error ? error.message : 'An unknown error occurred');

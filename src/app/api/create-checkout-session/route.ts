@@ -3,12 +3,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { format } from 'date-fns';
 import { formatTime } from '@/lib/date';
 import { Availability } from '../../../services/availabilities';
-import { Timestamp } from 'firebase/firestore';
+import { doc, Timestamp, updateDoc } from 'firebase/firestore';
 import { capitalizeWords } from '../../../lib/string';
+import { db } from '../../../lib/firebase';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2025-03-31.basil'
 });
+
+const TEN_MINUTES = 10 * 60 * 1000;
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,10 +32,16 @@ export async function POST(req: NextRequest) {
         ${formattedDate} | ${formattedStartTime} - ${formattedEndTime}
     `.trim();
 
+    const availabilityRef = doc(db, 'availabilities', lesson.id);
+    const pendingUntil = new Date(Date.now() + TEN_MINUTES);
+    await updateDoc(availabilityRef, {
+      status: 'pending',
+      pendingUntil: Timestamp.fromDate(pendingUntil)
+    });
+
     const encodedLesson = encodeURIComponent(
       Buffer.from(JSON.stringify(lesson)).toString('base64')
     );
-    console.log('🚀 ~ lesson passed to stripe:', lesson.id);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -64,7 +73,7 @@ export async function POST(req: NextRequest) {
         source: 'mlt-tennis-app'
       },
       success_url: `${req.nextUrl.origin}/success?lesson=${encodedLesson}&sessionId={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.nextUrl.origin}`
+      cancel_url: `${req.nextUrl.origin}?releaseLesson=${lesson.id}`
     });
 
     return NextResponse.json({ url: session.url });

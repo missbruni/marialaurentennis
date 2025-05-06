@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { collection, addDoc, Timestamp, deleteDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, Timestamp, doc, updateDoc, deleteField } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 type Booking = {
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     if (booking.id) {
       const availabilityRef = doc(db, 'availabilities', booking.id);
-      await deleteDoc(availabilityRef);
+      await updateDoc(availabilityRef, { status: 'booked', pendingUntil: deleteField() });
     }
 
     return NextResponse.json({

@@ -2,12 +2,12 @@
 
 import React from 'react';
 import Login from '@/components/Login';
-import ClientPageWrapper from '../../../components/ClientPageWrapper';
+import SuspenseLoading from '../../../components/SuspenseLoading';
 
 export default function LoginPage() {
   return (
-    <ClientPageWrapper>
+    <SuspenseLoading>
       <Login open={true} />;
-    </ClientPageWrapper>
+    </SuspenseLoading>
   );
 }

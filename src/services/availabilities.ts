@@ -6,7 +6,9 @@ import {
   query,
   Timestamp,
   writeBatch,
-  doc
+  doc,
+  updateDoc,
+  deleteField
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
@@ -18,6 +20,8 @@ export interface Availability {
   price: number;
   location: string;
   type: string;
+  status?: 'available' | 'pending' | 'booked';
+  pendingUntil?: Timestamp;
 }
 
 export const getAvailability = async () => {
@@ -36,11 +40,21 @@ export const getAvailability = async () => {
         price: data.price,
         location: data.location,
         title: data.title,
-        type: data.type
+        type: data.type,
+        status: data.status,
+        pendingUntil: data.pendingUntil
       };
     });
 
-    return availabilities;
+    return availabilities.filter((availability) => {
+      if (availability.status === 'pending' && availability.pendingUntil) {
+        const now = new Date();
+        const pendingUntil = availability.pendingUntil.toDate();
+        return now > pendingUntil;
+      }
+
+      return availability.status === 'available';
+    });
   } catch (error) {
     console.error('Error fetching availabilities:', error);
     throw error;
@@ -69,7 +83,6 @@ export const createAvailability = async (
     endDate.setHours(endHours, endMinutes, 0, 0);
 
     if (createHourlySlots) {
-      // Calculate hour difference
       const hourDiff = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60));
 
       if (hourDiff <= 0) {
@@ -90,7 +103,8 @@ export const createAvailability = async (
           price,
           location,
           type,
-          currency: 'GBP'
+          currency: 'GBP',
+          status: 'available'
         };
 
         const newDocRef = doc(collection(db, 'availabilities'));
@@ -101,7 +115,6 @@ export const createAvailability = async (
       await availabilityBatch.commit();
       return { success: true, count: availabilityHourSlots };
     } else {
-      // Create the availability object
       const newAvailability = {
         startDateTime: Timestamp.fromDate(startDate),
         endDateTime: Timestamp.fromDate(endDate),
@@ -109,10 +122,10 @@ export const createAvailability = async (
         price,
         location,
         type,
-        currency: 'GBP'
+        currency: 'GBP',
+        status: 'available'
       };
 
-      // Add to Firestore
       const availabilitiesCollection = collection(db, 'availabilities');
       const docRef = await addDoc(availabilitiesCollection, newAvailability);
 
@@ -122,4 +135,9 @@ export const createAvailability = async (
     console.error('Error creating availability:', error);
     throw error;
   }
+};
+
+export const releaseAvailability = async (availabilityId: string) => {
+  const availabilityDocRef = doc(collection(db, 'availabilities'), availabilityId);
+  await updateDoc(availabilityDocRef, { status: 'available', pendingUntil: deleteField() });
 };
