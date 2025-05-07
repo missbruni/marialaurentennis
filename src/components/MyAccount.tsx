@@ -3,15 +3,21 @@ import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Button } from './ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { useRouter } from 'next/navigation';
 
-type LoginIndicatorProps = {
+type MyAccountProps = {
   onLoginClick: () => void;
 };
-const LoginIndicator: React.FC<LoginIndicatorProps> = ({ onLoginClick }) => {
+const MyAccount: React.FC<MyAccountProps> = ({ onLoginClick }) => {
   const { user, logout, loading } = useAuth();
+  const router = useRouter();
 
   const getInitials = (user: User) => {
     return user.displayName?.charAt(0) || user.email?.charAt(0).toUpperCase();
+  };
+
+  const viewBookings = () => {
+    router.push('/bookings');
   };
 
   if (loading) return null;
@@ -39,7 +45,18 @@ const LoginIndicator: React.FC<LoginIndicatorProps> = ({ onLoginClick }) => {
             <p className="text-sm font-medium">{user.displayName}</p>
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           </div>
-          <Button variant="ghost" className="w-full justify-start text-left" onClick={logout}>
+          <Button
+            variant="ghost"
+            className="cursor-pointer w-full justify-start text-left"
+            onClick={viewBookings}
+          >
+            View Bookings
+          </Button>
+          <Button
+            variant="ghost"
+            className="cursor-pointer w-full justify-start text-left"
+            onClick={logout}
+          >
             Logout
           </Button>
         </div>
@@ -58,4 +75,4 @@ const LoginIndicator: React.FC<LoginIndicatorProps> = ({ onLoginClick }) => {
   );
 };
 
-export default LoginIndicator;
+export default MyAccount;

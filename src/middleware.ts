@@ -24,5 +24,5 @@ export function middleware(request: NextRequest) {
 
 // middleware runs on
 export const config = {
-  matcher: ['/admin/:path*', '/api/auth/:path*']
+  matcher: ['/api/auth/:path*']
 };

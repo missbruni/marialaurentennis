@@ -120,10 +120,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setIsAdmin(false);
       setLoading(false);
-
-      if (window && window.location.pathname.startsWith('/admin')) {
-        window.location.href = '/';
-      }
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -158,5 +154,12 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
 
-  return context;
+  const memoizedValue = React.useMemo(() => {
+    return {
+      ...context,
+      loading: context.user ? false : context.loading
+    };
+  }, [context]);
+
+  return memoizedValue;
 }

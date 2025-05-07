@@ -1,13 +1,14 @@
 'use client';
 
 import React from 'react';
-import Login from '@/components/Login';
-import SuspenseLoading from '../../../components/SuspenseLoading';
+import { useLoginDialog } from '@/providers/LoginDialogProvider';
 
 export default function LoginPage() {
-  return (
-    <SuspenseLoading>
-      <Login open={true} />;
-    </SuspenseLoading>
-  );
+  const { openLoginDialog } = useLoginDialog();
+
+  React.useEffect(() => {
+    openLoginDialog();
+  }, [openLoginDialog]);
+
+  return null;
 }

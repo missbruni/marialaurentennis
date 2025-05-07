@@ -4,6 +4,7 @@ import AppBar from '../components/AppBar';
 import React from 'react';
 import { SectionRefProvider } from '@/hooks/useSectionRef';
 import { AuthProvider } from '@/hooks/useAuth';
+import { LoginDialogProvider } from '@/providers/LoginDialogProvider';
 
 type ClientLayoutProps = {
   children: React.ReactNode;
@@ -12,12 +13,14 @@ type ClientLayoutProps = {
 const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   return (
     <AuthProvider>
-      <SectionRefProvider>
-        <div className="flex flex-col">
-          <AppBar />
-          {children}
-        </div>
-      </SectionRefProvider>
+      <LoginDialogProvider>
+        <SectionRefProvider>
+          <div className="flex flex-col">
+            <AppBar />
+            {children}
+          </div>
+        </SectionRefProvider>
+      </LoginDialogProvider>
     </AuthProvider>
   );
 };
