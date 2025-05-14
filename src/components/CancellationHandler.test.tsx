@@ -11,7 +11,8 @@ vi.mock('@/services/availabilities', () => ({
 
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
-  useSearchParams: vi.fn()
+  useSearchParams: vi.fn(),
+  usePathname: vi.fn().mockReturnValue('/')
 }));
 
 vi.mock('@tanstack/react-query', () => ({

@@ -7,7 +7,7 @@ import AuthGuard from '@/components/AuthGuard';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthGuard loadingMessage="Checking you have access...">
+    <AuthGuard>
       <SidebarProvider defaultOpen={true} className="min-h-[calc(100vh-72px)]">
         <AppSidebar />
         <main className="w-full max-h-[calc(100vh-72px)] py-8 px-4 lg:p-8">{children}</main>

@@ -2,6 +2,7 @@ import { describe, expect, vi, test, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
 import { POST } from './route';
 import * as firebaseAdmin from '@/lib/firebase-admin';
+import { COOKIE_NAME } from '../../../../lib/auth';
 
 vi.mock('@/lib/firebase-admin', () => ({
   createSessionCookie: vi.fn()
@@ -43,7 +44,7 @@ describe('POST /api/auth/session', () => {
 
     expect(firebaseAdmin.createSessionCookie).toHaveBeenCalledWith('valid-id-token');
 
-    expect(mockCookies.set).toHaveBeenCalledWith('session', mockSessionCookie, {
+    expect(mockCookies.set).toHaveBeenCalledWith(COOKIE_NAME, mockSessionCookie, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 60 * 60 * 24 * 5, // 5 days

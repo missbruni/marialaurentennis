@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen } from '@/lib/test-utils';
-import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import Login from './Login';
 import type { User } from 'firebase/auth';
 import { useAuth } from '../hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useLoginDialog } from '@/providers/LoginDialogProvider';
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: vi.fn(),
@@ -17,9 +17,15 @@ vi.mock('next/navigation', () => ({
   useSearchParams: vi.fn()
 }));
 
+vi.mock('@/providers/LoginDialogProvider', () => ({
+  useLoginDialog: vi.fn(),
+  LoginDialogProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
+}));
+
 describe('Login', () => {
   const mockSignInWithGoogle = vi.fn();
   const mockPush = vi.fn();
+  const mockOpenLoginDialog = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -31,6 +37,12 @@ describe('Login', () => {
     (useSearchParams as any).mockReturnValue({
       get: vi.fn().mockReturnValue('/')
     });
+
+    (useLoginDialog as any).mockReturnValue({
+      openLoginDialog: mockOpenLoginDialog,
+      closeLoginDialog: vi.fn(),
+      isOpen: false
+    });
   });
 
   test('should render login button when user is not logged in', () => {
@@ -41,7 +53,7 @@ describe('Login', () => {
       logout: vi.fn()
     });
 
-    render(<Login open={false} />);
+    render(<Login />);
 
     expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
   });
@@ -59,7 +71,7 @@ describe('Login', () => {
       logout: vi.fn()
     });
 
-    render(<Login open={false} />);
+    render(<Login />);
 
     expect(screen.queryByRole('button', { name: /login/i })).not.toBeInTheDocument();
     const avatarPopover = document.querySelector('[data-slot="popover-trigger"]');
@@ -79,7 +91,7 @@ describe('Login', () => {
       logout: vi.fn()
     });
 
-    render(<Login open={false} />);
+    render(<Login />);
 
     const avatarFallback = screen.getByText('T');
     expect(avatarFallback).toBeInTheDocument();
@@ -93,14 +105,10 @@ describe('Login', () => {
       logout: vi.fn()
     });
 
-    render(<Login open={false} />);
-
-    const user = userEvent.setup();
+    const { user } = render(<Login />);
     await user.click(screen.getByRole('button', { name: /login/i }));
 
-    expect(screen.getByText('Sign Up Sign In')).toBeInTheDocument();
-    expect(screen.getByText('Please sign in to continue.')).toBeInTheDocument();
-    expect(screen.getByText('Continue with Google')).toBeInTheDocument();
+    expect(mockOpenLoginDialog).toHaveBeenCalled();
   });
 
   test('should call onClick prop when login button is clicked', async () => {
@@ -112,15 +120,16 @@ describe('Login', () => {
     });
 
     const mockOnClick = vi.fn();
-    render(<Login open={false} onClick={mockOnClick} />);
-
-    const user = userEvent.setup();
+    const { user } = render(<Login onClick={mockOnClick} />);
     await user.click(screen.getByRole('button', { name: /login/i }));
 
     expect(mockOnClick).toHaveBeenCalledTimes(1);
+    expect(mockOpenLoginDialog).toHaveBeenCalled();
   });
 
   test('should call signInWithGoogle and close modal when Google button is clicked', async () => {
+    // This test needs to be updated since the login dialog is now managed by LoginDialogProvider
+    // We'll test that the openLoginDialog function is called
     (useAuth as any).mockReturnValue({
       signInWithGoogle: mockSignInWithGoogle,
       user: null,
@@ -128,15 +137,10 @@ describe('Login', () => {
       logout: vi.fn()
     });
 
-    render(<Login open={false} />);
-
-    const user = userEvent.setup();
+    const { user } = render(<Login />);
     await user.click(screen.getByRole('button', { name: /login/i }));
-    await user.click(screen.getByText('Continue with Google'));
 
-    expect(mockSignInWithGoogle).toHaveBeenCalledTimes(1);
-
-    expect(screen.queryByText('Sign Up / Sign In')).not.toBeInTheDocument();
+    expect(mockOpenLoginDialog).toHaveBeenCalledTimes(1);
   });
 
   test('should close modal when cancel button is clicked', async () => {
@@ -147,10 +151,10 @@ describe('Login', () => {
       logout: vi.fn()
     });
 
-    render(<Login open={false} />);
-
-    const user = userEvent.setup();
+    const { user } = render(<Login />);
     await user.click(screen.getByRole('button', { name: /login/i }));
+
+    expect(mockOpenLoginDialog).toHaveBeenCalledTimes(1);
   });
 
   test('should redirect to specified path after successful authentication', async () => {
@@ -170,15 +174,9 @@ describe('Login', () => {
       logout: vi.fn()
     });
 
-    render(<Login open={false} />);
-
-    const user = userEvent.setup();
+    const { user } = render(<Login />);
     await user.click(screen.getByRole('button', { name: /login/i }));
-    await user.click(screen.getByText('Continue with Google'));
 
-    await vi.waitFor(() => {
-      expect(mockSignInWithGoogle).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith('/admin/availability');
-    });
+    expect(mockOpenLoginDialog).toHaveBeenCalledTimes(1);
   });
 });

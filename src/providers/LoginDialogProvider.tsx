@@ -3,12 +3,14 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import GoogleIcon from '@/lib/icons/Google';
-import FacebookIcon from '../lib/icons/Facebook';
-import { EmailPassword } from '@/components/EmailPassword';
+import FacebookIcon from '@/lib/icons/Facebook';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { isProtectedRoute } from '@/lib/auth';
+import { Typography } from '@/components/ui/typography';
+import { EmailPassword } from '@/components/EmailPassword';
 
 type LoginDialogContextType = {
   openLoginDialog: (redirectPath?: string) => void;
@@ -21,30 +23,47 @@ const LoginDialogContext = React.createContext<LoginDialogContextType | undefine
 export function LoginDialogProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const { signInWithGoogle, signInWithFacebook } = useAuth();
+  const { signInWithGoogle, signInWithFacebook, user } = useAuth();
 
   const [isOpen, setIsOpen] = React.useState(false);
   const [redirectPath, setRedirectPath] = React.useState<string | undefined>(undefined);
+  const [isForProtectedRoute, setIsForProtectedRoute] = React.useState(false);
 
   const openLoginDialog = React.useCallback(
     (path?: string) => {
-      setRedirectPath(path || pathname);
+      const targetPath = path || pathname;
+      setRedirectPath(targetPath);
+      setIsForProtectedRoute(isProtectedRoute(targetPath));
       setIsOpen(true);
     },
-    [searchParams]
+    [pathname]
   );
 
   const closeLoginDialog = React.useCallback(() => {
-    setIsOpen(false);
-  }, []);
+    // Only allow closing if not for a protected route or if user is authenticated
+    if (!isForProtectedRoute || user) {
+      setIsOpen(false);
+    }
+  }, [isForProtectedRoute, user]);
+
+  // Handle dialog close attempt from the UI
+  const handleOpenChange = React.useCallback(
+    (open: boolean) => {
+      if (open === false) {
+        closeLoginDialog();
+      } else {
+        setIsOpen(true);
+      }
+    },
+    [closeLoginDialog]
+  );
 
   const handleAuthSuccess = React.useCallback(() => {
-    closeLoginDialog();
+    setIsOpen(false);
     if (redirectPath) {
       router.push(redirectPath);
     }
-  }, [closeLoginDialog, redirectPath, router]);
+  }, [redirectPath, router]);
 
   const value = React.useMemo(
     () => ({
@@ -59,7 +78,7 @@ export function LoginDialogProvider({ children }: { children: React.ReactNode })
     <LoginDialogContext.Provider value={value}>
       {children}
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <DialogContent
           className={cn('mx-auto max-w-sm rounded bg-background text-foreground p-6 shadow')}
         >
@@ -69,7 +88,14 @@ export function LoginDialogProvider({ children }: { children: React.ReactNode })
           >
             Sign Up <span className="mx-2 text-muted-foreground font-extralight">|</span> Sign In
           </DialogTitle>
-          <DialogDescription>Please sign in to continue.</DialogDescription>
+
+          {isForProtectedRoute && (
+            <DialogDescription>
+              <Typography.P className="text-center">
+                Authentication required to access this page.
+              </Typography.P>
+            </DialogDescription>
+          )}
 
           <div className="flex flex-col gap-4">
             <EmailPassword onClose={handleAuthSuccess} />

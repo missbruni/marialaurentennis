@@ -6,7 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import type { User } from 'firebase/auth';
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: vi.fn()
+  useAuth: vi.fn(),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
 }));
 
 describe('AuthGuard', () => {
@@ -56,28 +57,11 @@ describe('AuthGuard', () => {
     });
 
     render(
-      <AuthGuard loadingMessage="Custom loading message">
+      <AuthGuard>
         <div data-testid="protected-content">Protected Content</div>
       </AuthGuard>
     );
 
     expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
-    expect(screen.getByText('Custom loading message')).toBeInTheDocument();
-  });
-
-  test('should render custom fallback when provided', () => {
-    (useAuth as any).mockReturnValue({
-      user: null,
-      loading: false
-    });
-
-    render(
-      <AuthGuard fallback={<div data-testid="custom-fallback">Custom Fallback</div>}>
-        <div data-testid="protected-content">Protected Content</div>
-      </AuthGuard>
-    );
-
-    expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
-    expect(screen.getByTestId('custom-fallback')).toBeInTheDocument();
   });
 });

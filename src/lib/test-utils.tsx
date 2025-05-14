@@ -6,6 +6,7 @@ import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SectionRefProvider } from '@/hooks/useSectionRef';
 import { AuthProvider } from '@/hooks/useAuth';
+import { LoginDialogProvider } from '@/providers/LoginDialogProvider';
 
 function customRender(ui: React.ReactElement) {
   return {
@@ -15,7 +16,9 @@ function customRender(ui: React.ReactElement) {
         <ReactQueryProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
             <AuthProvider>
-              <SectionRefProvider>{children}</SectionRefProvider>
+              <LoginDialogProvider>
+                <SectionRefProvider>{children}</SectionRefProvider>
+              </LoginDialogProvider>
             </AuthProvider>
           </ThemeProvider>
         </ReactQueryProvider>

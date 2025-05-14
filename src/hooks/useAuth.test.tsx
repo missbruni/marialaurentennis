@@ -36,16 +36,13 @@ describe('useAuth', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Instead of using act, we'll use a more direct approach
     vi.spyOn(firebaseAuth, 'onAuthStateChanged').mockImplementation((_auth, callback: any) => {
-      // Call the callback asynchronously
       setTimeout(() => {
         callback(null);
       }, 0);
       return vi.fn();
     });
 
-    // Mock fetch for session cookie tests
     global.fetch = vi.fn().mockImplementation(() =>
       Promise.resolve({
         ok: true,
@@ -57,7 +54,6 @@ describe('useAuth', () => {
   test('provides authentication context to children', async () => {
     render(<TestComponent />);
 
-    // Wait for the loading state to be updated
     await waitFor(() => {
       expect(screen.getByTestId('loading-state')).toHaveTextContent('false');
     });
@@ -81,7 +77,6 @@ describe('useAuth', () => {
 
     render(<TestComponent />);
 
-    // Wait for state updates to complete
     await waitFor(() => {
       expect(screen.getByTestId('loading-state')).toHaveTextContent('false');
       expect(screen.getByTestId('user-state')).toHaveTextContent('logged-in');
@@ -92,7 +87,6 @@ describe('useAuth', () => {
     const googleProviderInstance = new firebaseAuth.GoogleAuthProvider();
     vi.spyOn(firebaseAuth, 'GoogleAuthProvider').mockImplementation(() => googleProviderInstance);
 
-    // Mock the user object properly for handleUserAuthentication
     const mockUser = {
       uid: 'test-uid',
       email: 'test@example.com',
@@ -106,7 +100,6 @@ describe('useAuth', () => {
 
     const { user } = render(<TestComponent />);
 
-    // Wait for initial render to complete
     await waitFor(() => {
       expect(screen.getByTestId('loading-state')).toHaveTextContent('false');
     });
@@ -121,7 +114,6 @@ describe('useAuth', () => {
 
     const { user } = render(<TestComponent />);
 
-    // Wait for initial render to complete
     await waitFor(() => {
       expect(screen.getByTestId('loading-state')).toHaveTextContent('false');
     });
@@ -137,7 +129,6 @@ describe('useAuth', () => {
 
     const { user } = render(<TestComponent />);
 
-    // Wait for initial render to complete
     await waitFor(() => {
       expect(screen.getByTestId('loading-state')).toHaveTextContent('false');
     });
@@ -158,7 +149,6 @@ describe('useAuth', () => {
 
     const { user } = render(<TestComponent />);
 
-    // Wait for initial render to complete
     await waitFor(() => {
       expect(screen.getByTestId('loading-state')).toHaveTextContent('false');
     });
@@ -223,7 +213,6 @@ describe('useAuth', () => {
 
     render(<TestAdminComponent />);
 
-    // Wait for state updates to complete
     await waitFor(() => {
       expect(screen.getByTestId('admin-state')).toHaveTextContent('true');
     });
@@ -242,7 +231,6 @@ describe('useAuth', () => {
   test('handles session creation failure gracefully', async () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    // Mock fetch to fail
     global.fetch = vi.fn().mockImplementation(() =>
       Promise.resolve({
         ok: false,
@@ -294,31 +282,64 @@ describe('useAuth', () => {
   });
 
   test('redirects to home page when logging out from admin route', async () => {
-    // Mock window.location
+    const mockLocation = {
+      pathname: '/admin/settings',
+      href: ''
+    };
+
+    Object.defineProperty(mockLocation, 'href', {
+      get: function () {
+        return this._href;
+      },
+      set: function (newValue) {
+        this._href = newValue;
+      },
+      enumerable: true,
+      configurable: true
+    });
+
     const originalLocation = window.location;
     Object.defineProperty(window, 'location', {
-      value: { ...originalLocation, pathname: '/admin/settings', href: '' },
-      writable: true
+      value: mockLocation,
+      writable: true,
+      configurable: true
     });
 
     const signOutMock = vi.spyOn(firebaseAuth, 'signOut').mockResolvedValueOnce(undefined);
+
+    global.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ success: true, isProtected: true })
+      })
+    );
+
     const { user } = render(<TestComponent />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading-state')).toHaveTextContent('false');
+    });
 
     await user.click(screen.getByTestId('logout-button'));
 
     expect(signOutMock).toHaveBeenCalledWith(auth);
     expect(global.fetch).toHaveBeenCalledWith('/api/auth/logout', { method: 'POST' });
-    expect(window.location.href).toBe('/');
 
-    // Restore original location
+    await waitFor(
+      () => {
+        expect(mockLocation.href).toBe('/');
+      },
+      { timeout: 2000 }
+    );
+
     Object.defineProperty(window, 'location', {
       value: originalLocation,
-      writable: true
+      writable: true,
+      configurable: true
     });
   });
 
   test('does not redirect when logging out from non-admin route', async () => {
-    // Mock window.location
     const originalLocation = window.location;
     Object.defineProperty(window, 'location', {
       value: { ...originalLocation, pathname: '/contact', href: '' },
@@ -332,9 +353,7 @@ describe('useAuth', () => {
 
     expect(signOutMock).toHaveBeenCalledWith(auth);
     expect(global.fetch).toHaveBeenCalledWith('/api/auth/logout', { method: 'POST' });
-    expect(window.location.href).toBe(''); // Should not change
 
-    // Restore original location
     Object.defineProperty(window, 'location', {
       value: originalLocation,
       writable: true

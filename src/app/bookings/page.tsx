@@ -30,7 +30,7 @@ export default function BookingsPage() {
   });
 
   return (
-    <AuthGuard loadingMessage="Getting your booked lessons...">
+    <AuthGuard>
       <section className="p-8 md:p-16 lg:p-24 dark:bg-background min-h-[calc(100vh-72px)] w-full relative overflow-hidden flex flex-col gap-8">
         <Typography.H3 className="mb-6">My Lessons</Typography.H3>
 
@@ -50,8 +50,8 @@ export default function BookingsPage() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <Typography.H4 className="text-muted-foreground mb-2">No bookings found</Typography.H4>
-            <Typography.P>You haven't made any bookings yet.</Typography.P>
+            <Typography.H4 className="text-muted-foreground mb-2">No lessons found</Typography.H4>
+            <Typography.P>You haven&apos;t booked any lessons yet.</Typography.P>
           </div>
         )}
       </section>
@@ -61,7 +61,6 @@ export default function BookingsPage() {
 
 function BookingCard({ booking }: { booking: Booking }) {
   const startDate = booking.startDateTime.toDate();
-  const endDate = booking.endDateTime.toDate();
 
   const formattedDate = format(startDate, 'EEEE, MMMM d yyyy');
   const formattedStartTime = formatTime(booking.startDateTime);

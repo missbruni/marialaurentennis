@@ -19,7 +19,7 @@ describe('middleware', () => {
     });
   });
 
-  test('should redirect to login when accessing protected route without session', () => {
+  test('should redirect with auth params when accessing protected route without session', () => {
     mockRequest = {
       cookies: {
         get: vi.fn().mockReturnValue(undefined)
@@ -37,10 +37,12 @@ describe('middleware', () => {
     expect(response.status).toBe(302);
 
     const locationHeader = response.headers.get('Location');
-    expect(locationHeader).toContain('/login');
+    expect(locationHeader).toContain('auth=true');
+    expect(locationHeader).toContain('from=%2Fadmin%2Favailability');
 
     const redirectUrl = new URL(locationHeader || '');
     expect(redirectUrl.searchParams.get('from')).toBe('/admin/availability');
+    expect(redirectUrl.searchParams.get('auth')).toBe('true');
   });
 
   test('should allow access to protected route with valid session', () => {
@@ -49,7 +51,8 @@ describe('middleware', () => {
         get: vi.fn().mockReturnValue({ value: 'valid-session-token' })
       },
       nextUrl: {
-        pathname: '/admin/availability'
+        pathname: '/admin/availability',
+        searchParams: new URLSearchParams()
       }
     } as unknown as NextRequest;
 
@@ -59,39 +62,22 @@ describe('middleware', () => {
     expect(response.status).toBe(200);
   });
 
-  test('should return 401 for API routes without session', () => {
-    const mockJsonResponse = new NextResponse(
-      JSON.stringify({ error: 'Authentication required' }),
-      {
-        status: 401,
-        headers: { 'content-type': 'application/json' }
-      }
-    );
-
-    const originalNextResponse = NextResponse;
-    (global as any).NextResponse = vi.fn().mockImplementation(() => {
-      return mockJsonResponse;
-    }) as any;
-
+  test('should not redirect if auth param already exists', () => {
     mockRequest = {
       cookies: {
         get: vi.fn().mockReturnValue(undefined)
       },
       nextUrl: {
-        pathname: '/api/auth/session'
-      }
+        pathname: '/admin/availability',
+        searchParams: new URLSearchParams('auth=true')
+      },
+      url: 'https://example.com/admin/availability?auth=true'
     } as unknown as NextRequest;
 
     const response = middleware(mockRequest);
 
-    expect(response.status).toBe(401);
-
-    return response.text().then((text) => {
-      const responseBody = JSON.parse(text);
-      expect(responseBody).toEqual({ error: 'Authentication required' });
-
-      (global as any).NextResponse = originalNextResponse;
-    });
+    expect(NextResponse.next).toHaveBeenCalled();
+    expect(response.status).toBe(200);
   });
 
   test('should allow access to API routes with valid session', () => {
@@ -100,7 +86,8 @@ describe('middleware', () => {
         get: vi.fn().mockReturnValue({ value: 'valid-session-token' })
       },
       nextUrl: {
-        pathname: '/api/auth/session'
+        pathname: '/api/auth/session',
+        searchParams: new URLSearchParams()
       }
     } as unknown as NextRequest;
 
@@ -116,7 +103,8 @@ describe('middleware', () => {
         get: vi.fn().mockReturnValue(undefined)
       },
       nextUrl: {
-        pathname: '/login'
+        pathname: '/login',
+        searchParams: new URLSearchParams()
       }
     } as unknown as NextRequest;
 

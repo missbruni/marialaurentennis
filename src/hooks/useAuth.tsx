@@ -116,7 +116,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await signOut(auth);
 
-      await fetch('/api/auth/logout', { method: 'POST' });
+      const response = await fetch('/api/auth/logout', { method: 'POST' });
+      const data = await response.json();
+
+      if (data.isProtected) {
+        window.location.href = '/';
+      }
+
       setUser(null);
       setIsAdmin(false);
       setLoading(false);
