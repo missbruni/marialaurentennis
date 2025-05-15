@@ -110,10 +110,6 @@ const AppBar = () => {
           </nav>
 
           <div className="flex items-center gap-4">
-            <SuspenseLoading>
-              <Login />
-            </SuspenseLoading>
-
             <Button
               className="hidden md:inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-medium transition-colors hover:bg-primary/90 h-9 px-4"
               onClick={handleBookLesson}
@@ -190,6 +186,9 @@ const AppBar = () => {
                 </div>
               </PopoverContent>
             </Popover>
+            <SuspenseLoading>
+              <Login />
+            </SuspenseLoading>
             <ThemeToggle />
           </div>
         </div>

@@ -6,7 +6,13 @@ import ClientLayout from './client-layout';
 
 export const metadata: Metadata = {
   title: 'Maria Lauren Tennis',
-  description: 'Book your tennis lesson with Maria Lauren'
+  description: 'Book your tennis lesson with Maria Lauren',
+  viewport: 'width=device-width, initial-scale=1.0, viewport-fit=cover',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Maria Lauren Tennis'
+  }
 };
 
 export default function RootLayout({

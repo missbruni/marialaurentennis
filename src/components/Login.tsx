@@ -27,7 +27,7 @@ export default function Login({ onClick }: LoginProps) {
     <Button
       size="lg"
       variant="ghost"
-      className="border-1 cursor-pointer duration-200 hidden md:inline-flex items-center justify-center rounded-md transition-colors hover:bg-white/20 text-foreground h-9 px-4"
+      className="border-1 cursor-pointer duration-200 md:inline-flex items-center justify-center rounded-md transition-colors hover:bg-white/20 text-foreground h-9 px-4"
       onClick={handleLoginClick}
       aria-label="Login"
     >
