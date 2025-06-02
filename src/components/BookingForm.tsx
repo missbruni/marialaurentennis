@@ -7,27 +7,15 @@ import { parseISO, format } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import AvailableLessons from './AvailableLessons';
 import { z } from 'zod';
-import { Form, FormDescription, FormField, FormItem, FormLabel } from './ui/form';
+import { Form, FormField } from './ui/form';
 import TennisBall from './TennisBall';
 import { Typography } from './ui/typography';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue
-} from './ui/select';
 import { useSectionRef } from '@/hooks/useSectionRef';
 
 const DATE_FORMAT = 'yyyy-MM-dd';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 const BookingFormSchema = z.object({
-  location: z.string({
-    required_error: 'Please select a location.'
-  }),
   date: z
     .string({
       required_error: 'Please select a date.'
@@ -41,8 +29,7 @@ const BookingForm: React.FC = () => {
   const form = useForm<z.infer<typeof BookingFormSchema>>({
     resolver: zodResolver(BookingFormSchema),
     defaultValues: {
-      date: undefined,
-      location: 'sundridge'
+      date: undefined
     }
   });
 
@@ -58,7 +45,7 @@ const BookingForm: React.FC = () => {
   });
 
   const selectedDate = form.watch('date');
-  const selectedLocation = form.watch('location');
+  const selectedLocation = 'sundridge';
 
   const datesByLocation = React.useMemo(() => {
     if (!availabilities || !selectedLocation) return [];
@@ -90,10 +77,6 @@ const BookingForm: React.FC = () => {
     return Array.from(uniqueDates).map((dateString) => parseISO(dateString));
   }, [datesByLocation]);
 
-  React.useEffect(() => {
-    form.setValue('date', undefined);
-  }, [selectedLocation, form]);
-
   return (
     <section
       ref={bookingFormRef}
@@ -104,7 +87,7 @@ const BookingForm: React.FC = () => {
       </div>
 
       <div>
-        <div className="flex flex-col xl:flex-row w-full relative z-1 gap-10 lg:gap-30">
+        <div className="flex flex-col xl:flex-row w-full relative z-1 gap-4">
           <div className="flex-1 p-2">
             <Typography.H2 className="mb-5 text-2xl lg:text-4xl text-tennis-green lg:px-3">
               Improve your game
@@ -112,40 +95,14 @@ const BookingForm: React.FC = () => {
 
             <div className="flex flex-col gap-5 lg:gap-10">
               <Typography.H1 className="text-2xl lg:text-4xl text-foreground lg:backdrop-blur-md rounded-lg lg:p-3">
-                {`Whether you're picking up a racket for the first time or looking to refine your
-                technique, our private tennis lessons are tailored to your level and goals.`}
-              </Typography.H1>
-              <Typography.H1 className="text-2xl lg:text-4xl text-foreground lg:backdrop-blur-md rounded-lg lg:p-3">
                 Book a session today and take the next step in your tennis journey.
               </Typography.H1>
             </div>
           </div>
 
-          <div className="p-2 flex-2 flex-col items-start">
-            <Form {...form}>
-              <div className="flex flex-col gap-6 w-full lg:w-96 backdrop-blur-md rounded-lg p-4">
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled>
-                        <SelectTrigger className="w-full bg-white/80 dark:bg-gray-800/80">
-                          <SelectValue placeholder="Select a location" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>Locations</SelectLabel>
-                            <SelectItem value="sundridge">Sundridge Park</SelectItem>
-                            <SelectItem value="muswell">Muswell Hill Methodist (LTC)</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>Choose a tennis club.</FormDescription>
-                    </FormItem>
-                  )}
-                ></FormField>
+          <div className="p-2 flex-2 flex flex-wrap gap-10">
+            <Form {...form} >
+              <div className="flex flex-1 flex-col gap-2 w-full backdrop-blur-md rounded-lg p-4">
                 <FormField
                   control={form.control}
                   name="date"
@@ -168,7 +125,7 @@ const BookingForm: React.FC = () => {
             )}
 
             {selectedDate && (
-              <div className="relative z-10 mt-10 lg:mt-20">
+              <div className="relative z-10 flex-1">
                 <AvailableLessons availableLessons={availableLessons} date={selectedDate} />
               </div>
             )}

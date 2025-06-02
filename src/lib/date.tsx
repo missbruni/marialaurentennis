@@ -2,17 +2,17 @@ import { differenceInHours } from 'date-fns';
 import { Timestamp } from 'firebase/firestore';
 
 /**
- * Formats a time string (HH:MM:SS) or Timestamp into a user-friendly time format.
+ * Formats a Timestamp into a user-friendly 12-hour time format with AM/PM.
  *
- * @param timeInput - Time string in 24-hour format (e.g., "14:30:00") or Timestamp object
- * @returns Formatted time string in 24-hour format (e.g., "14:30")
+ * @param timeInput - Timestamp object to format
+ * @returns Formatted time string in 12-hour format with AM/PM (e.g., "2:30 PM")
  */
 export const formatTime = (timeInput: Timestamp) => {
   return timeInput.toDate().toLocaleTimeString('en-GB', {
     hour: 'numeric',
     minute: '2-digit',
-    hour12: false
-  });
+    hour12: true
+  }).toUpperCase();
 };
 
 /**
@@ -45,4 +45,18 @@ export const formatTimeHHMM = (date: Date): string => {
  */
 export const createDateWithTime = (dateString: string, timeString: string): Date => {
   return new Date(`${dateString}T${timeString}`);
+};
+
+/**
+ * Formats a Timestamp into a user-friendly 12-hour time format with AM/PM.
+ *
+ * @param timeInput - Timestamp object to format
+ * @returns Formatted time string in 12-hour format with AM/PM (e.g., "2:30 PM")
+ */
+export const formatTimestamp = (timeInput: Timestamp) => {
+  return timeInput.toDate().toLocaleTimeString('en-GB', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
 };

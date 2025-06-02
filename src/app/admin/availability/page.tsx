@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Typography } from '@/components/ui/typography';
 import { addDays } from 'date-fns';
 import { useForm } from 'react-hook-form';
-import DatePicker from '@/components/DatePicker';
+
 import {
   Form,
   FormControl,
@@ -28,6 +28,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { createAvailability } from '@/services/availabilities';
+import SelectDatePicker from '../../../components/SelectDatePicker';
 
 const AvailabilityFormSchema = z.object({
   type: z.enum(['private', 'group'], {
@@ -149,7 +150,7 @@ export default function AdminPage() {
                   control={form.control}
                   name="availabilityDate"
                   render={({ field }) => (
-                    <DatePicker field={field} isLoading={isLoading} disabled={false} />
+                    <SelectDatePicker field={field} isLoading={isLoading} disabled={false} />
                   )}
                 />
 

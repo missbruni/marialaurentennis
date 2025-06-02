@@ -17,15 +17,6 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, d
 
   if (!date) return null;
 
-  const getGridClass = () => {
-    const count = availableLessons.length;
-
-    if (count > 3) {
-      return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4';
-    } else {
-      return 'flex justify-end';
-    }
-  };
 
   const handleCheckout = async (lesson: Availability) => {
     setIsLoading(true);
@@ -54,12 +45,12 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, d
 
   return (
     <div className="relative">
-      <Typography.H2 className="text-2xl md:text-3xl mb-6 text-foreground">
+      <Typography.H3 className="my-6 text-foreground">
         <span className="font-bold text-tennis-green">Availability</span> on{' '}
         {format(date, 'EEEE MMMM d')}
-      </Typography.H2>
+      </Typography.H3>
 
-      <div className={`${getGridClass()} gap-3 ml-auto`}>
+      <div className="flex flex-wrap gap-3 ml-auto">
         {[...availableLessons].map((availability, index) => (
           <Lesson
             key={index}
