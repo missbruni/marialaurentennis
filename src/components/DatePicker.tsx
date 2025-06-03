@@ -70,14 +70,14 @@ const DatePicker: React.FC<DatePickerProps> = ({ field, availableDates}) => {
         }}
         classNames={{
           day_outside: "",
-          day: 'border-0 h-15 w-15 text-lg font-medium p-0 bg-transparent focus:bg-transparent focus:text-tennis-green',
+          day: 'border-0 h-10 w-10 text-base font-medium p-0 bg-transparent focus:bg-transparent focus:text-tennis-green sm:h-15 sm:w-15 sm:text-lg',
           day_disabled: 'cursor-not-allowed text-gray-400',
-          day_range_middle: 'text-lg',
-          day_today: 'text-lg',
+          day_range_middle: 'text-base sm:text-lg',
+          day_today: 'text-base sm:text-lg',
           caption: 'flex justify-center pt-1 relative items-center',
-          caption_label: 'text-lg font-bold',
-          cell: 'text-center text-lg p-0 relative',
-          head_cell: 'w-15 text-lg font-medium text-muted-foreground',
+          caption_label: 'text-base font-bold sm:text-lg',
+          cell: 'text-center text-base p-0 relative sm:text-lg',
+          head_cell: 'w-10 text-base font-medium text-muted-foreground sm:w-15 sm:text-lg',
           table: 'w-full border-collapse'
         }}
       />

@@ -45,10 +45,10 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, d
 
   return (
     <div className="relative">
-      <Typography.H3 className="my-6 text-foreground">
+      <Typography.H4 className="my-6 text-foreground text-center md:text-left">
         <span className="font-bold text-tennis-green">Availability</span> on{' '}
         {format(date, 'EEEE MMMM d')}
-      </Typography.H3>
+      </Typography.H4>
 
       <div className="flex flex-wrap gap-3 ml-auto">
         {[...availableLessons].map((availability, index) => (
