@@ -4,6 +4,8 @@ import type { FieldValues } from 'react-hook-form';
 import { FormItem} from '@/components/ui/form';
 import { Calendar } from '@/components/ui/calendar';
 import { isEqual, startOfDay, isBefore, startOfMonth } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { buttonVariants } from './ui/button';
 
 type DatePickerProps = {
   field: FieldValues;
@@ -70,7 +72,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ field, availableDates}) => {
         }}
         classNames={{
           day_outside: "",
-          day: 'border-0 h-10 w-10 text-base font-medium p-0 bg-transparent focus:bg-transparent focus:text-tennis-green sm:h-15 sm:w-15 sm:text-lg',
+          day: 'border-0 h-10 w-10 text-base font-medium p-0 bg-transparent focus:bg-transparent focus:text-tennis-green sm:h-15 sm:w-15 sm:text-lg transition-colors duration-300',
           day_disabled: 'cursor-not-allowed text-gray-400',
           day_range_middle: 'text-base sm:text-lg',
           day_today: 'text-base sm:text-lg',
@@ -78,7 +80,11 @@ const DatePicker: React.FC<DatePickerProps> = ({ field, availableDates}) => {
           caption_label: 'text-base font-bold sm:text-lg',
           cell: 'text-center text-base p-0 relative sm:text-lg',
           head_cell: 'w-10 text-base font-medium text-muted-foreground sm:w-15 sm:text-lg',
-          table: 'w-full border-collapse'
+          table: 'w-full border-collapse',
+          nav_button: cn(
+            buttonVariants({ variant: "outline" }),
+            "size-7 md:size-10 bg-transparent p-0 opacity-50 hover:opacity-100 cursor-pointer"
+          ),
         }}
       />
     </FormItem>
