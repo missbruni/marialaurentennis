@@ -100,7 +100,7 @@ const BookingForm: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-2 flex-2 flex flex-wrap gap-10">
+          <div className="p-2 flex-2 flex flex-col md:flex-row flex-wrap gap-5 lg:gap-10">
             <Form {...form} >
               <div className="flex flex-1 flex-col gap-2 w-full backdrop-blur-md rounded-lg">
                 <FormField

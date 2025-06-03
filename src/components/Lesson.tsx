@@ -24,7 +24,7 @@ const Lesson: React.FC<LessonProps> = ({
 
   return (
     <Card
-      className="flex-1 min-w-[230px] max-w-[400px] flex-shrink-0 basis-0 py-3 md:py-4 relative transition-transform hover:translate-y-[-4px] shadow-md hover:shadow-lg cursor-pointer bg-white dark:bg-[#242423]"
+      className="min-w-[230px] h-full w-full flex flex-col justify-center items-center flex-1 flex-shrink-0 basis-0 py-3 md:py-4 relative transition-transform hover:translate-y-[-4px] shadow-md hover:shadow-lg cursor-pointer bg-white dark:bg-[#242423]"
       onClick={() => !isLoading && onLessonSelected(lesson)}
     >
       <CardContent className="flex flex-row align-center justify-between gap-1">

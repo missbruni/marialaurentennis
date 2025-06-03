@@ -1,9 +1,9 @@
+import React from 'react';
+import { useTrail, animated } from '@react-spring/web';
 import { format } from 'date-fns/format';
 import { Availability } from '../services/availabilities';
 import Lesson from './Lesson';
 import { Typography } from './ui/typography';
-
-import React from 'react';
 import Loader from './Loader';
 
 type AvailableLessonsProps = {
@@ -15,17 +15,23 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, d
   const [isLoading, setIsLoading] = React.useState(false);
   const [selectedLessonId, setSelectedLessonId] = React.useState<string | null>(null);
 
-  if (!date) return null;
+  const trail = useTrail(availableLessons.length, {
+    from: { opacity: 0, transform: 'translateY(-24px) scale(0.96)' },
+    to: { opacity: 1, transform: 'translateY(0px) scale(1)' },
+    reset: true,
+    config: { mass: 1, tension: 220, friction: 24 },
+  }).reverse();
 
+  if (!date) return null;
 
   const handleCheckout = async (lesson: Availability) => {
     setIsLoading(true);
     setSelectedLessonId(lesson.id);
 
     try {
-      const res = await fetch('/api/create-checkout-session', {
+      const res = await fetch('/api/create-checkouts-session', {
         method: 'POST',
-        body: JSON.stringify({ lesson })
+        body: JSON.stringify({ lesson }),
       });
 
       const data = await res.json();
@@ -44,21 +50,26 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, d
   };
 
   return (
-    <div className="relative">
+    <div className="relative @container">
       <Typography.H4 className="my-6 text-foreground text-center md:text-left">
         <span className="font-bold text-tennis-green">Availability</span> on{' '}
         {format(date, 'EEEE MMMM d')}
       </Typography.H4>
 
-      <div className="flex flex-wrap gap-3 ml-auto">
-        {[...availableLessons].map((availability, index) => (
-          <Lesson
-            key={index}
-            lesson={availability}
-            isLoading={isLoading}
-            onLessonSelected={handleCheckout}
-            selectedLessonId={selectedLessonId}
-          />
+      <div className="grid grid-cols-1 gap-3 @[500px]:grid-cols-2">
+        {trail.map((style, index) => (
+          <animated.div
+            key={availableLessons[index].id}
+            style={style}
+            className="md:max-w-[280px]"
+          >
+            <Lesson
+              lesson={availableLessons[index]}
+              isLoading={isLoading}
+              onLessonSelected={handleCheckout}
+              selectedLessonId={selectedLessonId}
+            />
+          </animated.div>
         ))}
       </div>
 
