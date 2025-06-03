@@ -49,7 +49,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ field, availableDates}) => {
   );
 
   return (
-    <FormItem className="flex m-auto">
+    <FormItem className="flex mx-auto md:mx-0">
       <Calendar
         mode="single"
         initialFocus

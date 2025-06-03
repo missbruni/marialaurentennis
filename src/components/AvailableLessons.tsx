@@ -15,7 +15,7 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, d
   const [isLoading, setIsLoading] = React.useState(false);
   const [selectedLessonId, setSelectedLessonId] = React.useState<string | null>(null);
 
-  const trail = useTrail(availableLessons.length, {
+  const trail = useTrail(availableLessons.length + 1, {
     from: { opacity: 0, transform: 'translateY(-24px) scale(0.96)' },
     to: { opacity: 1, transform: 'translateY(0px) scale(1)' },
     reset: true,
@@ -51,17 +51,19 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, d
 
   return (
     <div className="relative @container">
-      <Typography.H4 className="my-6 text-foreground text-center md:text-left">
-        <span className="font-bold text-tennis-green">Availability</span> on{' '}
-        {format(date, 'EEEE MMMM d')}
-      </Typography.H4>
+      <animated.div style={trail[0]}>
+        <Typography.H4 className="my-6 md:text-2xl text-foreground text-center md:text-left">
+          <span className="font-bold text-tennis-green">Availability</span> on{' '}
+          {format(date, 'EEEE MMMM d')}
+        </Typography.H4>
+      </animated.div>
 
-      <div className="grid grid-cols-1 gap-3 @[500px]:grid-cols-2">
-        {trail.map((style, index) => (
+      <div className="mx-auto grid grid-cols-1 gap-3 @[500px]:grid-cols-2 max-w-[570px] md:mx-0">
+        {trail.slice(1).map((style, index) => (
           <animated.div
             key={availableLessons[index].id}
             style={style}
-            className="md:max-w-[280px]"
+            className="mx-auto max-w-[300px] lg:max-w-[280px] w-full md:mx-0"
           >
             <Lesson
               lesson={availableLessons[index]}

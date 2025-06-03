@@ -24,10 +24,10 @@ const Lesson: React.FC<LessonProps> = ({
 
   return (
     <Card
-      className="min-w-[230px] h-full w-full flex flex-col justify-center items-center flex-1 flex-shrink-0 basis-0 py-3 md:py-4 relative transition-transform hover:translate-y-[-4px] shadow-md hover:shadow-lg cursor-pointer bg-white dark:bg-[#242423]"
+      className="min-w-[240px] h-full w-full flex flex-col basis-0 py-3 md:py-4 relative transition-transform hover:translate-y-[-4px] shadow-md hover:shadow-lg cursor-pointer bg-white dark:bg-[#242423]"
       onClick={() => !isLoading && onLessonSelected(lesson)}
     >
-      <CardContent className="flex flex-row align-center justify-between gap-1">
+      <CardContent className="flex justify-between">
         <Typography.P className="text-foreground dark:text-foreground whitespace-nowrap">
           {formatTime(lesson.startDateTime)} - {formatTime(lesson.endDateTime)}
         </Typography.P>
