@@ -1,11 +1,11 @@
 import React from 'react';
-
 import type { FieldValues } from 'react-hook-form';
 import { FormItem} from '@/components/ui/form';
 import { Calendar } from '@/components/ui/calendar';
 import { isEqual, startOfDay, isBefore, startOfMonth } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from './ui/button';
+import { Button } from './ui/button';
 
 type DatePickerProps = {
   field: FieldValues;
@@ -14,13 +14,29 @@ type DatePickerProps = {
   numberOfMonths?: number;
   availableDates?: Date[];
   disabled: boolean;
+  onNextAvailableSlot?: (date: Date) => void;
+  nextAvailableDate: Date | null;
 };
 
-const DatePicker: React.FC<DatePickerProps> = ({ field, availableDates}) => {
+const DatePicker: React.FC<DatePickerProps> = ({ 
+  field, 
+  availableDates, 
+  disabled, 
+  onNextAvailableSlot,
+  nextAvailableDate 
+}) => {
   const [currentMonth, setCurrentMonth] = React.useState<Date>(new Date());
 
   const onDateChange = (date?: Date) => {
     field.onChange(date);
+  };
+
+  const handleNextAvailableClick = () => {
+    if (nextAvailableDate) {
+      onDateChange(nextAvailableDate);
+      setCurrentMonth(nextAvailableDate);
+      onNextAvailableSlot?.(nextAvailableDate);
+    }
   };
 
   const isDayDisabled = (date: Date) => {
@@ -51,7 +67,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ field, availableDates}) => {
   );
 
   return (
-    <FormItem className="flex mx-auto md:mx-0">
+    <FormItem className="flex flex-col mx-auto md:mx-0">
       <Calendar
         mode="single"
         initialFocus
@@ -84,9 +100,18 @@ const DatePicker: React.FC<DatePickerProps> = ({ field, availableDates}) => {
           nav_button: cn(
             buttonVariants({ variant: "outline" }),
             "size-7 md:size-10 bg-transparent p-0 opacity-50 hover:opacity-100 cursor-pointer"
-          ),
+          )
         }}
       />
+      <Button
+        onClick={handleNextAvailableClick}
+        disabled={!nextAvailableDate || disabled}
+        variant="outline"
+        size="lg"
+        className="w-full text-tennis-green hover:text-tennis-green hover:bg-transparent hover:border-tennis-green disabled:text-muted-foreground disabled:hover:text-muted-foreground"
+      >
+        {nextAvailableDate ? 'Next available date' : 'No available dates'}
+      </Button>
     </FormItem>
   );
 };

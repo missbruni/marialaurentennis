@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTrail, animated } from '@react-spring/web';
-import { format } from 'date-fns/format';
+import { format, isAfter, isEqual, isToday } from 'date-fns';
 import { Availability } from '../services/availabilities';
 import Lesson from './Lesson';
 import { Typography } from './ui/typography';
@@ -9,13 +9,28 @@ import Loader from './Loader';
 type AvailableLessonsProps = {
   availableLessons: Availability[];
   date: string;
+  nextAvailableSlot: Date | null;
 };
 
-const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, date }) => {
+const AvailableLessons: React.FC<AvailableLessonsProps> = ({ 
+  date,
+  availableLessons, 
+  nextAvailableSlot 
+}) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [selectedLessonId, setSelectedLessonId] = React.useState<string | null>(null);
 
-  const trail = useTrail(availableLessons.length + 1, {
+  const filteredLessons = React.useMemo(() => {
+    if (!nextAvailableSlot || !isToday(nextAvailableSlot)) return availableLessons;
+
+    const now = new Date();
+    return availableLessons.filter(lesson => {
+      const lessonStartTime = lesson.startDateTime.toDate();
+      return isAfter(lessonStartTime, now) || isEqual(lessonStartTime, now);
+    });
+  }, [availableLessons, nextAvailableSlot]);
+
+  const trail = useTrail(filteredLessons.length + 1, {
     from: { opacity: 0, transform: 'translateY(-24px) scale(0.96)' },
     to: { opacity: 1, transform: 'translateY(0px) scale(1)' },
     reset: true,
@@ -61,12 +76,12 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({ availableLessons, d
       <div className="mx-auto grid grid-cols-1 gap-3 @[500px]:grid-cols-2 max-w-[570px] md:mx-0">
         {trail.slice(1).map((style, index) => (
           <animated.div
-            key={availableLessons[index].id}
+            key={filteredLessons[index].id}
             style={style}
             className="mx-auto max-w-[300px] lg:max-w-[280px] w-full md:mx-0"
           >
             <Lesson
-              lesson={availableLessons[index]}
+              lesson={filteredLessons[index]}
               isLoading={isLoading}
               onLessonSelected={handleCheckout}
               selectedLessonId={selectedLessonId}

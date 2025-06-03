@@ -3,7 +3,7 @@ import { getAvailability } from '@/services/availabilities';
 import { useForm } from 'react-hook-form';
 import React from 'react';
 import DatePicker from './DatePicker';
-import { parseISO, format } from 'date-fns';
+import { parseISO, format, startOfDay, isAfter, isEqual, isBefore } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import AvailableLessons from './AvailableLessons';
 import { z } from 'zod';
@@ -25,6 +25,7 @@ const BookingFormSchema = z.object({
 
 const BookingForm: React.FC = () => {
   const { bookingFormRef } = useSectionRef();
+  const [nextAvailableSlot, setNextAvailableSlot] = React.useState<Date | null>(null);
 
   const form = useForm<z.infer<typeof BookingFormSchema>>({
     resolver: zodResolver(BookingFormSchema),
@@ -70,12 +71,40 @@ const BookingForm: React.FC = () => {
     if (!datesByLocation || datesByLocation.length === 0) return [];
 
     const uniqueDates = new Set<string>();
-    datesByLocation.forEach((availability) => {
-      uniqueDates.add(format(availability.startDateTime.toDate(), DATE_FORMAT));
+    const now = new Date();
+    const today = startOfDay(now);
+
+    datesByLocation.forEach(availability => {
+      const date = startOfDay(availability.startDateTime.toDate());
+      const dateString = format(date, DATE_FORMAT);
+      const isToday = isEqual(date, today);
+
+      if (isBefore(date, today)) return;
+
+      if (isToday && availability.startDateTime.toDate() <= now) return;
+
+      uniqueDates.add(dateString);
     });
 
     return Array.from(uniqueDates).map((dateString) => parseISO(dateString));
   }, [datesByLocation]);
+
+  React.useEffect(() => {
+    if (!availableUniqueDates || availableUniqueDates.length === 0) {
+      setNextAvailableSlot(null);
+      return;
+    }
+    
+    const today = startOfDay(new Date());
+    const nextAvailable = availableUniqueDates
+      .filter(date => {
+        const dateToCheck = startOfDay(date);
+        return isAfter(dateToCheck, today) || isEqual(dateToCheck, today);
+      })
+      .sort((a, b) => a.getTime() - b.getTime())[0] || null;
+
+    setNextAvailableSlot(nextAvailable);
+  }, [availableUniqueDates]);
 
   return (
     <section
@@ -113,6 +142,7 @@ const BookingForm: React.FC = () => {
                       isLoading={isLoading}
                       disabled={!selectedLocation}
                       helperText="Choose a date to see available lessons."
+                      nextAvailableDate={nextAvailableSlot}
                     />
                   )}
                 />
@@ -126,7 +156,11 @@ const BookingForm: React.FC = () => {
 
             {selectedDate && (
               <div className="relative z-10 flex-1">
-                <AvailableLessons availableLessons={availableLessons} date={selectedDate} />
+                <AvailableLessons 
+                  availableLessons={availableLessons} 
+                  date={selectedDate} 
+                  nextAvailableSlot={nextAvailableSlot}
+                />
               </div>
             )}
           </div>
