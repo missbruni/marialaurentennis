@@ -91,6 +91,25 @@ const BookingForm: React.FC = () => {
     return Array.from(uniqueDates).map((dateString) => parseISO(dateString));
   }, [datesByLocation]);
 
+
+  const nextAvailableDate = React.useMemo(() => {
+    if (!availableUniqueDates.length) return null;
+    if (!selectedDate) return availableUniqueDates[0];
+
+    const selectedDateStart = startOfDay(selectedDate);
+    const nextDate = availableUniqueDates.find(date => 
+      isAfter(startOfDay(date), selectedDateStart)
+    );
+    
+    if (nextDate) return nextDate;
+
+    return null;
+  }, [availableUniqueDates, selectedDate]);
+
+  const handleNextAvailableSlot = (date: Date) => {
+    form.setValue('date', format(date, DATE_FORMAT));
+  };
+
   React.useEffect(() => {
     if (!availableUniqueDates || availableUniqueDates.length === 0) {
       setNextAvailableSlot(null);
@@ -137,7 +156,7 @@ const BookingForm: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-2 flex-2 flex flex-col md:flex-row flex-wrap gap-5 lg:gap-10">
+          <div className="p-2 flex-2 flex flex-col md:flex-row flex-wrap gap-5 lg:gap-20">
             <Form {...form} >
               <div className="flex flex-col gap-2 backdrop-blur-md rounded-lg">
                 <FormField
@@ -150,7 +169,8 @@ const BookingForm: React.FC = () => {
                       isLoading={isLoading}
                       disabled={!selectedLocation}
                       helperText="Choose a date to see available lessons."
-                      nextAvailableDate={nextAvailableSlot}
+                      nextAvailableDate={nextAvailableDate}
+                      onNextAvailableSlot={handleNextAvailableSlot}
                     />
                   )}
                 />

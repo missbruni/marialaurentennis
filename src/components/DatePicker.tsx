@@ -20,8 +20,8 @@ type DatePickerProps = {
 
 const DatePicker: React.FC<DatePickerProps> = ({ 
   field, 
-  availableDates, 
   disabled, 
+  availableDates, 
   onNextAvailableSlot,
   nextAvailableDate 
 }) => {
@@ -29,14 +29,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
   const onDateChange = (date?: Date) => {
     field.onChange(date);
-  };
 
-  const handleNextAvailableClick = () => {
-    if (nextAvailableDate) {
-      onDateChange(nextAvailableDate);
-      setCurrentMonth(nextAvailableDate);
-      onNextAvailableSlot?.(nextAvailableDate);
-    }
   };
 
   const isDayDisabled = (date: Date) => {
@@ -66,13 +59,21 @@ const DatePicker: React.FC<DatePickerProps> = ({
     [availableDates]
   );
 
+  const onNextAvailableClick = () => {
+    if (nextAvailableDate) {
+      onDateChange(nextAvailableDate);
+      setCurrentMonth(nextAvailableDate);
+      onNextAvailableSlot?.(nextAvailableDate);
+    }
+  };
+
   return (
     <FormItem className="flex flex-col mx-auto md:mx-0">
       <Calendar
         mode="single"
         numberOfMonths={1}
         month={currentMonth}
-        selected={field.value}
+        selected={new Date(field.value)}
         disabled={isDayDisabled}
         onSelect={onDateChange}
         onMonthChange={setCurrentMonth}
@@ -103,7 +104,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         }}
       />
       <Button
-        onClick={handleNextAvailableClick}
+        onClick={onNextAvailableClick}
         disabled={!nextAvailableDate || disabled}
         variant="outline"
         size="lg"
