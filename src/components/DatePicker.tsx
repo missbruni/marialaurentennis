@@ -70,7 +70,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
     <FormItem className="flex flex-col mx-auto md:mx-0">
       <Calendar
         mode="single"
-        initialFocus
         numberOfMonths={1}
         month={currentMonth}
         selected={field.value}

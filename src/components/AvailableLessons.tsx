@@ -30,12 +30,12 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({
     });
   }, [availableLessons, nextAvailableSlot]);
 
-  const trail = useTrail(filteredLessons.length + 1, {
+  const trail = useTrail(filteredLessons.length, {
     from: { opacity: 0, transform: 'translateY(-24px) scale(0.96)' },
     to: { opacity: 1, transform: 'translateY(0px) scale(1)' },
     reset: true,
     config: { mass: 1, tension: 220, friction: 24 },
-  }).reverse();
+  });
 
   if (!date) return null;
 
@@ -66,15 +66,13 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({
 
   return (
     <div className="relative @container">
-      <animated.div style={trail[0]}>
-        <Typography.H4 className="my-6 md:text-2xl text-foreground text-center md:text-left">
-          <span className="font-bold text-tennis-green">Availability</span> on{' '}
-          {format(date, 'EEEE MMMM d')}
-        </Typography.H4>
-      </animated.div>
+      <Typography.H4 className="my-6 md:text-2xl text-foreground text-center md:text-left">
+        <span className="font-bold text-tennis-green">Availability</span> on{' '}
+        {format(date, 'EEEE MMMM d')}
+      </Typography.H4>
 
       <div className="mx-auto grid grid-cols-1 gap-3 @[500px]:grid-cols-2 max-w-[570px] md:mx-0">
-        {trail.slice(1).map((style, index) => (
+        {trail.map((style, index) => (
           <animated.div
             key={filteredLessons[index].id}
             style={style}

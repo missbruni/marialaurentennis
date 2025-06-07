@@ -6,8 +6,10 @@ import { HEADER_HEIGHT } from '../components/AppBar';
 type SectionRefContextType = {
   bookingFormRef: React.RefObject<HTMLDivElement | null>;
   contactRef: React.RefObject<HTMLDivElement | null>;
+  availableLessonsRef: React.RefObject<HTMLDivElement | null>;
   scrollToBookingForm: () => void;
   scrollToContact: () => void;
+  scrollToAvailableLessons: () => void;
 };
 
 const SectionRefContext = React.createContext<SectionRefContextType | undefined>(undefined);
@@ -15,6 +17,7 @@ const SectionRefContext = React.createContext<SectionRefContextType | undefined>
 export function SectionRefProvider({ children }: { children: React.ReactNode }) {
   const bookingFormRef = React.useRef<HTMLDivElement>(null);
   const contactRef = React.useRef<HTMLDivElement>(null);
+  const availableLessonsRef = React.useRef<HTMLDivElement>(null);
 
   const scrollToSection = React.useCallback((ref: React.RefObject<HTMLDivElement | null>) => {
     if (ref.current) {
@@ -39,9 +42,13 @@ export function SectionRefProvider({ children }: { children: React.ReactNode }) 
     scrollToSection(contactRef);
   }, [scrollToSection]);
 
+  const scrollToAvailableLessons = React.useCallback(() => {
+    scrollToSection(availableLessonsRef);
+  }, [scrollToSection]);
+
   return (
     <SectionRefContext.Provider
-      value={{ bookingFormRef, contactRef, scrollToBookingForm, scrollToContact }}
+      value={{ bookingFormRef, contactRef, availableLessonsRef, scrollToBookingForm, scrollToContact, scrollToAvailableLessons }}
     >
       {children}
     </SectionRefContext.Provider>

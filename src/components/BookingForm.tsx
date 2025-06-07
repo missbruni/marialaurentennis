@@ -11,6 +11,7 @@ import { Form, FormField } from './ui/form';
 import TennisBall from './TennisBall';
 import { Typography } from './ui/typography';
 import { useSectionRef } from '@/hooks/useSectionRef';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const DATE_FORMAT = 'yyyy-MM-dd';
 
@@ -24,8 +25,9 @@ const BookingFormSchema = z.object({
 });
 
 const BookingForm: React.FC = () => {
-  const { bookingFormRef } = useSectionRef();
+  const { bookingFormRef, availableLessonsRef, scrollToAvailableLessons } = useSectionRef();
   const [nextAvailableSlot, setNextAvailableSlot] = React.useState<Date | null>(null);
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const form = useForm<z.infer<typeof BookingFormSchema>>({
     resolver: zodResolver(BookingFormSchema),
@@ -106,6 +108,12 @@ const BookingForm: React.FC = () => {
     setNextAvailableSlot(nextAvailable);
   }, [availableUniqueDates]);
 
+  React.useEffect(() => {
+    if (selectedDate && isMobile) {
+      scrollToAvailableLessons();
+    }
+  }, [selectedDate, isMobile, scrollToAvailableLessons]);
+
   return (
     <section
       ref={bookingFormRef}
@@ -122,7 +130,7 @@ const BookingForm: React.FC = () => {
               Improve your game
             </Typography.H2>
 
-            <div className="flex flex-col gap-5 lg:gap-10">
+            <div className="flex flex-col gap-5 md:gap-8 lg:gap-10">
               <Typography.H1 className="text-2xl lg:text-4xl text-foreground lg:backdrop-blur-md rounded-lg lg:p-3">
                 Book a session today and take the next step in your tennis journey.
               </Typography.H1>
@@ -155,7 +163,7 @@ const BookingForm: React.FC = () => {
             )}
 
             {selectedDate && (
-              <div className="relative z-10 flex-1">
+              <div className="relative z-10 flex-1" ref={availableLessonsRef}>
                 <AvailableLessons 
                   availableLessons={availableLessons} 
                   date={selectedDate} 
