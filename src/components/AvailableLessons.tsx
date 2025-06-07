@@ -44,7 +44,7 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({
     setSelectedLessonId(lesson.id);
 
     try {
-      const res = await fetch('/api/create-checkouts-session', {
+      const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         body: JSON.stringify({ lesson }),
       });
