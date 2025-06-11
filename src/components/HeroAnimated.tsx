@@ -24,7 +24,7 @@ const HeroAnimated: React.FC = () => {
         </p>
 
         <Button
-          className="bg-white text-black font-semibold px-8 py-6 no-border text-lg cursor-pointer"
+          className="bg-white text-black font-semibold px-8 py-6 no-border text-md cursor-pointer"
           onClick={scrollToBookingForm}
           aria-label="Book Lesson"
         >

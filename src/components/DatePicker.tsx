@@ -88,7 +88,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         }}
         classNames={{
           day_outside: "",
-          day: 'border-0 h-10 w-10 text-base font-medium p-0 bg-transparent focus:bg-transparent focus:text-tennis-green sm:h-15 sm:w-15 sm:text-lg transition-colors duration-300',
+          day: 'border-0 h-12 w-12 text-base font-medium p-0 bg-transparent focus:bg-transparent focus:text-tennis-green sm:h-15 sm:w-15 sm:text-lg transition-colors duration-300',
           day_disabled: 'cursor-not-allowed text-gray-400',
           day_range_middle: 'text-base sm:text-lg',
           day_today: 'text-base sm:text-lg',
@@ -108,9 +108,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
         disabled={!nextAvailableDate || disabled}
         variant="outline"
         size="lg"
-        className="w-full text-tennis-green hover:text-tennis-green hover:bg-transparent hover:border-tennis-green disabled:text-muted-foreground disabled:hover:text-muted-foreground"
+        className="w-full text-md text-tennis-green hover:text-tennis-green hover:bg-transparent hover:border-tennis-green disabled:text-muted-foreground disabled:hover:text-muted-foreground"
       >
-        {nextAvailableDate ? 'Next available date' : 'No available dates'}
+        {nextAvailableDate ? 'Next available date' : 'No future dates available'}
       </Button>
     </FormItem>
   );

@@ -9,7 +9,7 @@ type SectionRefContextType = {
   availableLessonsRef: React.RefObject<HTMLDivElement | null>;
   scrollToBookingForm: () => void;
   scrollToContact: () => void;
-  scrollToAvailableLessons: () => void;
+  scrollToAvailableLessons: (offset?: number) => void;
 };
 
 const SectionRefContext = React.createContext<SectionRefContextType | undefined>(undefined);
@@ -19,11 +19,11 @@ export function SectionRefProvider({ children }: { children: React.ReactNode }) 
   const contactRef = React.useRef<HTMLDivElement>(null);
   const availableLessonsRef = React.useRef<HTMLDivElement>(null);
 
-  const scrollToSection = React.useCallback((ref: React.RefObject<HTMLDivElement | null>) => {
+  const scrollToSection = React.useCallback((ref: React.RefObject<HTMLDivElement | null>, offset: number = 0) => {
     if (ref.current) {
       const headerOffset = HEADER_HEIGHT;
       const elementPosition = ref.current.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset + offset;
 
       window.scrollTo({
         top: offsetPosition,
@@ -42,8 +42,8 @@ export function SectionRefProvider({ children }: { children: React.ReactNode }) 
     scrollToSection(contactRef);
   }, [scrollToSection]);
 
-  const scrollToAvailableLessons = React.useCallback(() => {
-    scrollToSection(availableLessonsRef);
+  const scrollToAvailableLessons = React.useCallback((offset?: number) => {
+    scrollToSection(availableLessonsRef, offset);
   }, [scrollToSection]);
 
   return (

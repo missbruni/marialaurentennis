@@ -129,7 +129,7 @@ const BookingForm: React.FC = () => {
 
   React.useEffect(() => {
     if (selectedDate && isMobile) {
-      scrollToAvailableLessons();
+      scrollToAvailableLessons(-100);
     }
   }, [selectedDate, isMobile, scrollToAvailableLessons]);
 
