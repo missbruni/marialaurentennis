@@ -11,7 +11,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2025-03-31.basil'
 });
 
-const TEN_MINUTES = 1 * 60 * 1000;
+const TEN_MINUTES = 10 * 60 * 1000;
 
 export async function POST(req: NextRequest) {
   try {

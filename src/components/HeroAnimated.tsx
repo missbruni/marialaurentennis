@@ -6,10 +6,9 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const HeroAnimated: React.FC = () => {
   const { scrollToBookingForm } = useSectionRef();
+  
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const isTablet = useMediaQuery('(max-width: 1024px)');
-
-  const logoWidth = isMobile ? 280 : isTablet ? 400 : 500;
+  const logoWidth = isMobile ? 280 : 400;
 
   return (
     <>

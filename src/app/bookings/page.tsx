@@ -3,16 +3,11 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Typography } from '@/components/ui/typography';
-import { format } from 'date-fns';
-import { formatTime } from '@/lib/date';
-import { capitalizeWords } from '@/lib/string';
-import { Badge } from '@/components/ui/badge';
-import { Booking, getUserBookings } from '../../services/booking';
+import { getUserBookings } from '../../services/booking';
 import Loader from '../../components/Loader';
 import AuthGuard from '../../components/AuthGuard';
-import { StatusCard } from '@/components/StatusCard';
+import { BookingCard } from '@/components/BookingCard';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 

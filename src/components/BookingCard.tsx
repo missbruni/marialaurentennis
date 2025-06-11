@@ -4,7 +4,7 @@ import { Booking } from "../services/booking";
 import { format } from "date-fns";
 import { StatusCard } from "./StatusCard";
 
-const BookingCard = ({ booking }: { booking: Booking }) => {
+export const BookingCard = ({ booking }: { booking: Booking }) => {
   const startDate = booking.startDateTime.toDate();
   const now = new Date();
 
