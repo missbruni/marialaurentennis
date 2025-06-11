@@ -10,8 +10,8 @@ import CancellationHandler from '@/components/CancellationHandler';
 export default function HomePage() {
   return (
     <main className="relative w-full flex flex-col items-center justify-start">
-      <SuspenseLoading>
-        <CancellationHandler />
+      <SuspenseLoading> 
+        <CancellationHandler /> 
       </SuspenseLoading>
 
       <Hero />

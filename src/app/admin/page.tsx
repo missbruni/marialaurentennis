@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Typography } from '@/components/ui/typography';
-import { DashboardCard, type StatusChipColor } from '@/components/DashboardCard';
+import { StatusCard, type StatusChipColor } from '@/components/StatusCard';
 
 type DashboardItem = {
   title: string;
@@ -84,7 +84,7 @@ export default function AdminPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {dashboardItems.map((item) => (
-          <DashboardCard
+          <StatusCard
             disabled={item.disabled}
             key={item.title}
             title={item.title}

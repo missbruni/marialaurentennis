@@ -8,7 +8,8 @@ import {
   writeBatch,
   doc,
   updateDoc,
-  deleteField
+  deleteField,
+  where
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
@@ -24,30 +25,25 @@ export interface Availability {
   pendingUntil?: Timestamp;
 }
 
-export const getAvailability = async () => {
+export const getAvailability = async (): Promise<Availability[]> => {
   try {
-    const availabilitiesCollection = collection(db, 'availabilities');
-    const availabilitiesQuery = query(availabilitiesCollection, orderBy('startDateTime', 'asc'));
+    const availabilitiesRef = collection(db, 'availabilities');
+    const q = query(
+      availabilitiesRef,
+      where('status', 'in', ['available', 'pending']),
+      orderBy('startDateTime', 'asc')
+    );
 
-    const availabilitiesSnapshot = await getDocs(availabilitiesQuery);
-    const availabilities: Availability[] = availabilitiesSnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        startDateTime: data.startDateTime,
-        endDateTime: data.endDateTime,
-        players: data.players,
-        price: data.price,
-        location: data.location,
-        title: data.title,
-        type: data.type,
-        status: data.status,
-        pendingUntil: data.pendingUntil
-      };
-    });
+    const querySnapshot = await getDocs(q);
+    const availabilities = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Availability[];
+
+    await checkPendingAvailabilities(availabilities);
 
     return availabilities.filter((availability) => {
-      if (availability.status === 'pending' && availability.pendingUntil) {
+     if (availability.status === 'pending' && availability.pendingUntil) {
         const now = new Date();
         const pendingUntil = availability.pendingUntil.toDate();
         return now > pendingUntil;
@@ -140,4 +136,30 @@ export const createAvailability = async (
 export const releaseAvailability = async (availabilityId: string) => {
   const availabilityDocRef = doc(collection(db, 'availabilities'), availabilityId);
   await updateDoc(availabilityDocRef, { status: 'available', pendingUntil: deleteField() });
+};
+
+const checkPendingAvailabilities = async (availabilities: Availability[]) => {
+  try {
+    for (const availability of availabilities) {
+      if (availability.status === 'pending' && availability.pendingUntil) {
+        const now = new Date();
+        const pendingUntil = availability.pendingUntil.toDate();
+        const isExpired = now > pendingUntil;
+        
+        if (isExpired) {
+          try {
+            const availabilityRef = doc(db, 'availabilities', availability.id);
+            await updateDoc(availabilityRef, {
+              status: 'available',
+              pendingUntil: deleteField()
+            });
+          } catch (error) {
+            console.error(`Error releasing expired availability ${availability.id}:`, error);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error checking pending availabilities:', error);
+  }
 };

@@ -129,4 +129,15 @@ describe('POST /api/create-checkout-session', () => {
     expect(createSessionArgs.line_items[0].price_data.unit_amount).toBe(5000);
     expect(createSessionArgs.line_items[0].price_data.currency).toBe('gbp');
   });
+
+  test('should set correct cancel URL in Stripe session', async () => {
+    createSessionMock.mockClear();
+
+    await POST(mockRequest);
+
+    expect(createSessionMock).toHaveBeenCalled();
+    const createSessionArgs = createSessionMock.mock.calls[0][0];
+
+    expect(createSessionArgs.cancel_url).toBe('https://tennis-booking.example.com?releaseLesson=lesson-123');
+  });
 });

@@ -19,6 +19,7 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({
 }) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [selectedLessonId, setSelectedLessonId] = React.useState<string | null>(null);
+  const prevDateRef = React.useRef(date);
 
   const filteredLessons = React.useMemo(() => {
     if (!nextAvailableSlot || !isToday(nextAvailableSlot)) return availableLessons;
@@ -33,9 +34,13 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({
   const trail = useTrail(filteredLessons.length, {
     from: { opacity: 0, transform: 'translateY(-24px) scale(0.96)' },
     to: { opacity: 1, transform: 'translateY(0px) scale(1)' },
-    reset: true,
     config: { mass: 1, tension: 220, friction: 24 },
+    reset: prevDateRef.current !== date,
   });
+
+  React.useEffect(() => {
+    prevDateRef.current = date;
+  }, [date]);
 
   if (!date) return null;
 
@@ -60,6 +65,7 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({
     } catch (error) {
       console.error('Error during checkout:', error);
     } finally {
+      setIsLoading(false);
       setSelectedLessonId(null);
     }
   };
