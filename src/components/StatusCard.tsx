@@ -3,20 +3,21 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Typography } from '@/components/ui/typography';
 import { cn } from '@/lib/utils';
 
-export type StatusChipColor = 'blue' | 'green' | 'yellow' | 'purple' | 'indigo' | 'gray';
+export type StatusChipColor = 'blue' | 'green' | 'yellow' | 'purple' | 'indigo' | 'gray' | 'red';
 
-export type DashboardCardProps = {
+export type StatusCardProps = {
   title: string;
   description: string;
-  actionText: string;
+  actionText?: string;
   statusText: string;
   statusColor: StatusChipColor;
   onClick?: () => void;
   className?: string;
   disabled?: boolean;
+  children?: React.ReactNode;
 };
 
-export function DashboardCard({
+export function StatusCard({
   title,
   description,
   actionText,
@@ -24,8 +25,9 @@ export function DashboardCard({
   statusColor,
   onClick,
   className,
-  disabled = false
-}: DashboardCardProps) {
+  disabled = false,
+  children
+}: StatusCardProps) {
   const getStatusColorClasses = (color: StatusChipColor) => {
     const colorMap = {
       blue: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
@@ -33,7 +35,8 @@ export function DashboardCard({
       yellow: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
       purple: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
       indigo: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
-      gray: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
+      gray: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+      red: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
     };
 
     return colorMap[color];
@@ -58,6 +61,8 @@ export function DashboardCard({
           </div>
         </div>
         <Typography.P className="text-muted-foreground mb-4">{description}</Typography.P>
+        {children && <div className="mb-4">{children}</div>}
+        {actionText && (
         <div className="mt-auto">
           <button
             className={cn(
@@ -67,9 +72,10 @@ export function DashboardCard({
             )}
             disabled={disabled}
           >
-            {actionText} →
-          </button>
-        </div>
+              {actionText} →
+            </button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Booking, getUserBookings } from '../../services/booking';
 import Loader from '../../components/Loader';
 import AuthGuard from '../../components/AuthGuard';
+import { StatusCard } from '@/components/StatusCard';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 
@@ -59,59 +60,4 @@ export default function BookingsPage() {
   );
 }
 
-function BookingCard({ booking }: { booking: Booking }) {
-  const startDate = booking.startDateTime.toDate();
 
-  const formattedDate = format(startDate, 'EEEE, MMMM d yyyy');
-  const formattedStartTime = formatTime(booking.startDateTime);
-  const formattedEndTime = formatTime(booking.endDateTime);
-
-  const isPast = startDate < new Date();
-
-  return (
-    <Card className="overflow-hidden">
-      <CardHeader className="bg-muted/50 pb-2">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg">{formattedDate}</CardTitle>
-          <Badge variant={isPast ? 'outline' : 'default'}>
-            {isPast ? 'Completed' : 'Upcoming'}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="pt-4">
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Time:</span>
-            <span className="font-medium">
-              {formattedStartTime} - {formattedEndTime}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Location:</span>
-            <span className="font-medium">{capitalizeWords(booking.location)}</span>
-          </div>
-          {booking.type && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Type:</span>
-              <span className="font-medium">{capitalizeWords(booking.type)} Lesson</span>
-            </div>
-          )}
-          {booking.price && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Price:</span>
-              <span className="font-medium">£{booking.price}</span>
-            </div>
-          )}
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Status:</span>
-            <span className="font-medium">{capitalizeWords(booking.status)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Booked on:</span>
-            <span className="font-medium">{format(booking.createdAt.toDate(), 'MMM d, yyyy')}</span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
