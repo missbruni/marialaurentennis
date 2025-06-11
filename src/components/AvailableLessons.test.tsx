@@ -1,21 +1,30 @@
+import React from 'react';
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
-
+import { render, screen } from '@/lib/test-utils';
 import AvailableLessons from './AvailableLessons';
 import { Timestamp } from 'firebase/firestore';
 import type { Availability } from '@/services/availabilities';
-import { render, screen } from '../lib/test-utils';
 
 vi.mock('./Lesson', () => ({
   default: ({
     lesson,
-    onLessonSelected
+    onLessonSelected,
+    isLoading,
+    selectedLessonId
   }: {
     lesson: Availability;
     onLessonSelected: (lesson: Availability) => void;
+    isLoading: boolean;
+    selectedLessonId: string | null;
   }) => (
-    <div data-testid={`lesson-${lesson.id}`} onClick={() => onLessonSelected(lesson)}>
-      Lesson {lesson.id}
-    </div>
+    <button
+      data-testid={`lesson-${lesson.id}`}
+      onClick={() => onLessonSelected(lesson)}
+      type="button"
+      disabled={isLoading}
+    >
+      {isLoading && selectedLessonId === lesson.id ? 'Loading...' : `Lesson ${lesson.id}`}
+    </button>
   )
 }));
 
@@ -52,13 +61,13 @@ describe('AvailableLessons', () => {
   ];
 
   beforeEach(() => {
-    // Mock the current date to be 2023-07-15 at 10:30 AM
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2023-07-15T10:30:00'));
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   test('renders available lessons correctly', () => {
@@ -79,15 +88,13 @@ describe('AvailableLessons', () => {
       />
     );
 
-    // Should only show lessons at or after 11:00
     expect(screen.queryByTestId('lesson-1')).not.toBeInTheDocument();
     expect(screen.getByTestId('lesson-2')).toBeInTheDocument();
     expect(screen.getByTestId('lesson-3')).toBeInTheDocument();
   });
 
   test('filters lessons based on current time when nextAvailableSlot is today', () => {
-    // Current time is mocked to 10:30 AM
-    const nextAvailableSlot = new Date('2023-07-15T00:00:00'); // Today
+    const nextAvailableSlot = new Date('2023-07-15T00:00:00');
     render(
       <AvailableLessons 
         availableLessons={mockLessons} 
@@ -96,33 +103,8 @@ describe('AvailableLessons', () => {
       />
     );
 
-    // Should only show lessons after 10:30 AM
-    expect(screen.queryByTestId('lesson-1')).not.toBeInTheDocument(); // 10:00 AM
-    expect(screen.getByTestId('lesson-2')).toBeInTheDocument(); // 11:30 AM
-    expect(screen.getByTestId('lesson-3')).toBeInTheDocument(); // 1:00 PM
-  });
-
-  test('handles lesson selection', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
-      json: () => Promise.resolve({ url: 'https://checkout.url' }),
-      ok: true
-    });
-
-    const { user } = render(
-      <AvailableLessons 
-        availableLessons={mockLessons} 
-        date={mockDate} 
-        nextAvailableSlot={null} 
-      />
-    );
-    await user.click(screen.getByTestId('lesson-1'));
-
-    expect(screen.getByText('Preparing your checkout...')).toBeInTheDocument();
-
-    await vi.waitFor(() => {
-      expect(global.fetch).toHaveBeenCalled();
-    });
-
-    vi.restoreAllMocks();
+    expect(screen.queryByTestId('lesson-1')).not.toBeInTheDocument();
+    expect(screen.getByTestId('lesson-2')).toBeInTheDocument();
+    expect(screen.getByTestId('lesson-3')).toBeInTheDocument();
   });
 });

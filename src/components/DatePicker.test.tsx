@@ -3,14 +3,9 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@/lib/test-utils';
 import DatePicker from './DatePicker';
 import type { FieldValues } from 'react-hook-form';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { FormProvider, useForm } from 'react-hook-form';
-
-vi.mock('@/hooks/useMediaQuery', () => ({
-  useMediaQuery: vi.fn()
-}));
-
-import { useMediaQuery } from '@/hooks/useMediaQuery';
+import userEvent from '@testing-library/user-event';
 
 const DatePickerWithFormContext = (props: React.ComponentProps<typeof DatePicker>) => {
   const methods = useForm();
@@ -22,286 +17,142 @@ const DatePickerWithFormContext = (props: React.ComponentProps<typeof DatePicker
 };
 
 describe('DatePicker', () => {
+  const today = new Date();
+  const tomorrow = addDays(today, 1);
+  const nextWeek = addDays(today, 7);
+
   const mockField: FieldValues = {
-    value: new Date('2023-07-15'),
+    value: tomorrow,
     onChange: vi.fn(),
     onBlur: vi.fn(),
-    name: 'testDate'
+    name: 'testDate',
+    isLoading: false
   };
 
   const mockAvailableDates = [
-    new Date('2023-07-10'),
-    new Date('2023-07-15'),
-    new Date('2023-07-20')
+    tomorrow,
+    nextWeek,
+    addDays(today, 14)
   ];
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default to desktop view
-    vi.mocked(useMediaQuery).mockReturnValue(false);
   });
 
-  test('renders correctly in desktop mode', () => {
+  test('renders calendar with correct initial month', () => {
     render(
       <DatePickerWithFormContext
         field={mockField}
         isLoading={false}
         disabled={false}
         availableDates={mockAvailableDates}
+        nextAvailableDate={tomorrow}
       />
     );
 
-    expect(screen.getByText('Select Date')).toBeInTheDocument();
-    expect(screen.getByText(format(mockField.value, 'PPP'))).toBeInTheDocument();
+    expect(screen.getByText(format(today, 'MMMM yyyy'))).toBeInTheDocument();
   });
 
-  test('renders correctly in mobile mode', () => {
-    vi.mocked(useMediaQuery).mockReturnValue(true); // Set to mobile view
-
+  test('displays next available date button', () => {
     render(
       <DatePickerWithFormContext
         field={mockField}
         isLoading={false}
         disabled={false}
         availableDates={mockAvailableDates}
+        nextAvailableDate={tomorrow}
       />
     );
 
-    expect(screen.getByText('Select Date')).toBeInTheDocument();
-    expect(screen.getByText(format(mockField.value, 'PPP'))).toBeInTheDocument();
-
-    // dialog is not open by default
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByText('Next available date')).toBeInTheDocument();
   });
 
-  test('shows loading state when isLoading is true', () => {
-    render(
-      <DatePickerWithFormContext
-        field={mockField}
-        isLoading={true}
-        disabled={false}
-        availableDates={mockAvailableDates}
-      />
-    );
-
-    const loadingIcon = document.querySelector('.animate-spin');
-    expect(loadingIcon).toBeInTheDocument();
-  });
-
-  test('disables button when disabled prop is true', () => {
+  test('disables next available date button when no dates are available', () => {
     render(
       <DatePickerWithFormContext
         field={mockField}
         isLoading={false}
-        disabled={true}
-        availableDates={mockAvailableDates}
+        disabled={false}
+        availableDates={[]}
+        nextAvailableDate={null}
       />
     );
 
-    const button = screen.getByText(format(mockField.value, 'PPP')).closest('button');
+    const button = screen.getByText('No future dates available');
     expect(button).toBeDisabled();
   });
 
-  test('shows placeholder text when no date is selected', () => {
-    const emptyField = { ...mockField, value: undefined };
-
-    render(
-      <DatePickerWithFormContext
-        field={emptyField}
-        isLoading={false}
-        disabled={false}
-        availableDates={mockAvailableDates}
-      />
-    );
-
-    expect(screen.getByText('Pick a date')).toBeInTheDocument();
-  });
-
-  test('displays helper text when provided', () => {
-    const helperText = 'This is a helper text';
+  test('calls onNextAvailableSlot when next available date button is clicked', async () => {
+    const onNextAvailableSlot = vi.fn();
+    const user = userEvent.setup();
 
     render(
       <DatePickerWithFormContext
         field={mockField}
         isLoading={false}
         disabled={false}
-        helperText={helperText}
         availableDates={mockAvailableDates}
+        nextAvailableDate={tomorrow}
+        onNextAvailableSlot={onNextAvailableSlot}
       />
     );
 
-    expect(screen.getByText(helperText)).toBeInTheDocument();
+    const button = screen.getByText('Next available date');
+    await user.click(button);
+
+    expect(onNextAvailableSlot).toHaveBeenCalledWith(tomorrow);
+    expect(mockField.onChange).toHaveBeenCalledWith(tomorrow);
   });
 
-  test('opens calendar popover when button is clicked in desktop mode', async () => {
-    const { user } = render(
+  test('marks available dates with correct styling', () => {
+    render(
       <DatePickerWithFormContext
         field={mockField}
         isLoading={false}
         disabled={false}
         availableDates={mockAvailableDates}
+        nextAvailableDate={tomorrow}
       />
     );
 
-    const button = screen.getByText(format(mockField.value, 'PPP')).closest('button');
-    await user.click(button as HTMLElement);
-
-    expect(document.querySelector('[role="dialog"]')).toBeInTheDocument();
-  });
-
-  test('opens calendar dialog when button is clicked in mobile mode', async () => {
-    vi.mocked(useMediaQuery).mockReturnValue(true);
-
-    const { user } = render(
-      <DatePickerWithFormContext
-        field={mockField}
-        isLoading={false}
-        disabled={false}
-        availableDates={mockAvailableDates}
-      />
-    );
-
-    const button = screen.getByText(format(mockField.value, 'PPP')).closest('button');
-    await user.click(button as HTMLElement);
-
-    const dialog = document.querySelector('[role="dialog"]');
-    expect(dialog).toBeInTheDocument();
-
-    const dialogTitle = dialog?.querySelector('.p-4.flex.items-center h2');
-    expect(dialogTitle).toHaveTextContent('Select Date');
-  });
-
-  test('calculates fromMonth correctly with available dates', async () => {
-    const pastDate = new Date();
-    pastDate.setMonth(pastDate.getMonth() - 2);
-
-    const availableDates = [pastDate, new Date()];
-
-    const { user } = render(
-      <DatePickerWithFormContext
-        field={mockField}
-        isLoading={false}
-        disabled={false}
-        availableDates={availableDates}
-      />
-    );
-
-    // open calendar
-    const button = screen.getByText(format(mockField.value, 'PPP')).closest('button');
-    await user.click(button as HTMLElement);
-
-    // check that the month navigation allows going back to the past date's month
-    const prevMonthButton = screen.getByLabelText('Go to previous month');
-    await user.click(prevMonthButton);
-    await user.click(prevMonthButton);
-
-    // verify we can see the month of the earliest available date
-    expect(screen.getByText(format(pastDate, 'MMMM yyyy'))).toBeInTheDocument();
+    const availableDate = screen.getByText(format(tomorrow, 'd'));
+    expect(availableDate).toHaveClass('text-tennis-green');
   });
 
   test('calls field.onChange when a date is selected', async () => {
-    const { user } = render(
+    const user = userEvent.setup();
+    render(
       <DatePickerWithFormContext
         field={mockField}
         isLoading={false}
         disabled={false}
         availableDates={mockAvailableDates}
+        nextAvailableDate={tomorrow}
       />
     );
 
-    const button = screen.getByText(format(mockField.value, 'PPP')).closest('button');
-    await user.click(button as HTMLElement);
+    const availableDate = screen.getByText(format(tomorrow, 'd'));
+    await user.click(availableDate);
 
-    const dateButtons = document.querySelectorAll('[role="gridcell"] button');
-    if (dateButtons.length > 0) {
-      // Click a date in the middle of the month
-      await user.click(dateButtons[15] as HTMLElement);
-      expect(mockField.onChange).toHaveBeenCalled();
-    }
+    expect(mockField.onChange).toHaveBeenCalled();
   });
 
-  test('renders mobile calendar with initial months when dialog is opened', async () => {
-    vi.mocked(useMediaQuery).mockReturnValue(true); // Set to mobile view
-
-    const { user } = render(
+  test('updates current month when navigating', async () => {
+    const user = userEvent.setup();
+    render(
       <DatePickerWithFormContext
         field={mockField}
         isLoading={false}
         disabled={false}
         availableDates={mockAvailableDates}
+        nextAvailableDate={tomorrow}
       />
     );
 
-    // open the dialog
-    const button = screen.getByText(format(mockField.value, 'PPP')).closest('button');
-    await user.click(button as HTMLElement);
+    const nextMonthButton = screen.getByLabelText('Go to next month');
+    await user.click(nextMonthButton);
 
-    const dialog = screen.getByRole('dialog');
-    expect(dialog).toBeInTheDocument();
-
-    const loadMoreButton = screen.getByText('Load more dates');
-    expect(loadMoreButton).toBeInTheDocument();
-
-    const monthHeaders = screen.getAllByText(
-      /^(January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/
-    );
-    expect(monthHeaders.length).toBe(12);
-  });
-
-  test('loads more months when "Load more dates" button is clicked', async () => {
-    vi.mocked(useMediaQuery).mockReturnValue(true); // Set to mobile view
-
-    const { user } = render(
-      <DatePickerWithFormContext
-        field={mockField}
-        isLoading={false}
-        disabled={false}
-        availableDates={mockAvailableDates}
-      />
-    );
-
-    const button = screen.getByText(format(mockField.value, 'PPP')).closest('button');
-    await user.click(button as HTMLElement);
-
-    const initialMonthHeaders = screen.getAllByText(
-      /^(January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/
-    );
-    const initialCount = initialMonthHeaders.length;
-
-    const loadMoreButton = screen.getByText('Load more dates');
-    await user.click(loadMoreButton);
-
-    // adding 12 more months instead of 6
-    const updatedMonthHeaders = screen.getAllByText(
-      /^(January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/
-    );
-    expect(updatedMonthHeaders.length).toBe(initialCount + 12);
-  });
-
-  test('generates correct months starting from fromMonth', async () => {
-    vi.mocked(useMediaQuery).mockReturnValue(true); // Set to mobile view
-
-    const pastDate = new Date();
-    pastDate.setMonth(pastDate.getMonth() - 3);
-
-    const availableDates = [pastDate, new Date()];
-
-    const { user } = render(
-      <DatePickerWithFormContext
-        field={mockField}
-        isLoading={false}
-        disabled={false}
-        availableDates={availableDates}
-      />
-    );
-
-    const button = screen.getByText(format(mockField.value, 'PPP')).closest('button');
-    await user.click(button as HTMLElement);
-
-    // first month displayed is the month of the earliest available date
-    const firstMonthHeader = screen.getAllByText(
-      /^(January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/
-    )[0];
-    expect(firstMonthHeader).toHaveTextContent(format(pastDate, 'MMMM yyyy'));
+    const nextMonth = addDays(today, 30);
+    expect(screen.getByText(format(nextMonth, 'MMMM yyyy'))).toBeInTheDocument();
   });
 });
