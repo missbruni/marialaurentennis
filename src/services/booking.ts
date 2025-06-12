@@ -1,7 +1,6 @@
 import { getDocs, Timestamp } from 'firebase/firestore';
 import { orderBy, query, where } from 'firebase/firestore';
 import { collection } from 'firebase/firestore';
-import type { Availability } from './availabilities';
 import { db } from '../lib/firebase';
 
 export type Booking = {
@@ -9,30 +8,15 @@ export type Booking = {
   startDateTime: Timestamp;
   endDateTime: Timestamp;
   location: string;
-  status: string;
+  status: 'confirmed' | 'failed' | 'cancelled';
   createdAt: Timestamp;
   price?: number;
   type?: string;
-};
-
-export const createBooking = async (
-  booking: Availability,
-  sessionId: string,
-  userEmail: string,
-  userId: string
-) => {
-  return fetch('/api/create-booking', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      booking,
-      sessionId,
-      userEmail,
-      userId
-    })
-  });
+  stripeId?: string;
+  userId?: string;
+  userEmail?: string;
+  failureReason?: string;
+  refunded?: boolean;
 };
 
 export const getUserBookings = async (userId?: string) => {

@@ -134,7 +134,7 @@ describe('DatePicker', () => {
     const availableDate = screen.getByText(format(tomorrow, 'd'));
     await user.click(availableDate);
 
-    expect(mockField.onChange).toHaveBeenCalled();
+      expect(mockField.onChange).toHaveBeenCalled();
   });
 
   test('updates current month when navigating', async () => {

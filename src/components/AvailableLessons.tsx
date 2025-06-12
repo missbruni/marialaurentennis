@@ -5,6 +5,7 @@ import { Availability } from '../services/availabilities';
 import Lesson from './Lesson';
 import { Typography } from './ui/typography';
 import Loader from './Loader';
+import { useAuth } from '../hooks/useAuth';
 
 type AvailableLessonsProps = {
   availableLessons: Availability[];
@@ -17,6 +18,7 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({
   availableLessons, 
   nextAvailableSlot 
 }) => {
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
   const [selectedLessonId, setSelectedLessonId] = React.useState<string | null>(null);
   const prevDateRef = React.useRef(date);
@@ -43,15 +45,15 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({
   }, [date]);
 
   if (!date) return null;
-
   const handleCheckout = async (lesson: Availability) => {
     setIsLoading(true);
     setSelectedLessonId(lesson.id);
 
     try {
+
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
-        body: JSON.stringify({ lesson }),
+        body: JSON.stringify({ lesson, userId: user?.uid, userEmail: user?.email }),
       });
 
       const data = await res.json();

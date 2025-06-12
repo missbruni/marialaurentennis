@@ -15,14 +15,24 @@ export const BookingCard = ({ booking }: { booking: Booking }) => {
 
   const isPast = startDate < now;
   const isCancelled = booking.status === 'cancelled';
+  const isFailed = booking.status === 'failed';
 
   const getStatusInfo = () => {
+    if (isFailed) {
+      return {
+        statusText: 'Failed',
+        statusColor: 'red' as const,
+        description: booking.failureReason || 'This booking could not be completed.',
+        actionText: undefined,
+      };
+    }
+
     if (isCancelled) {
       return {
         statusText: 'Cancelled',
         statusColor: 'red' as const,
         description: 'This lesson has been cancelled.',
-         actionText: undefined,
+        actionText: undefined,
       };
     }
 
@@ -40,7 +50,6 @@ export const BookingCard = ({ booking }: { booking: Booking }) => {
       statusColor: 'green' as const,
       description: 'Your lesson is confirmed.',
       actionText: undefined,
-      // actionText: 'Manage Lesson',
     };
   };
 
@@ -70,6 +79,12 @@ export const BookingCard = ({ booking }: { booking: Booking }) => {
           <span className="font-medium">£{booking.price}</span>
         </div>
       )}
+      {booking.refunded && (
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Status:</span>
+          <span className="font-medium text-red-500">Payment Refunded</span>
+        </div>
+      )}
       <div className="flex justify-between">
         <span className="text-muted-foreground">Booked on:</span>
         <span className="font-medium">{formattedBookedDate}</span>
@@ -84,7 +99,7 @@ export const BookingCard = ({ booking }: { booking: Booking }) => {
       actionText={statusInfo.actionText}
       statusText={statusInfo.statusText}
       statusColor={statusInfo.statusColor}
-      disabled={isPast || isCancelled}
+      disabled={isPast || isCancelled || isFailed}
       onClick={() => {
         // TODO: Implement view details action
         console.log('View booking details:', booking.id);

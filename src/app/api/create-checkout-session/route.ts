@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { format } from 'date-fns';
 import { formatTime } from '@/lib/date';
 import { Availability } from '../../../services/availabilities';
-import { doc, Timestamp, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, Timestamp, updateDoc, deleteField } from 'firebase/firestore';
 import { capitalizeWords } from '../../../lib/string';
 import { db } from '../../../lib/firebase';
 
@@ -11,11 +11,19 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2025-03-31.basil'
 });
 
-const TEN_MINUTES = 10 * 60 * 1000;
+const THIRTY_MINUTES = 30 * 60 * 1000;
+const THIRTY_MINUTES_IN_SECONDS = 30 * 60;
 
 export async function POST(req: NextRequest) {
   try {
-    const { lesson } = (await req.json()) as { lesson: Availability };
+    const { lesson, userId, userEmail } = (await req.json()) as { lesson: Availability, userId: string, userEmail: string };
+
+    const lessonRef = doc(db, 'availabilities', lesson.id);
+    const lessonDoc = await getDoc(lessonRef);
+  
+    if (!lessonDoc.exists() || lessonDoc.data()?.status !== 'available') {
+      return NextResponse.json({ error: 'Lesson is no longer available' }, { status: 400 });
+    }
 
     const startDateTime = new Timestamp(
       lesson.startDateTime.seconds,
@@ -33,18 +41,23 @@ export async function POST(req: NextRequest) {
     `.trim();
 
     const availabilityRef = doc(db, 'availabilities', lesson.id);
-    const pendingUntil = new Date(Date.now() + TEN_MINUTES);
+    const pendingUntil = new Date(Date.now() + THIRTY_MINUTES);
     await updateDoc(availabilityRef, {
       status: 'pending',
-      pendingUntil: Timestamp.fromDate(pendingUntil)
+      pendingUntil: Timestamp.fromDate(pendingUntil),
+      pendingSessionId: null
     });
 
     const encodedLesson = encodeURIComponent(
       Buffer.from(JSON.stringify(lesson)).toString('base64')
     );
 
+    const expiresAt = Math.floor(Date.now() / 1000) + THIRTY_MINUTES_IN_SECONDS;
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
+      expires_at: expiresAt,
       mode: 'payment',
       line_items: [
         {
@@ -53,12 +66,6 @@ export async function POST(req: NextRequest) {
             product_data: {
               name: capitalizeWords(`${lesson.type} Tennis Lesson - ${lesson.location}`),
               description,
-              metadata: {
-                location: lesson.location,
-                lesson_date: formattedDate,
-                lesson_time: `${formattedStartTime} - ${formattedEndTime}`,
-                source: 'mlt-tennis-app'
-              }
             },
             unit_amount: lesson.price * 100 // Stripe expects amount in pence
           },
@@ -70,15 +77,24 @@ export async function POST(req: NextRequest) {
         lesson_date: formattedDate,
         lesson_time: `${formattedStartTime} - ${formattedEndTime}`,
         location: lesson.location,
-        source: 'mlt-tennis-app'
+        source: 'mlt-tennis-app',
+        timestamp: currentTimestamp.toString(),
+        user_id: userId,
+        user_email: userEmail
       },
-      success_url: `${req.nextUrl.origin}/success?lesson=${encodedLesson}&sessionId={CHECKOUT_SESSION_ID}`,
+      success_url: `${req.nextUrl.origin}/confirmation?lesson=${encodedLesson}&sessionId={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.nextUrl.origin}?releaseLesson=${lesson.id}`
+    });
+
+    await updateDoc(availabilityRef, {
+      pendingSessionId: session.id
     });
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error('Stripe Checkout error:', error);
-    return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to create checkout session',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
