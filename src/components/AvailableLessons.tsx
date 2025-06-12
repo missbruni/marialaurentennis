@@ -6,6 +6,9 @@ import Lesson from './Lesson';
 import { Typography } from './ui/typography';
 import Loader from './Loader';
 import { useAuth } from '../hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { AlertCircleIcon } from 'lucide-react';
 
 type AvailableLessonsProps = {
   availableLessons: Availability[];
@@ -13,21 +16,24 @@ type AvailableLessonsProps = {
   nextAvailableSlot: Date | null;
 };
 
-const AvailableLessons: React.FC<AvailableLessonsProps> = ({ 
+const AvailableLessons: React.FC<AvailableLessonsProps> = ({
   date,
-  availableLessons, 
-  nextAvailableSlot 
+  availableLessons,
+  nextAvailableSlot
 }) => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+
   const [isLoading, setIsLoading] = React.useState(false);
   const [selectedLessonId, setSelectedLessonId] = React.useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const prevDateRef = React.useRef(date);
 
   const filteredLessons = React.useMemo(() => {
     if (!nextAvailableSlot || !isToday(nextAvailableSlot)) return availableLessons;
 
     const now = new Date();
-    return availableLessons.filter(lesson => {
+    return availableLessons.filter((lesson) => {
       const lessonStartTime = lesson.startDateTime.toDate();
       return isAfter(lessonStartTime, now) || isEqual(lessonStartTime, now);
     });
@@ -37,7 +43,7 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({
     from: { opacity: 0, transform: 'translateY(-24px) scale(0.96)' },
     to: { opacity: 1, transform: 'translateY(0px) scale(1)' },
     config: { mass: 1, tension: 220, friction: 24 },
-    reset: prevDateRef.current !== date,
+    reset: prevDateRef.current !== date
   });
 
   React.useEffect(() => {
@@ -47,13 +53,13 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({
   if (!date) return null;
   const handleCheckout = async (lesson: Availability) => {
     setIsLoading(true);
+    setErrorMessage(null);
     setSelectedLessonId(lesson.id);
 
     try {
-
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
-        body: JSON.stringify({ lesson, userId: user?.uid, userEmail: user?.email }),
+        body: JSON.stringify({ lesson, userId: user?.uid, userEmail: user?.email })
       });
 
       const data = await res.json();
@@ -62,29 +68,38 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({
           window.location.href = data.url;
         }, 500);
       } else {
-        console.error('Failed to create checkout session');
+        setErrorMessage(data.error);
       }
     } catch (error) {
-      console.error('Error during checkout:', error);
+      setErrorMessage('Sorry, there was a problem starting your checkout. Please try again.');
     } finally {
+      queryClient.invalidateQueries({ queryKey: ['availabilities'] });
       setIsLoading(false);
       setSelectedLessonId(null);
     }
   };
 
   return (
-    <div className="relative @container">
-      <Typography.H4 className="my-6 md:text-2xl text-foreground text-center md:text-left">
-        <span className="font-bold text-tennis-green">Availability</span> on{' '}
+    <div className="@container relative">
+      <Typography.H4 className="text-foreground my-6 text-center md:text-left md:text-2xl">
+        <span className="text-tennis-green font-bold">Availability</span> on{' '}
         {format(date, 'EEEE MMMM d')}
       </Typography.H4>
 
-      <div className="mx-auto grid grid-cols-1 gap-3 @[500px]:grid-cols-2 max-w-[570px] md:mx-0">
+      {errorMessage && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircleIcon className="h-4 w-4" />
+          <AlertTitle>Lesson no longer available</AlertTitle>
+          <AlertDescription>Looks like someone else beat you to it.</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="mx-auto grid max-w-[570px] grid-cols-1 gap-3 md:mx-0 @[500px]:grid-cols-2">
         {trail.map((style, index) => (
           <animated.div
             key={filteredLessons[index].id}
             style={style}
-            className="mx-auto max-w-[300px] lg:max-w-[280px] w-full md:mx-0"
+            className="mx-auto w-full max-w-[300px] md:mx-0 lg:max-w-[280px]"
           >
             <Lesson
               lesson={filteredLessons[index]}

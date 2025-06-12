@@ -6,24 +6,24 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const HeroAnimated: React.FC = () => {
   const { scrollToBookingForm } = useSectionRef();
-  
+
   const isMobile = useMediaQuery('(max-width: 768px)');
   const logoWidth = isMobile ? 280 : 400;
 
   return (
     <>
-      <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/30 z-0"></div>
-      <div className="relative z-10 text-center mx-auto flex items-center justify-center flex-col">
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/10 to-black/30"></div>
+      <div className="relative z-10 mx-auto flex flex-col items-center justify-center text-center">
         <div className="mb-10">
           <AnimatedLogo width={logoWidth} />
         </div>
-        <p className="text-lg md:text-xl max-w-sm md:max-w-xl mx-auto mb-6 drop-shadow-md">
+        <p className="mx-auto mb-6 max-w-sm text-lg drop-shadow-md md:max-w-xl md:text-xl">
           Personalized coaching, convenient scheduling, and world-class support to level up your
           game.
         </p>
 
         <Button
-          className="bg-white text-black font-semibold px-8 py-6 no-border text-md cursor-pointer"
+          className="no-border text-md cursor-pointer px-8 py-6 font-semibold"
           onClick={scrollToBookingForm}
           aria-label="Book Lesson"
         >

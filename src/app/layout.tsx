@@ -3,6 +3,7 @@ import './globals.css';
 import { ReactQueryProvider } from '../lib/react-query';
 import { ThemeProvider } from '../components/ThemeProvider';
 import ClientLayout from './client-layout';
+import { Toaster } from '../components/ui/sonner';
 
 export const metadata: Metadata = {
   title: 'Maria Lauren Tennis',
@@ -38,6 +39,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <Toaster position="bottom-right" richColors closeButton expand={true} />
             <ClientLayout>{children}</ClientLayout>
           </ThemeProvider>
         </ReactQueryProvider>
