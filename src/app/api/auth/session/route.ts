@@ -3,7 +3,6 @@ import { createSessionCookie } from '@/lib/firebase-admin';
 import { COOKIE_NAME } from '../../../../lib/auth';
 
 export async function POST(request: NextRequest) {
-  console.log('Session creation request received');
   try {
     const { idToken } = await request.json();
 

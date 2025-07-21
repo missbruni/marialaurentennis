@@ -61,7 +61,6 @@ export async function POST(req: NextRequest) {
     const lessonId = session.metadata?.lesson_id;
 
     if (!lessonId) {
-      console.log('Webhook debug - No lesson ID found in metadata:', session.metadata);
       return NextResponse.json({ error: 'No lesson ID in session metadata' }, { status: 400 });
     }
 
@@ -103,38 +102,15 @@ export async function POST(req: NextRequest) {
       const now = Date.now();
       const isSameSession = lessonData.pendingSessionId === session.id;
 
-      console.log('Webhook debug - Pending check:', {
-        now,
-        pendingUntil,
-        isStillPending: pendingUntil && now < pendingUntil,
-        isSameSession,
-        sessionId: session.id,
-        pendingSessionId: lessonData.pendingSessionId,
-        sessionMetadata: session.metadata,
-        lessonData: {
-          status: lessonData.status,
-          pendingUntil: lessonData.pendingUntil,
-          pendingSessionId: lessonData.pendingSessionId
-        }
-      });
-
-      if (isSameSession) {
-        console.log('Webhook debug - This is the same session that created the pending status');
-        // This is the same session, proceed with booking
-      } else if (pendingUntil && now >= pendingUntil) {
-        console.log('Webhook debug - Pending status has expired');
-        // The pending status has expired, we can proceed with the booking
-      } else {
-        console.log('Webhook debug - Lesson is still pending for another session');
-        // This is a different pending session
+      if (!isSameSession && (!pendingUntil || now < pendingUntil)) {
         await stripe.refunds.create({
           payment_intent: session.payment_intent as string,
           reason: 'requested_by_customer'
         });
-        await createFailedBooking(session, lessonData, 'Lesson is pending for another customer');
+        await createFailedBooking(session, lessonData, 'Lesson is pending for another player');
         return NextResponse.json(
           {
-            error: 'Lesson is pending for another customer, payment refunded',
+            error: 'Lesson is pending for another player, payment refunded',
             debug: {
               now,
               pendingUntil,
@@ -147,22 +123,6 @@ export async function POST(req: NextRequest) {
         );
       }
     }
-
-    const bookingsCollection = collection(db, 'bookings');
-    const newBooking = {
-      startDateTime: lessonData.startDateTime,
-      endDateTime: lessonData.endDateTime,
-      location: lessonData.location,
-      type: lessonData.type,
-      price: lessonData.price,
-      status: 'confirmed',
-      stripeId: session.id,
-      createdAt: Timestamp.now(),
-      userId: session.metadata?.user_id || null,
-      userEmail: session.metadata?.user_email || null
-    };
-
-    const bookingDoc = await addDoc(bookingsCollection, newBooking);
 
     await updateDoc(lessonRef, {
       status: 'booked',
