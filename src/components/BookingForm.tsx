@@ -24,7 +24,7 @@ const BookingFormSchema = z.object({
     .optional()
 });
 
-const BookingForm: React.FC = () => {
+const BookingForm: React.FC = React.memo(() => {
   const { bookingFormRef, availableLessonsRef, scrollToAvailableLessons } = useSectionRef();
   const [nextAvailableSlot, setNextAvailableSlot] = React.useState<Date | null>(null);
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -50,6 +50,7 @@ const BookingForm: React.FC = () => {
   const selectedDate = form.watch('date');
   const selectedLocation = 'sundridge';
 
+  // Memoize expensive date calculations
   const datesByLocation = React.useMemo(() => {
     if (!availabilities || !selectedLocation) return [];
 
@@ -76,7 +77,7 @@ const BookingForm: React.FC = () => {
     const now = new Date();
     const today = startOfDay(now);
 
-    datesByLocation.forEach(availability => {
+    datesByLocation.forEach((availability) => {
       const date = startOfDay(availability.startDateTime.toDate());
       const dateString = format(date, DATE_FORMAT);
       const isToday = isEqual(date, today);
@@ -91,74 +92,82 @@ const BookingForm: React.FC = () => {
     return Array.from(uniqueDates).map((dateString) => parseISO(dateString));
   }, [datesByLocation]);
 
-
   const nextAvailableDate = React.useMemo(() => {
     if (!availableUniqueDates.length) return null;
     if (!selectedDate) return availableUniqueDates[0];
 
     const selectedDateStart = startOfDay(selectedDate);
-    const nextDate = availableUniqueDates.find(date => 
+    const nextDate = availableUniqueDates.find((date) =>
       isAfter(startOfDay(date), selectedDateStart)
     );
-    
+
     if (nextDate) return nextDate;
 
     return null;
   }, [availableUniqueDates, selectedDate]);
 
-  const handleNextAvailableSlot = (date: Date) => {
-    form.setValue('date', format(date, DATE_FORMAT));
-  };
+  // Memoize callback to prevent unnecessary re-renders
+  const handleNextAvailableSlot = React.useCallback(
+    (date: Date) => {
+      form.setValue('date', format(date, DATE_FORMAT));
+    },
+    [form]
+  );
+
+  const scrollToAvailableLessonsCallback = React.useCallback(() => {
+    scrollToAvailableLessons(-100);
+  }, [scrollToAvailableLessons]);
 
   React.useEffect(() => {
     if (!availableUniqueDates || availableUniqueDates.length === 0) {
       setNextAvailableSlot(null);
       return;
     }
-    
+
     const today = startOfDay(new Date());
-    const nextAvailable = availableUniqueDates
-      .filter(date => {
-        const dateToCheck = startOfDay(date);
-        return isAfter(dateToCheck, today) || isEqual(dateToCheck, today);
-      })
-      .sort((a, b) => a.getTime() - b.getTime())[0] || null;
+    const nextAvailable =
+      availableUniqueDates
+        .filter((date) => {
+          const dateToCheck = startOfDay(date);
+          return isAfter(dateToCheck, today) || isEqual(dateToCheck, today);
+        })
+        .sort((a, b) => a.getTime() - b.getTime())[0] || null;
 
     setNextAvailableSlot(nextAvailable);
   }, [availableUniqueDates]);
 
   React.useEffect(() => {
     if (selectedDate && isMobile) {
-      scrollToAvailableLessons(-100);
+      scrollToAvailableLessonsCallback();
     }
-  }, [selectedDate, isMobile, scrollToAvailableLessons]);
+  }, [selectedDate, isMobile, scrollToAvailableLessonsCallback]);
 
   return (
     <section
       ref={bookingFormRef}
-      className="p-8 md:p-16 lg:p-24 dark:bg-background min-h-[calc(100vh-72px)] w-full relative overflow-hidden flex flex-col gap-8"
+      className="dark:bg-background relative flex min-h-[calc(100vh-72px)] w-full flex-col gap-8 overflow-hidden p-8 md:p-16 lg:p-24"
     >
       <div className="hidden lg:block">
         <TennisBall left="-100px" />
       </div>
 
       <div>
-        <div className="flex flex-col xl:flex-row w-full relative z-1 gap-4">
+        <div className="relative z-1 flex w-full flex-col gap-4 xl:flex-row">
           <div className="flex-1 p-2">
-            <Typography.H2 className="mb-5 text-2xl lg:text-4xl text-tennis-green lg:px-3">
+            <Typography.H2 className="text-tennis-green mb-5 text-2xl lg:px-3 lg:text-4xl">
               Improve your game
             </Typography.H2>
 
             <div className="flex flex-col gap-5 md:gap-8 lg:gap-10">
-              <Typography.H1 className="text-2xl lg:text-4xl text-foreground lg:backdrop-blur-md rounded-lg lg:p-3">
+              <Typography.H1 className="text-foreground rounded-lg text-2xl lg:p-3 lg:text-4xl lg:backdrop-blur-md">
                 Book a session today and take the next step in your tennis journey.
               </Typography.H1>
             </div>
           </div>
 
-          <div className="p-2 flex-2 flex flex-col md:flex-row flex-wrap gap-5 lg:gap-20">
-            <Form {...form} >
-              <div className="flex flex-col gap-2 backdrop-blur-md rounded-lg">
+          <div className="flex flex-2 flex-col flex-wrap gap-5 p-2 md:flex-row lg:gap-20">
+            <Form {...form}>
+              <div className="flex flex-col gap-2 rounded-lg backdrop-blur-md">
                 <FormField
                   control={form.control}
                   name="date"
@@ -177,16 +186,16 @@ const BookingForm: React.FC = () => {
               </div>
             </Form>
             {error && (
-              <Typography.P className="text-red-500 relative z-10 px-4">
+              <Typography.P className="relative z-10 px-4 text-red-500">
                 Error loading lessons. Please try again later.
               </Typography.P>
             )}
 
             {selectedDate && (
               <div className="relative z-10 flex-1" ref={availableLessonsRef}>
-                <AvailableLessons 
-                  availableLessons={availableLessons} 
-                  date={selectedDate} 
+                <AvailableLessons
+                  availableLessons={availableLessons}
+                  date={selectedDate}
                   nextAvailableSlot={nextAvailableSlot}
                 />
               </div>
@@ -200,6 +209,7 @@ const BookingForm: React.FC = () => {
       </div>
     </section>
   );
-};
+});
 
+BookingForm.displayName = 'BookingForm';
 export default BookingForm;

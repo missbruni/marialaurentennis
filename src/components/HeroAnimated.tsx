@@ -4,11 +4,15 @@ import { useSectionRef } from '@/hooks/useSectionRef';
 import { Button } from './ui/button';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
-const HeroAnimated: React.FC = () => {
+const HeroAnimated: React.FC = React.memo(() => {
   const { scrollToBookingForm } = useSectionRef();
 
   const isMobile = useMediaQuery('(max-width: 768px)');
   const logoWidth = isMobile ? 280 : 400;
+
+  const handleBookLessonClick = React.useCallback(() => {
+    scrollToBookingForm();
+  }, [scrollToBookingForm]);
 
   return (
     <>
@@ -24,7 +28,7 @@ const HeroAnimated: React.FC = () => {
 
         <Button
           className="no-border text-md cursor-pointer px-8 py-6 font-semibold"
-          onClick={scrollToBookingForm}
+          onClick={handleBookLessonClick}
           aria-label="Book Lesson"
         >
           Book a Lesson
@@ -32,5 +36,7 @@ const HeroAnimated: React.FC = () => {
       </div>
     </>
   );
-};
+});
+
+HeroAnimated.displayName = 'HeroAnimated';
 export default HeroAnimated;

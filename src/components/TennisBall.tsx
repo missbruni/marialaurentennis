@@ -8,41 +8,40 @@ type TennisBallProps = {
   bottomPercent?: number;
 };
 
-const TennisBall: React.FC<TennisBallProps> = ({
-  left,
-  right,
-  width = '18rem',
-  topPercent = 80,
-  bottomPercent = 20
-}) => {
-  const [scrollY, setScrollY] = React.useState(0);
+const TennisBall: React.FC<TennisBallProps> = React.memo(
+  ({ left, right, width = '18rem', topPercent = 80, bottomPercent = 20 }) => {
+    const [scrollY, setScrollY] = React.useState(0);
 
-  React.useEffect(() => {
-    const handleScroll = () => {
+    // Memoize the scroll handler to prevent unnecessary re-renders
+    const handleScroll = React.useCallback(() => {
       setScrollY(window.scrollY);
-    };
+    }, []);
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    React.useEffect(() => {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      return () => window.removeEventListener('scroll', handleScroll);
+    }, [handleScroll]);
 
-  return (
-    <div
-      className="absolute z-0 opacity-80"
-      style={{
-        width,
-        height: width,
-        bottom: `calc(${bottomPercent}% - ${scrollY * 0.3}px)`,
-        top: `calc(${topPercent}% + ${scrollY * -0.5}px)`,
-        ...(left && { left }),
-        ...(right && { right }),
-        backgroundImage: "url('/tennis-ball.webp')",
-        backgroundSize: 'contain',
-        backgroundRepeat: 'no-repeat',
-        transform: `rotate(${scrollY * 0.3}deg)`,
-        transition: 'transform 0.1s ease-out'
-      }}
-    />
-  );
-};
+    return (
+      <div
+        className="absolute z-0 opacity-80"
+        style={{
+          width,
+          height: width,
+          bottom: `calc(${bottomPercent}% - ${scrollY * 0.3}px)`,
+          top: `calc(${topPercent}% + ${scrollY * -0.5}px)`,
+          ...(left && { left }),
+          ...(right && { right }),
+          backgroundImage: "url('/tennis-ball.webp')",
+          backgroundSize: 'contain',
+          backgroundRepeat: 'no-repeat',
+          transform: `rotate(${scrollY * 0.3}deg)`,
+          transition: 'transform 0.1s ease-out'
+        }}
+      />
+    );
+  }
+);
+
+TennisBall.displayName = 'TennisBall';
 export default TennisBall;

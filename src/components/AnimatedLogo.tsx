@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 
 const paths = [
@@ -40,9 +41,9 @@ interface AnimatedLogoProps {
   width?: string | number;
 }
 
-const AnimatedLogo: FC<AnimatedLogoProps> = ({ width = '100%' }) => {
+const AnimatedLogo: FC<AnimatedLogoProps> = React.memo(({ width = '100%' }) => {
   return (
-    <div className="flex justify-center items-center w-full h-full">
+    <div className="flex h-full w-full items-center justify-center">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 582.36 423.69"
@@ -134,6 +135,7 @@ const AnimatedLogo: FC<AnimatedLogoProps> = ({ width = '100%' }) => {
       </svg>
     </div>
   );
-};
+});
 
+AnimatedLogo.displayName = 'AnimatedLogo';
 export default AnimatedLogo;

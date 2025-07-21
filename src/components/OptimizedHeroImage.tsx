@@ -6,7 +6,7 @@ interface OptimizedHeroImageProps {
   style?: React.CSSProperties;
 }
 
-export default function OptimizedHeroImage({ className, style }: OptimizedHeroImageProps) {
+const OptimizedHeroImage: React.FC<OptimizedHeroImageProps> = React.memo(({ className, style }) => {
   return (
     <picture className={className} style={style}>
       {/* WebP format for modern browsers - 85% smaller than original */}
@@ -27,4 +27,7 @@ export default function OptimizedHeroImage({ className, style }: OptimizedHeroIm
       />
     </picture>
   );
-}
+});
+
+OptimizedHeroImage.displayName = 'OptimizedHeroImage';
+export default OptimizedHeroImage;
