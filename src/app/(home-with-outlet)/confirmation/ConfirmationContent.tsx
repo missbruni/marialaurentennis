@@ -25,6 +25,8 @@ export default function ConfirmationContent({ onClose }: ConfirmationContentProp
   const lessonParam = searchParams.get('lesson');
   const sessionId = searchParams.get('sessionId');
 
+  const POLLING_TIMEOUT_MS = 30000; // 30 seconds
+
   let lesson: Availability | null = null;
   if (lessonParam) {
     try {
@@ -35,12 +37,15 @@ export default function ConfirmationContent({ onClose }: ConfirmationContentProp
     }
   }
 
-  // Query for the user's bookings to find the newly created one
-  const { data: bookings, isLoading, error: queryError } = useQuery({
+  const {
+    data: bookings,
+    isLoading,
+    error: queryError
+  } = useQuery({
     queryKey: ['userBookings', user?.uid],
     queryFn: () => getUserBookings(user?.uid),
     enabled: !!user?.uid && !!sessionId,
-    refetchInterval: 2000, // Poll every 2 seconds until we find the booking
+    refetchInterval: 2000,
     refetchIntervalInBackground: true,
     staleTime: 0,
     retry: false // Don't retry on error to avoid infinite polling
@@ -48,7 +53,7 @@ export default function ConfirmationContent({ onClose }: ConfirmationContentProp
 
   const newBooking = React.useMemo(() => {
     if (!bookings || !sessionId) return null;
-    return bookings.find(booking => booking.stripeId === sessionId);
+    return bookings.find((booking) => booking.stripeId === sessionId);
   }, [bookings, sessionId]);
 
   const getBookingStatusMessage = () => {
@@ -59,10 +64,11 @@ export default function ConfirmationContent({ onClose }: ConfirmationContentProp
         <div className="text-red-500">
           <p>Your booking could not be completed:</p>
           <p className="mt-2">{newBooking.failureReason}</p>
-          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 text-yellow-800 text-sm mt-2">
-            <p className="font-medium mb-1">Important:</p>
+          <div className="mt-2 rounded-md border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+            <p className="mb-1 font-medium">Important:</p>
             <p>
-              Your payment has been automatically refunded. Please try booking a different lesson time.
+              Your payment has been automatically refunded. Please try booking a different lesson
+              time.
             </p>
           </div>
         </div>
@@ -82,7 +88,7 @@ export default function ConfirmationContent({ onClose }: ConfirmationContentProp
     if (isLoading && !newBooking && sessionId) {
       const timeout = setTimeout(() => {
         setShowTimeoutError(true);
-      }, 30000); // Show error after 30 seconds of polling
+      }, POLLING_TIMEOUT_MS); // 30 seconds
       return () => clearTimeout(timeout);
     }
   }, [isLoading, newBooking, sessionId]);
@@ -129,26 +135,29 @@ export default function ConfirmationContent({ onClose }: ConfirmationContentProp
     );
   };
 
-  const errorMessage = queryError || showTimeoutError ? (
-    <div className="text-red-500">
-      <p>There was an issue confirming your booking:</p>
-      {queryError ? (
-        <p>{queryError instanceof Error ? queryError.message : 'Failed to load booking details'}</p>
-      ) : (
-        <p>Your booking is taking longer than expected to confirm.</p>
-      )}
-      <p className="mt-2">
-        Your payment ID: <span className="break-all text-red-400">{sessionId}</span>
-      </p>
-      <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 text-yellow-800 text-sm mt-2">
-        <p className="font-medium mb-1">Important:</p>
-        <p>
-          Your payment was processed successfully, but there was an issue confirming your booking
-          record. Please contact us with your payment ID for assistance.
+  const errorMessage =
+    queryError || showTimeoutError ? (
+      <div className="text-red-500">
+        <p>There was an issue confirming your booking:</p>
+        {queryError ? (
+          <p>
+            {queryError instanceof Error ? queryError.message : 'Failed to load booking details'}
+          </p>
+        ) : (
+          <p>Your booking is taking longer than expected to confirm.</p>
+        )}
+        <p className="mt-2">
+          Your payment ID: <span className="break-all text-red-400">{sessionId}</span>
         </p>
+        <div className="mt-2 rounded-md border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+          <p className="mb-1 font-medium">Important:</p>
+          <p>
+            Your payment was processed successfully, but there was an issue confirming your booking
+            record. Please contact us with your payment ID for assistance.
+          </p>
+        </div>
       </div>
-    </div>
-  ) : null;
+    ) : null;
 
   const isLoadingOrConfirming = isLoading || (!newBooking && !!sessionId);
 
@@ -156,7 +165,7 @@ export default function ConfirmationContent({ onClose }: ConfirmationContentProp
     <>
       <DialogHeader>
         {newBooking?.status === 'failed' ? (
-          <span className="flex items-center gap-2 text-destructive">
+          <span className="text-destructive flex items-center gap-2">
             <XCircle className="h-6 w-6" />
             <DialogTitle className="text-destructive">Booking Not Completed</DialogTitle>
           </span>
@@ -168,8 +177,8 @@ export default function ConfirmationContent({ onClose }: ConfirmationContentProp
         )}
       </DialogHeader>
       <DialogDescription>
-        {errorMessage || (
-          isLoading ? (
+        {errorMessage ||
+          (isLoading ? (
             <div className="flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
               <span>Confirming your booking...</span>
@@ -179,26 +188,26 @@ export default function ConfirmationContent({ onClose }: ConfirmationContentProp
           ) : (
             <div className="text-yellow-600">
               <p>Your payment was successful, but we are still confirming your booking.</p>
-              <p className="text-sm mt-2">
-                Please keep this window open while we process your booking. This may take a few moments.
+              <p className="mt-2 text-sm">
+                Please keep this window open while we process your booking. This may take a few
+                moments.
               </p>
             </div>
-          )
-        )}
+          ))}
       </DialogDescription>
 
       {lesson && getBookingDetails()}
 
       <DialogFooter className="mt-4">
-        <Button 
-          onClick={onClose} 
-          className="w-full" 
+        <Button
+          onClick={onClose}
+          className="w-full"
           disabled={isLoadingOrConfirming}
           variant={newBooking?.status === 'failed' ? 'destructive' : 'default'}
         >
           {isLoadingOrConfirming ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Confirming...
             </>
           ) : (

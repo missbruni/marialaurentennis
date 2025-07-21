@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { format } from 'date-fns';
 import { formatTime } from '@/lib/date';
 import { Availability } from '../../../services/availabilities';
-import { doc, getDoc, Timestamp, updateDoc, deleteField } from 'firebase/firestore';
+import { doc, getDoc, Timestamp, updateDoc } from 'firebase/firestore';
 import { capitalizeWords } from '../../../lib/string';
 import { db } from '../../../lib/firebase';
 
@@ -16,11 +16,15 @@ const THIRTY_MINUTES_IN_SECONDS = 30 * 60;
 
 export async function POST(req: NextRequest) {
   try {
-    const { lesson, userId, userEmail } = (await req.json()) as { lesson: Availability, userId: string, userEmail: string };
+    const { lesson, userId, userEmail } = (await req.json()) as {
+      lesson: Availability;
+      userId: string;
+      userEmail: string;
+    };
 
     const lessonRef = doc(db, 'availabilities', lesson.id);
     const lessonDoc = await getDoc(lessonRef);
-  
+
     if (!lessonDoc.exists() || lessonDoc.data()?.status !== 'available') {
       return NextResponse.json({ error: 'Lesson is no longer available' }, { status: 400 });
     }
@@ -54,7 +58,7 @@ export async function POST(req: NextRequest) {
 
     const expiresAt = Math.floor(Date.now() / 1000) + THIRTY_MINUTES_IN_SECONDS;
     const currentTimestamp = Math.floor(Date.now() / 1000);
-    
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       expires_at: expiresAt,
@@ -65,7 +69,7 @@ export async function POST(req: NextRequest) {
             currency: 'gbp',
             product_data: {
               name: capitalizeWords(`${lesson.type} Tennis Lesson - ${lesson.location}`),
-              description,
+              description
             },
             unit_amount: lesson.price * 100 // Stripe expects amount in pence
           },
@@ -92,9 +96,12 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    return NextResponse.json({ 
-      error: 'Failed to create checkout session',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to create checkout session',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
   }
 }

@@ -1,7 +1,16 @@
 import Stripe from 'stripe';
 import { NextRequest, NextResponse } from 'next/server';
-import { doc, getDoc, updateDoc, deleteField, collection, addDoc, Timestamp } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  deleteField,
+  collection,
+  addDoc,
+  Timestamp
+} from 'firebase/firestore';
 import { db } from '../../../../lib/firebase';
+import type { Availability } from '../../../../services/availabilities';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2025-03-31.basil'
@@ -9,7 +18,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 
 async function createFailedBooking(
   session: Stripe.Checkout.Session,
-  lessonData: any,
+  lessonData: Partial<Availability>,
   errorReason: string
 ) {
   const bookingsCollection = collection(db, 'bookings');
@@ -38,7 +47,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.text();
-  
+
   let event;
   try {
     event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
@@ -50,7 +59,7 @@ export async function POST(req: NextRequest) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
     const lessonId = session.metadata?.lesson_id;
-    
+
     if (!lessonId) {
       console.log('Webhook debug - No lesson ID found in metadata:', session.metadata);
       return NextResponse.json({ error: 'No lesson ID in session metadata' }, { status: 400 });
@@ -59,7 +68,7 @@ export async function POST(req: NextRequest) {
     // Get the lesson
     const lessonRef = doc(db, 'availabilities', lessonId);
     const lessonDoc = await getDoc(lessonRef);
-    
+
     if (!lessonDoc.exists()) {
       // Lesson doesn't exist anymore
       await stripe.refunds.create({
@@ -67,13 +76,16 @@ export async function POST(req: NextRequest) {
         reason: 'requested_by_customer'
       });
       await createFailedBooking(session, {}, 'Lesson no longer exists');
-      return NextResponse.json({ 
-        error: 'Lesson no longer exists, payment refunded' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Lesson no longer exists, payment refunded'
+        },
+        { status: 400 }
+      );
     }
 
     const lessonData = lessonDoc.data();
-    
+
     if (lessonData.status === 'booked') {
       // Lesson was booked by someone else
       await stripe.refunds.create({
@@ -81,16 +93,19 @@ export async function POST(req: NextRequest) {
         reason: 'requested_by_customer'
       });
       await createFailedBooking(session, lessonData, 'Lesson was booked by someone else');
-      return NextResponse.json({ 
-        error: 'Lesson was booked by someone else, payment refunded' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Lesson was booked by someone else, payment refunded'
+        },
+        { status: 400 }
+      );
     }
 
     if (lessonData.status === 'pending') {
       const pendingUntil = lessonData.pendingUntil?.toDate().getTime();
       const now = Date.now();
       const isSameSession = lessonData.pendingSessionId === session.id;
-      
+
       console.log('Webhook debug - Pending check:', {
         now,
         pendingUntil,
@@ -105,7 +120,7 @@ export async function POST(req: NextRequest) {
           pendingSessionId: lessonData.pendingSessionId
         }
       });
-      
+
       if (isSameSession) {
         console.log('Webhook debug - This is the same session that created the pending status');
         // This is the same session, proceed with booking
@@ -120,16 +135,19 @@ export async function POST(req: NextRequest) {
           reason: 'requested_by_customer'
         });
         await createFailedBooking(session, lessonData, 'Lesson is pending for another customer');
-        return NextResponse.json({ 
-          error: 'Lesson is pending for another customer, payment refunded',
-          debug: {
-            now,
-            pendingUntil,
-            isSameSession,
-            sessionId: session.id,
-            pendingSessionId: lessonData.pendingSessionId
-          }
-        }, { status: 400 });
+        return NextResponse.json(
+          {
+            error: 'Lesson is pending for another customer, payment refunded',
+            debug: {
+              now,
+              pendingUntil,
+              isSameSession,
+              sessionId: session.id,
+              pendingSessionId: lessonData.pendingSessionId
+            }
+          },
+          { status: 400 }
+        );
       }
     }
 
@@ -143,7 +161,7 @@ export async function POST(req: NextRequest) {
       status: lessonData.status,
       pendingSessionId: lessonData.pendingSessionId
     });
-    
+
     // Create a booking document
     const bookingsCollection = collection(db, 'bookings');
     const newBooking = {
@@ -160,7 +178,7 @@ export async function POST(req: NextRequest) {
     };
 
     await addDoc(bookingsCollection, newBooking);
-    
+
     // Update the availability document
     await updateDoc(lessonRef, {
       status: 'booked',
@@ -172,4 +190,4 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ received: true });
-} 
+}

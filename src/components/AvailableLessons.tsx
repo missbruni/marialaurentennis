@@ -70,7 +70,7 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = ({
       } else {
         setErrorMessage(data.error);
       }
-    } catch (error) {
+    } catch {
       setErrorMessage('Sorry, there was a problem starting your checkout. Please try again.');
     } finally {
       queryClient.invalidateQueries({ queryKey: ['availabilities'] });
