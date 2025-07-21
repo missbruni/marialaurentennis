@@ -65,12 +65,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No lesson ID in session metadata' }, { status: 400 });
     }
 
-    // Get the lesson
     const lessonRef = doc(db, 'availabilities', lessonId);
     const lessonDoc = await getDoc(lessonRef);
 
     if (!lessonDoc.exists()) {
-      // Lesson doesn't exist anymore
       await stripe.refunds.create({
         payment_intent: session.payment_intent as string,
         reason: 'requested_by_customer'
@@ -87,7 +85,6 @@ export async function POST(req: NextRequest) {
     const lessonData = lessonDoc.data();
 
     if (lessonData.status === 'booked') {
-      // Lesson was booked by someone else
       await stripe.refunds.create({
         payment_intent: session.payment_intent as string,
         reason: 'requested_by_customer'
@@ -151,18 +148,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // If we get here, either:
-    // 1. The lesson was available (not pending)
-    // 2. The lesson was pending but this is the same session that created it
-    // 3. The lesson was pending but the pending status has expired
-    console.log('Webhook debug - Proceeding with booking:', {
-      lessonId,
-      sessionId: session.id,
-      status: lessonData.status,
-      pendingSessionId: lessonData.pendingSessionId
-    });
-
-    // Create a booking document
     const bookingsCollection = collection(db, 'bookings');
     const newBooking = {
       startDateTime: lessonData.startDateTime,
@@ -177,9 +162,8 @@ export async function POST(req: NextRequest) {
       userEmail: session.metadata?.user_email || null
     };
 
-    await addDoc(bookingsCollection, newBooking);
+    const bookingDoc = await addDoc(bookingsCollection, newBooking);
 
-    // Update the availability document
     await updateDoc(lessonRef, {
       status: 'booked',
       pendingUntil: deleteField(),
