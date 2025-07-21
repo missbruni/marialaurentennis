@@ -4,7 +4,9 @@
   "private": true,
   "author": "Bruna Lima",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "./start-dev.sh",
+    "dev:app": "next dev --turbopack",
+    "dev:stripe": "stripe listen --forward-to localhost:3001/api/webhooks/stripe",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -59,6 +61,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^4.4.1",
+    "concurrently": "^9.2.0",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
     "framer-motion": "^12.6.3",
