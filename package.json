@@ -15,7 +15,9 @@
     "test": "vitest",
     "test:watch": "vitest watch",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "optimize:images": "node scripts/optimize-images.js",
+    "convert:webp": "node scripts/convert-to-webp.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",

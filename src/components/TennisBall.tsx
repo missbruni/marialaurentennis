@@ -36,7 +36,7 @@ const TennisBall: React.FC<TennisBallProps> = ({
         top: `calc(${topPercent}% + ${scrollY * -0.5}px)`,
         ...(left && { left }),
         ...(right && { right }),
-        backgroundImage: "url('/tennis-ball.png')",
+        backgroundImage: "url('/tennis-ball.webp')",
         backgroundSize: 'contain',
         backgroundRepeat: 'no-repeat',
         transform: `rotate(${scrollY * 0.3}deg)`,

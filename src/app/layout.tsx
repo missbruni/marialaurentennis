@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="preload" href="/tennis-hero-3.jpeg" as="image" type="image/jpeg" />
+        <link rel="preload" href="/tennis-hero-3.webp" as="image" type="image/webp" />
       </head>
       <body className="relative min-h-screen overflow-x-hidden" suppressHydrationWarning>
         <ReactQueryProvider>
