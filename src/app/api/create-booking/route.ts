@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { collection, addDoc, Timestamp, doc, updateDoc, deleteField } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getFirestore } from '@/lib/firebase';
 
 type Booking = {
   startDateTime: Timestamp;
@@ -17,6 +17,8 @@ export async function POST(request: NextRequest) {
   const { booking, userEmail, sessionId, userId } = await request.json();
 
   try {
+    const db = await getFirestore();
+
     const newBooking: Booking = {
       startDateTime: new Timestamp(
         booking.startDateTime.seconds,

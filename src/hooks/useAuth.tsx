@@ -1,4 +1,4 @@
-import type { User } from 'firebase/auth';
+import type { User, Auth } from 'firebase/auth';
 import {
   GoogleAuthProvider,
   FacebookAuthProvider,
@@ -9,7 +9,7 @@ import {
   signInWithEmailAndPassword
 } from 'firebase/auth';
 import React from 'react';
-import { auth } from '@/lib/firebase';
+import { getAuth } from '@/lib/firebase';
 
 type AuthEmailPassword = (email: string, password: string) => Promise<void>;
 export type AuthContextType = {
@@ -50,6 +50,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [isAdmin, setIsAdmin] = React.useState(false);
+  const [auth, setAuth] = React.useState<Auth | null>(null);
+
+  React.useEffect(() => {
+    getAuth().then(setAuth);
+  }, []);
 
   const handleUserAuthentication = async (user: User | null) => {
     if (user) {
@@ -71,6 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithGoogle = React.useCallback(async () => {
+    if (!auth) return;
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
@@ -79,9 +85,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Error signing in with Google:', error);
       setLoading(false);
     }
-  }, []);
+  }, [auth]);
 
   const signInWithFacebook = React.useCallback(async () => {
+    if (!auth) return;
     const provider = new FacebookAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
@@ -90,29 +97,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Error signing in with Facebook:', error);
       setLoading(false);
     }
-  }, []);
+  }, [auth]);
 
-  const signInWithEmail = React.useCallback(async (email: string, password: string) => {
-    try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      await handleUserAuthentication(result.user);
-    } catch (error) {
-      console.error('Error signing in with email/password:', error);
-      throw error;
-    }
-  }, []);
+  const signInWithEmail = React.useCallback(
+    async (email: string, password: string) => {
+      if (!auth) return;
+      try {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        await handleUserAuthentication(result.user);
+      } catch (error) {
+        console.error('Error signing in with email/password:', error);
+        throw error;
+      }
+    },
+    [auth]
+  );
 
-  const signUpWithEmail = React.useCallback(async (email: string, password: string) => {
-    try {
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-      await handleUserAuthentication(result.user);
-    } catch (error) {
-      console.error('Error signing up with email/password:', error);
-      throw error;
-    }
-  }, []);
+  const signUpWithEmail = React.useCallback(
+    async (email: string, password: string) => {
+      if (!auth) return;
+      try {
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        await handleUserAuthentication(result.user);
+      } catch (error) {
+        console.error('Error signing up with email/password:', error);
+        throw error;
+      }
+    },
+    [auth]
+  );
 
   const logout = React.useCallback(async () => {
+    if (!auth) return;
     try {
       await signOut(auth);
 
@@ -129,15 +145,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Error signing out:', error);
     }
-  }, []);
+  }, [auth]);
 
   React.useEffect(() => {
+    if (!auth) return;
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       await handleUserAuthentication(user);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [auth]);
 
   const value = {
     user,

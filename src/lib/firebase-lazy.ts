@@ -2,10 +2,12 @@ import type { FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
 
+// Lazy loading promises for Firebase services
 let firebaseAppPromise: Promise<FirebaseApp> | null = null;
 let authPromise: Promise<Auth> | null = null;
 let firestorePromise: Promise<Firestore> | null = null;
 
+// Initialize Firebase app lazily
 async function initializeFirebaseApp(): Promise<FirebaseApp> {
   if (firebaseAppPromise) {
     return firebaseAppPromise;
@@ -32,32 +34,38 @@ async function initializeFirebaseApp(): Promise<FirebaseApp> {
   return firebaseAppPromise;
 }
 
+// Lazy load Firebase Auth
 export async function getAuth(): Promise<Auth> {
   if (authPromise) {
     return authPromise;
   }
 
-  const firebaseAuthPromise = import('firebase/auth');
-  authPromise = Promise.all([firebaseAuthPromise, initializeFirebaseApp()]).then(
+  authPromise = Promise.all([import('firebase/auth'), initializeFirebaseApp()]).then(
     ([{ getAuth }, app]) => getAuth(app)
   );
 
   return authPromise;
 }
 
+// Lazy load Firestore
 export async function getFirestore(): Promise<Firestore> {
   if (firestorePromise) {
     return firestorePromise;
   }
 
-  const firebaseFirestorePromise = import('firebase/firestore');
-  firestorePromise = Promise.all([firebaseFirestorePromise, initializeFirebaseApp()]).then(
+  firestorePromise = Promise.all([import('firebase/firestore'), initializeFirebaseApp()]).then(
     ([{ getFirestore }, app]) => getFirestore(app)
   );
 
   return firestorePromise;
 }
 
+// Lazy load Firebase App
+export async function getFirebaseApp(): Promise<FirebaseApp> {
+  return initializeFirebaseApp();
+}
+
+// Preload functions for performance optimization
 export function preloadAuth(): void {
   if (!authPromise) {
     getAuth();

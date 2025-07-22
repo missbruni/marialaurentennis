@@ -42,10 +42,18 @@ vi.mock('firebase/firestore', () => {
     nanoseconds: (date.getTime() % 1000) * 1000000
   }));
 
+  const mockDoc = vi.fn(() => ({ id: 'mock-doc-id' }));
+  const mockGetDoc = vi.fn().mockResolvedValue({
+    exists: () => true,
+    data: () => ({ status: 'available' })
+  });
+  const mockUpdateDoc = vi.fn().mockResolvedValue(undefined);
+
   return {
     getFirestore: vi.fn(() => ({})),
-    doc: vi.fn(),
-    updateDoc: vi.fn(),
+    doc: mockDoc,
+    getDoc: mockGetDoc,
+    updateDoc: mockUpdateDoc,
     Timestamp: TimestampMock
   };
 });
@@ -101,7 +109,10 @@ describe('POST /api/create-checkout-session', () => {
 
     expect(response).toBeInstanceOf(NextResponse);
     expect(response.status).toBe(500);
-    expect(responseData).toEqual({ error: 'Failed to create checkout session' });
+    expect(responseData).toEqual({
+      error: 'Failed to create checkout session',
+      details: 'Stripe API error'
+    });
   });
 
   test('should encode lesson data correctly in success URL', async () => {
@@ -138,6 +149,8 @@ describe('POST /api/create-checkout-session', () => {
     expect(createSessionMock).toHaveBeenCalled();
     const createSessionArgs = createSessionMock.mock.calls[0][0];
 
-    expect(createSessionArgs.cancel_url).toBe('https://tennis-booking.example.com?releaseLesson=lesson-123');
+    expect(createSessionArgs.cancel_url).toBe(
+      'https://tennis-booking.example.com?releaseLesson=lesson-123'
+    );
   });
 });

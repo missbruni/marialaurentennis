@@ -11,7 +11,7 @@ import {
   deleteField,
   where
 } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { getFirestore } from '../lib/firebase';
 
 export interface Availability {
   id: string;
@@ -27,6 +27,7 @@ export interface Availability {
 
 export const getAvailability = async (): Promise<Availability[]> => {
   try {
+    const db = await getFirestore();
     const availabilitiesRef = collection(db, 'availabilities');
     const q = query(
       availabilitiesRef,
@@ -43,7 +44,7 @@ export const getAvailability = async (): Promise<Availability[]> => {
     await checkPendingAvailabilities(availabilities);
 
     return availabilities.filter((availability) => {
-     if (availability.status === 'pending' && availability.pendingUntil) {
+      if (availability.status === 'pending' && availability.pendingUntil) {
         const now = new Date();
         const pendingUntil = availability.pendingUntil.toDate();
         return now > pendingUntil;
@@ -68,6 +69,8 @@ export const createAvailability = async (
   createHourlySlots: boolean = false
 ) => {
   try {
+    const db = await getFirestore();
+
     // Parse the start time
     const [startHours, startMinutes] = startTime.split(':').map(Number);
     const startDate = new Date(date);
@@ -134,18 +137,20 @@ export const createAvailability = async (
 };
 
 export const releaseAvailability = async (availabilityId: string) => {
+  const db = await getFirestore();
   const availabilityDocRef = doc(collection(db, 'availabilities'), availabilityId);
   await updateDoc(availabilityDocRef, { status: 'available', pendingUntil: deleteField() });
 };
 
 const checkPendingAvailabilities = async (availabilities: Availability[]) => {
   try {
+    const db = await getFirestore();
     for (const availability of availabilities) {
       if (availability.status === 'pending' && availability.pendingUntil) {
         const now = new Date();
         const pendingUntil = availability.pendingUntil.toDate();
         const isExpired = now > pendingUntil;
-        
+
         if (isExpired) {
           try {
             const availabilityRef = doc(db, 'availabilities', availability.id);

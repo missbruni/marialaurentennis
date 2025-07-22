@@ -47,8 +47,6 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = React.memo(
       prevDateRef.current = date;
     }, [date]);
 
-    if (!date) return null;
-
     // Memoize the checkout handler to prevent unnecessary re-renders
     const handleCheckout = React.useCallback(
       async (lesson: Availability) => {
@@ -80,6 +78,8 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = React.memo(
       },
       [user?.uid, user?.email, queryClient]
     );
+
+    if (!date) return null;
 
     return (
       <div className="@container relative">

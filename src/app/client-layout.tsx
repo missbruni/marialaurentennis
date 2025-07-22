@@ -7,6 +7,7 @@ import { AuthProvider } from '@/hooks/useAuth';
 import { LoginDialogProvider } from '@/providers/LoginDialogProvider';
 import { AuthHandler } from '@/components/AuthHandler';
 import SuspenseLoading from '../components/SuspenseLoading';
+import { FirebaseLazyLoader } from '@/components/FirebaseLazyLoader';
 
 type ClientLayoutProps = {
   children: React.ReactNode;
@@ -14,19 +15,21 @@ type ClientLayoutProps = {
 
 const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   return (
-    <AuthProvider>
-      <LoginDialogProvider>
-        <SectionRefProvider>
-          <SuspenseLoading>
-            <AuthHandler />
-          </SuspenseLoading>
-          <div className="flex flex-col">
-            <AppBar />
-            {children}
-          </div>
-        </SectionRefProvider>
-      </LoginDialogProvider>
-    </AuthProvider>
+    <FirebaseLazyLoader preloadStrategy="all">
+      <AuthProvider>
+        <LoginDialogProvider>
+          <SectionRefProvider>
+            <SuspenseLoading>
+              <AuthHandler />
+            </SuspenseLoading>
+            <div className="flex flex-col">
+              <AppBar />
+              {children}
+            </div>
+          </SectionRefProvider>
+        </LoginDialogProvider>
+      </AuthProvider>
+    </FirebaseLazyLoader>
   );
 };
 

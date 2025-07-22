@@ -5,7 +5,7 @@ import { formatTime } from '@/lib/date';
 import { Availability } from '../../../services/availabilities';
 import { doc, getDoc, Timestamp, updateDoc } from 'firebase/firestore';
 import { capitalizeWords } from '../../../lib/string';
-import { db } from '../../../lib/firebase';
+import { getFirestore } from '@/lib/firebase';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2025-03-31.basil'
@@ -21,6 +21,8 @@ export async function POST(req: NextRequest) {
       userId: string;
       userEmail: string;
     };
+
+    const db = await getFirestore();
 
     const lessonRef = doc(db, 'availabilities', lesson.id);
     const lessonDoc = await getDoc(lessonRef);

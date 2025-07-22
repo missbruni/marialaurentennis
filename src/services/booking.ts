@@ -1,7 +1,5 @@
-import { getDocs, Timestamp } from 'firebase/firestore';
-import { orderBy, query, where } from 'firebase/firestore';
-import { collection } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { getDocs, Timestamp, orderBy, query, where, collection } from 'firebase/firestore';
+import { getFirestore } from '../lib/firebase';
 
 export type Booking = {
   id: string;
@@ -22,6 +20,7 @@ export type Booking = {
 export const getUserBookings = async (userId?: string) => {
   if (!userId) throw new Error('User not authenticated');
 
+  const db = await getFirestore();
   const bookingsCollection = collection(db, 'bookings');
   const bookingsQuery = query(
     bookingsCollection,
