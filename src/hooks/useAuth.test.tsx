@@ -4,7 +4,11 @@ import { render, screen, waitFor } from '@/lib/test-utils';
 import { render as originalRender } from '@testing-library/react';
 import { useAuth } from './useAuth';
 import * as firebaseAuth from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { getAuth } from '@/lib/firebase';
+
+vi.mock('@/lib/firebase', () => ({
+  getAuth: vi.fn()
+}));
 
 function TestComponent() {
   const { user, loading, signInWithGoogle, logout } = useAuth();
@@ -33,8 +37,22 @@ function OutsideProviderComponent() {
 }
 
 describe('useAuth', () => {
+  const mockAuth = {
+    currentUser: null,
+    onAuthStateChanged: vi.fn(),
+    signInWithPopup: vi.fn(),
+    signOut: vi.fn(),
+    GoogleAuthProvider: vi.fn(),
+    FacebookAuthProvider: vi.fn(),
+    createUserWithEmailAndPassword: vi.fn(),
+    signInWithEmailAndPassword: vi.fn()
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Mock getAuth to return our mock auth instance
+    (getAuth as any).mockResolvedValue(mockAuth);
 
     vi.spyOn(firebaseAuth, 'onAuthStateChanged').mockImplementation((_auth, callback: any) => {
       setTimeout(() => {
@@ -106,7 +124,7 @@ describe('useAuth', () => {
 
     await user.click(screen.getByTestId('login-button'));
 
-    expect(signInWithPopupMock).toHaveBeenCalledWith(auth, googleProviderInstance);
+    expect(signInWithPopupMock).toHaveBeenCalledWith(mockAuth, googleProviderInstance);
   });
 
   test('calls signOut when logout is called', async () => {
@@ -120,7 +138,7 @@ describe('useAuth', () => {
 
     await user.click(screen.getByTestId('logout-button'));
 
-    expect(signOutMock).toHaveBeenCalledWith(auth);
+    expect(signOutMock).toHaveBeenCalledWith(mockAuth);
   });
 
   test('handles signInWithGoogle error gracefully', async () => {
@@ -224,7 +242,7 @@ describe('useAuth', () => {
 
     await user.click(screen.getByTestId('logout-button'));
 
-    expect(signOutMock).toHaveBeenCalledWith(auth);
+    expect(signOutMock).toHaveBeenCalledWith(mockAuth);
     expect(global.fetch).toHaveBeenCalledWith('/api/auth/logout', { method: 'POST' });
   });
 
@@ -322,7 +340,7 @@ describe('useAuth', () => {
 
     await user.click(screen.getByTestId('logout-button'));
 
-    expect(signOutMock).toHaveBeenCalledWith(auth);
+    expect(signOutMock).toHaveBeenCalledWith(mockAuth);
     expect(global.fetch).toHaveBeenCalledWith('/api/auth/logout', { method: 'POST' });
 
     await waitFor(
@@ -351,7 +369,7 @@ describe('useAuth', () => {
 
     await user.click(screen.getByTestId('logout-button'));
 
-    expect(signOutMock).toHaveBeenCalledWith(auth);
+    expect(signOutMock).toHaveBeenCalledWith(mockAuth);
     expect(global.fetch).toHaveBeenCalledWith('/api/auth/logout', { method: 'POST' });
 
     Object.defineProperty(window, 'location', {

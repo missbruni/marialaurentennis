@@ -10,7 +10,7 @@ describe('TennisBall', () => {
     const tennisBallElement = container.querySelector('div');
     expect(tennisBallElement).toBeInTheDocument();
     expect(tennisBallElement).toHaveStyle({
-      backgroundImage: "url('/tennis-ball.png')"
+      backgroundImage: "url('/tennis-ball.webp')"
     });
   });
 

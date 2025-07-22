@@ -31,7 +31,7 @@ vi.mock('firebase/firestore', () => {
 });
 
 vi.mock('@/lib/firebase', () => ({
-  db: {}
+  getFirestore: vi.fn().mockResolvedValue({})
 }));
 
 describe('POST /api/create-booking', () => {
