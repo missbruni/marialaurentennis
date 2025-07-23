@@ -22,7 +22,7 @@ import { z } from 'zod';
 import { clearBookingsCache, clearAvailabilitiesCache } from './data';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2025-03-31.basil'
+  apiVersion: '2025-06-30.basil'
 });
 
 const THIRTY_MINUTES = 30 * 60 * 1000;

@@ -25,15 +25,10 @@ describe('DatePicker', () => {
     value: tomorrow,
     onChange: vi.fn(),
     onBlur: vi.fn(),
-    name: 'testDate',
-    isLoading: false
+    name: 'testDate'
   };
 
-  const mockAvailableDates = [
-    tomorrow,
-    nextWeek,
-    addDays(today, 14)
-  ];
+  const mockAvailableDates = [tomorrow, nextWeek, addDays(today, 14)];
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -43,7 +38,6 @@ describe('DatePicker', () => {
     render(
       <DatePickerWithFormContext
         field={mockField}
-        isLoading={false}
         disabled={false}
         availableDates={mockAvailableDates}
         nextAvailableDate={tomorrow}
@@ -57,7 +51,6 @@ describe('DatePicker', () => {
     render(
       <DatePickerWithFormContext
         field={mockField}
-        isLoading={false}
         disabled={false}
         availableDates={mockAvailableDates}
         nextAvailableDate={tomorrow}
@@ -71,7 +64,6 @@ describe('DatePicker', () => {
     render(
       <DatePickerWithFormContext
         field={mockField}
-        isLoading={false}
         disabled={false}
         availableDates={[]}
         nextAvailableDate={null}
@@ -89,7 +81,6 @@ describe('DatePicker', () => {
     render(
       <DatePickerWithFormContext
         field={mockField}
-        isLoading={false}
         disabled={false}
         availableDates={mockAvailableDates}
         nextAvailableDate={tomorrow}
@@ -108,7 +99,6 @@ describe('DatePicker', () => {
     render(
       <DatePickerWithFormContext
         field={mockField}
-        isLoading={false}
         disabled={false}
         availableDates={mockAvailableDates}
         nextAvailableDate={tomorrow}
@@ -124,7 +114,6 @@ describe('DatePicker', () => {
     render(
       <DatePickerWithFormContext
         field={mockField}
-        isLoading={false}
         disabled={false}
         availableDates={mockAvailableDates}
         nextAvailableDate={tomorrow}
@@ -134,7 +123,7 @@ describe('DatePicker', () => {
     const availableDate = screen.getByText(format(tomorrow, 'd'));
     await user.click(availableDate);
 
-      expect(mockField.onChange).toHaveBeenCalled();
+    expect(mockField.onChange).toHaveBeenCalled();
   });
 
   test('updates current month when navigating', async () => {
@@ -142,7 +131,6 @@ describe('DatePicker', () => {
     render(
       <DatePickerWithFormContext
         field={mockField}
-        isLoading={false}
         disabled={false}
         availableDates={mockAvailableDates}
         nextAvailableDate={tomorrow}

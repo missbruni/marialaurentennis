@@ -1,8 +1,13 @@
 {
   "name": "tennis-booking",
   "version": "0.1.0",
-  "private": true,
   "author": "Bruna Lima",
+  "description": "Tennis booking application for scheduling lessons and managing availability",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "scripts": {
     "dev": "./start-dev.sh",
     "dev:app": "next dev --turbopack",
@@ -20,6 +25,9 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
+    "test:all": "npm run test && npm run test:e2e",
+    "type-check": "tsc --noEmit",
+    "lint:fix": "next lint --fix",
     "optimize:images": "node scripts/optimize-images.js",
     "convert:webp": "node scripts/convert-to-webp.js"
   },
