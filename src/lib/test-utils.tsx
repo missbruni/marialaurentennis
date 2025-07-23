@@ -9,21 +9,24 @@ import { AuthProvider } from '@/hooks/useAuth';
 import { LoginDialogProvider } from '@/providers/LoginDialogProvider';
 
 function customRender(ui: React.ReactElement) {
+  const user = userEvent.setup();
+  const result = render(ui, {
+    wrapper: ({ children }) => (
+      <ReactQueryProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+          <AuthProvider>
+            <LoginDialogProvider>
+              <SectionRefProvider>{children}</SectionRefProvider>
+            </LoginDialogProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </ReactQueryProvider>
+    )
+  });
+
   return {
-    user: userEvent.setup(),
-    ...render(ui, {
-      wrapper: ({ children }) => (
-        <ReactQueryProvider>
-          <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-            <AuthProvider>
-              <LoginDialogProvider>
-                <SectionRefProvider>{children}</SectionRefProvider>
-              </LoginDialogProvider>
-            </AuthProvider>
-          </ThemeProvider>
-        </ReactQueryProvider>
-      )
-    })
+    ...result,
+    user
   };
 }
 
