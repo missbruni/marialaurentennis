@@ -55,4 +55,18 @@ describe('POST /api/auth/logout', () => {
     expect(mockCookies.set).toHaveBeenCalled();
     expect(response).toBe(mockJsonResponse);
   });
+
+  test('should identify bookings route as protected', async () => {
+    mockRequest.headers.get.mockReturnValue('https://example.com/bookings');
+
+    const response = await POST(mockRequest as any);
+
+    expect(NextResponse.json).toHaveBeenCalledWith({
+      success: true,
+      isProtected: true
+    });
+
+    expect(mockCookies.set).toHaveBeenCalled();
+    expect(response).toBe(mockJsonResponse);
+  });
 });
