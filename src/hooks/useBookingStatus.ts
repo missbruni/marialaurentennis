@@ -1,36 +1,65 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import { getUserBookings } from '@/services/booking';
+import { getUserBookings, getBookingBySessionId } from '@/services/booking';
 
 const POLLING_TIMEOUT_MS = 30000;
 const VIEW_DELAY_MS = 1000;
 
 export function useBookingStatus(sessionId: string | null) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [showTimeoutError, setShowTimeoutError] = React.useState(false);
   const [showConfirmedView, setShowConfirmedView] = React.useState(false);
+  const [shouldStopPolling, setShouldStopPolling] = React.useState(false);
 
   const waitForUserSession = !!user?.uid && !!sessionId;
+  const waitForSessionId = !!sessionId && !user?.uid;
 
   const {
-    data: bookings,
-    isLoading,
-    error: queryError
+    data: userBookings,
+    isLoading: isLoadingUserBookings,
+    error: userBookingsError
   } = useQuery({
     queryKey: ['userBookings', user?.uid],
     queryFn: () => getUserBookings(user?.uid),
-    enabled: waitForUserSession,
+    enabled: waitForUserSession && !shouldStopPolling,
     refetchInterval: 2000,
     refetchIntervalInBackground: true,
     staleTime: 0,
     retry: false
   });
 
+  const {
+    data: sessionBooking,
+    isLoading: isLoadingSessionBooking,
+    error: sessionBookingError
+  } = useQuery({
+    queryKey: ['sessionBooking', sessionId],
+    queryFn: () => getBookingBySessionId(sessionId!),
+    enabled: waitForSessionId && !shouldStopPolling,
+    refetchInterval: 2000,
+    refetchIntervalInBackground: true,
+    staleTime: 0,
+    retry: false
+  });
+
+  const bookings = userBookings || (sessionBooking ? [sessionBooking] : undefined);
+  const isLoading = isLoadingUserBookings || isLoadingSessionBooking;
+  const queryError = userBookingsError || sessionBookingError;
+
   const newBooking = React.useMemo(() => {
     if (!bookings || !sessionId) return null;
-    return bookings.find((booking) => booking.stripeId === sessionId);
+    const booking = bookings.find((booking) => booking.stripeId === sessionId);
+    return booking;
   }, [bookings, sessionId]);
+
+  // Stop polling when we have a booking or error
+  React.useEffect(() => {
+    if (newBooking || queryError) {
+      setShouldStopPolling(true);
+    }
+  }, [newBooking, queryError]);
 
   React.useEffect(() => {
     if (newBooking?.status === 'confirmed' && !showConfirmedView) {
@@ -40,11 +69,14 @@ export function useBookingStatus(sessionId: string | null) {
   }, [newBooking?.status, showConfirmedView]);
 
   React.useEffect(() => {
-    if (!newBooking && waitForUserSession) {
-      const timeout = setTimeout(() => setShowTimeoutError(true), POLLING_TIMEOUT_MS);
+    if (!newBooking && (waitForUserSession || waitForSessionId) && !shouldStopPolling) {
+      const timeout = setTimeout(() => {
+        setShowTimeoutError(true);
+        setShouldStopPolling(true);
+      }, POLLING_TIMEOUT_MS);
       return () => clearTimeout(timeout);
     }
-  }, [isLoading, newBooking, sessionId, showTimeoutError, waitForUserSession]);
+  }, [isLoading, newBooking, sessionId, shouldStopPolling, waitForUserSession, waitForSessionId]);
 
   return {
     newBooking,

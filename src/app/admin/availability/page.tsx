@@ -26,8 +26,8 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { createAvailability } from '@/services/availabilities';
 import SelectDatePicker from '../../../components/SelectDatePicker';
+import { createAvailabilityAction } from '@/lib/actions';
 
 const AvailabilityFormSchema = z.object({
   type: z.enum(['private', 'group'], {
@@ -71,25 +71,30 @@ export default function AdminPage() {
     try {
       setIsLoading(true);
 
-      const result = await createAvailability(
-        data.availabilityDate,
-        data.availabilityStartTime,
-        data.availabilityEndTime,
-        Number(data.players),
-        Number(data.price),
-        data.location,
-        data.type,
-        data.createHourlySlots
-      );
+      const formData = new FormData();
+      formData.append('type', data.type);
+      formData.append('availabilityDate', data.availabilityDate.toISOString());
+      formData.append('availabilityStartTime', data.availabilityStartTime);
+      formData.append('availabilityEndTime', data.availabilityEndTime);
+      formData.append('players', data.players.toString());
+      formData.append('location', data.location);
+      formData.append('price', data.price.toString());
+      formData.append('createHourlySlots', data.createHourlySlots ? 'on' : 'off');
 
-      if (data.createHourlySlots) {
-        setMessage(`Successfully added ${result.count} hourly availability slots!`);
+      const result = await createAvailabilityAction(formData);
+
+      if (result.success) {
+        if (data.createHourlySlots && result.count) {
+          setMessage(`Successfully added ${result.count} hourly availability slots!`);
+        } else {
+          setMessage('Availability added successfully!');
+        }
+        setMessageType('success');
+        form.reset(defaultValues);
       } else {
-        setMessage(`Availability added successfully!`);
+        setMessage(`Error adding availability: ${result.error || 'Unknown error'}`);
+        setMessageType('error');
       }
-
-      setMessageType('success');
-      form.reset(defaultValues);
     } catch (error) {
       console.error('Error adding availability:', error);
       setMessage(
@@ -264,10 +269,10 @@ export default function AdminPage() {
               <div className="pt-4">
                 <Button
                   type="submit"
-                  disabled={form.formState.isSubmitting}
+                  disabled={form.formState.isSubmitting || isLoading}
                   className="w-full md:w-auto"
                 >
-                  {form.formState.isSubmitting ? 'Adding...' : 'Add Availability'}
+                  {form.formState.isSubmitting || isLoading ? 'Adding...' : 'Add Availability'}
                 </Button>
               </div>
             </form>

@@ -45,7 +45,6 @@ export function AppSidebar() {
   const { preloadRouteComponents } = useAdminPreloader();
 
   const preloadPage = (url: string) => {
-    console.log('preloading page', url);
     preloadRouteComponents(url);
   };
 

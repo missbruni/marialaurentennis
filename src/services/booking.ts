@@ -34,3 +34,20 @@ export const getUserBookings = async (userId?: string) => {
     ...doc.data()
   })) as Booking[];
 };
+
+export const getBookingBySessionId = async (sessionId: string) => {
+  if (!sessionId) throw new Error('Session ID is required');
+
+  const db = await getFirestore();
+  const bookingsCollection = collection(db, 'bookings');
+  const bookingsQuery = query(bookingsCollection, where('stripeId', '==', sessionId));
+
+  const snapshot = await getDocs(bookingsQuery);
+  const bookings = snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data()
+  })) as Booking[];
+
+  // Return the first (and should be only) booking with this session ID
+  return bookings[0] || null;
+};

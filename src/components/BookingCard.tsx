@@ -1,8 +1,8 @@
-import { formatTime } from "../lib/date";
-import { capitalizeWords } from "../lib/string";
-import { Booking } from "../services/booking";
-import { format } from "date-fns";
-import { StatusCard } from "./StatusCard";
+import { formatTime } from '../lib/date';
+import { capitalizeWords } from '../lib/string';
+import { Booking } from '../services/booking';
+import { format } from 'date-fns';
+import { StatusCard } from './StatusCard';
 
 export const BookingCard = ({ booking }: { booking: Booking }) => {
   const startDate = booking.startDateTime.toDate();
@@ -23,7 +23,7 @@ export const BookingCard = ({ booking }: { booking: Booking }) => {
         statusText: 'Failed',
         statusColor: 'red' as const,
         description: booking.failureReason || 'This booking could not be completed.',
-        actionText: undefined,
+        actionText: undefined
       };
     }
 
@@ -32,16 +32,16 @@ export const BookingCard = ({ booking }: { booking: Booking }) => {
         statusText: 'Cancelled',
         statusColor: 'red' as const,
         description: 'This lesson has been cancelled.',
-        actionText: undefined,
+        actionText: undefined
       };
     }
 
     if (isPast) {
       return {
         statusText: 'Past',
-        statusColor: 'gray' as const, 
+        statusColor: 'gray' as const,
         description: 'This lesson has been completed.',
-        actionText: undefined,
+        actionText: undefined
       };
     }
 
@@ -49,7 +49,7 @@ export const BookingCard = ({ booking }: { booking: Booking }) => {
       statusText: 'Upcoming',
       statusColor: 'green' as const,
       description: 'Your lesson is confirmed.',
-      actionText: undefined,
+      actionText: undefined
     };
   };
 
@@ -108,4 +108,4 @@ export const BookingCard = ({ booking }: { booking: Booking }) => {
       {bookingDetails}
     </StatusCard>
   );
-}
+};

@@ -4,7 +4,6 @@ import React from 'react';
 import { useSearchParams } from 'next/navigation';
 import { DialogDescription, DialogFooter, DialogHeader } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
 import { useLessonFromParams } from '@/hooks/useLessonFromParams';
 import { useBookingStatus } from '@/hooks/useBookingStatus';
 import { BookingDetails } from './components/BookingDetails';
@@ -22,13 +21,10 @@ export default function Confirmation({ onClose, onBookAnother }: ConfirmationPro
   const sessionId = searchParams.get('sessionId');
   const lesson = useLessonFromParams();
 
-  const { newBooking, isLoading, queryError, showTimeoutError, showConfirmedView } =
+  const { newBooking, queryError, showTimeoutError, showConfirmedView } =
     useBookingStatus(sessionId);
 
-  const isBookingConfirmed = newBooking?.status === 'confirmed';
   const isBookingFailed = newBooking?.status === 'failed';
-
-  const isProcessing = isLoading || (!newBooking && !!sessionId);
 
   const renderContent = () => {
     if (queryError || showTimeoutError) {
@@ -49,7 +45,7 @@ export default function Confirmation({ onClose, onBookAnother }: ConfirmationPro
     );
   };
 
-  const isButtonLoading = isProcessing || (isBookingConfirmed && !showConfirmedView);
+  const shouldShowButton = showConfirmedView || showTimeoutError || queryError || isBookingFailed;
 
   return (
     <div className="flex min-h-[350px] flex-col">
@@ -57,6 +53,7 @@ export default function Confirmation({ onClose, onBookAnother }: ConfirmationPro
         <ConfirmationHeader
           isBookingFailed={isBookingFailed}
           showConfirmedView={showConfirmedView}
+          showTimeoutError={showTimeoutError}
         />
       </DialogHeader>
 
@@ -69,30 +66,31 @@ export default function Confirmation({ onClose, onBookAnother }: ConfirmationPro
         {renderContent()}
       </DialogDescription>
 
-      {lesson && <BookingDetails lesson={lesson} />}
+      {lesson && (
+        <>
+          <div className="mt-4 mb-2">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Details</h3>
+          </div>
+          <BookingDetails lesson={lesson} />
+        </>
+      )}
 
-      <DialogFooter className="mt-4 flex flex-col gap-2 sm:flex-row">
-        {showConfirmedView && (
-          <Button onClick={onBookAnother} variant="outline" className="w-full sm:w-auto">
-            Book Another Lesson
-          </Button>
-        )}
-        <Button
-          onClick={onClose}
-          className="w-full sm:w-auto"
-          disabled={isButtonLoading}
-          variant={isBookingFailed ? 'destructive' : 'default'}
-        >
-          {isButtonLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Confirming...
-            </>
-          ) : (
-            'Done'
+      {shouldShowButton && (
+        <DialogFooter className="mt-4 flex flex-col gap-2 sm:flex-row">
+          {showConfirmedView && !queryError && !showTimeoutError && (
+            <Button onClick={onBookAnother} variant="outline" className="w-full sm:w-auto">
+              Book Another Lesson
+            </Button>
           )}
-        </Button>
-      </DialogFooter>
+          <Button
+            onClick={onClose}
+            className="w-full sm:w-auto"
+            variant={isBookingFailed ? 'destructive' : 'default'}
+          >
+            Done
+          </Button>
+        </DialogFooter>
+      )}
     </div>
   );
 }

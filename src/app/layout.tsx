@@ -1,48 +1,44 @@
-import type { Metadata, Viewport } from 'next';
+'use client';
+
+import React from 'react';
+import { ThemeProvider } from 'next-themes';
+import { SectionRefProvider } from '@/hooks/useSectionRef';
+import { AuthProvider } from '@/hooks/useAuth';
+import { LoginDialogProvider } from '@/providers/LoginDialogProvider';
+import { FirebaseLazyLoader } from '@/components/FirebaseLazyLoader';
+import SuspenseLoading from '@/components/SuspenseLoading';
+import { Toaster } from '@/components/ui/sonner';
+import AppBar from '@/components/AppBar';
+import { AuthHandler } from '@/components/AuthHandler';
 import './globals.css';
-import { ReactQueryProvider } from '../lib/react-query';
-import { ThemeProvider } from '../components/ThemeProvider';
-import ClientLayout from './client-layout';
-import { Toaster } from '../components/ui/sonner';
 
-export const metadata: Metadata = {
-  title: 'Maria Lauren Tennis',
-  description: 'Book your tennis lesson with Maria Lauren',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'Maria Lauren Tennis'
-  }
-};
-
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  viewportFit: 'cover'
-};
-
-export default function RootLayout({
-  children
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preload" href="/tennis-hero-3.webp" as="image" type="image/webp" />
-      </head>
-      <body className="relative min-h-screen overflow-x-hidden" suppressHydrationWarning>
-        <ReactQueryProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Toaster position="bottom-right" richColors closeButton expand={true} />
-            <ClientLayout>{children}</ClientLayout>
-          </ThemeProvider>
-        </ReactQueryProvider>
+      <body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SectionRefProvider>
+            <FirebaseLazyLoader>
+              <AuthProvider>
+                <LoginDialogProvider>
+                  <SuspenseLoading>
+                    <AuthHandler />
+                  </SuspenseLoading>
+                  <div className="flex flex-col">
+                    <AppBar />
+                    {children}
+                  </div>
+                  <Toaster />
+                </LoginDialogProvider>
+              </AuthProvider>
+            </FirebaseLazyLoader>
+          </SectionRefProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

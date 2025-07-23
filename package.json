@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "./start-dev.sh",
     "dev:app": "next dev --turbopack",
-    "dev:stripe": "stripe listen --forward-to localhost:3001/api/webhooks/stripe",
+    "dev:stripe": "./scripts/stripe-dev.sh",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

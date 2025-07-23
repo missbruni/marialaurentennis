@@ -6,48 +6,74 @@ import Lesson from './Lesson';
 import { Typography } from './ui/typography';
 import Loader from './Loader';
 import { useAuth } from '../hooks/useAuth';
-import { useQueryClient } from '@tanstack/react-query';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { AlertCircleIcon } from 'lucide-react';
+import { createCheckoutSessionAction } from '@/lib/actions';
+import { use } from 'react';
+import { getAvailabilitiesData } from '@/lib/data';
+import { Skeleton } from './ui/skeleton';
+
+const availabilitiesPromise = getAvailabilitiesData();
 
 type AvailableLessonsProps = {
-  availableLessons: Availability[];
-  date: string;
+  selectedDate: string;
+  selectedLocation: string;
   nextAvailableSlot: Date | null;
 };
 
+export function AvailableLessonsSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-14 w-full rounded-lg" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const AvailableLessons: React.FC<AvailableLessonsProps> = React.memo(
-  ({ date, availableLessons, nextAvailableSlot }) => {
+  ({ selectedDate, selectedLocation, nextAvailableSlot }) => {
     const { user } = useAuth();
-    const queryClient = useQueryClient();
 
     const [isLoading, setIsLoading] = React.useState(false);
     const [selectedLessonId, setSelectedLessonId] = React.useState<string | null>(null);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
-    const prevDateRef = React.useRef(date);
+
+    const prevDateRef = React.useRef(selectedDate);
+    const availabilities = use(availabilitiesPromise);
+
+    const datesByLocation = React.useMemo(() => {
+      if (!availabilities || !selectedLocation) return [];
+
+      return availabilities.filter((availability: Availability) =>
+        availability.location.toLowerCase().includes(selectedLocation)
+      );
+    }, [availabilities, selectedLocation]);
+
+    const availableLessons = React.useMemo(() => {
+      if (!datesByLocation || !selectedDate) return [];
+
+      return datesByLocation.filter((availability: Availability) => {
+        return availability.startDateTime.toDate().toISOString().split('T')[0] === selectedDate;
+      });
+    }, [datesByLocation, selectedDate]);
 
     const filteredLessons = React.useMemo(() => {
       if (!nextAvailableSlot || !isToday(nextAvailableSlot)) return availableLessons;
 
       const now = new Date();
-      return availableLessons.filter((lesson) => {
+      return availableLessons.filter((lesson: Availability) => {
         const lessonStartTime = lesson.startDateTime.toDate();
         return isAfter(lessonStartTime, now) || isEqual(lessonStartTime, now);
       });
     }, [availableLessons, nextAvailableSlot]);
 
-    const trail = useTrail(filteredLessons.length, {
-      from: { opacity: 0, transform: 'translateY(-24px) scale(0.96)' },
-      to: { opacity: 1, transform: 'translateY(0px) scale(1)' },
-      config: { mass: 1, tension: 220, friction: 24 },
-      reset: prevDateRef.current !== date
-    });
-
     React.useEffect(() => {
-      prevDateRef.current = date;
-    }, [date]);
+      prevDateRef.current = selectedDate;
+    }, [selectedDate]);
 
-    // Memoize the checkout handler to prevent unnecessary re-renders
     const handleCheckout = React.useCallback(
       async (lesson: Availability) => {
         setIsLoading(true);
@@ -55,37 +81,45 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = React.memo(
         setSelectedLessonId(lesson.id);
 
         try {
-          const res = await fetch('/api/create-checkout-session', {
-            method: 'POST',
-            body: JSON.stringify({ lesson, userId: user?.uid, userEmail: user?.email })
-          });
+          const formData = new FormData();
+          formData.append('lesson', JSON.stringify(lesson));
 
-          const data = await res.json();
-          if (data.url) {
+          if (user?.uid) formData.append('userId', user.uid);
+          if (user?.email) formData.append('userEmail', user.email);
+
+          const result = await createCheckoutSessionAction(formData);
+
+          if (result.success && result.url) {
             setTimeout(() => {
-              window.location.href = data.url;
+              window.location.href = result.url || '';
             }, 500);
           } else {
-            setErrorMessage(data.error);
+            setErrorMessage(result.error || 'Failed to create checkout session');
           }
         } catch {
           setErrorMessage('Sorry, there was a problem starting your checkout. Please try again.');
         } finally {
-          queryClient.invalidateQueries({ queryKey: ['availabilities'] });
           setIsLoading(false);
           setSelectedLessonId(null);
         }
       },
-      [user?.uid, user?.email, queryClient]
+      [user?.uid, user?.email]
     );
 
-    if (!date) return null;
+    const trail = useTrail(filteredLessons.length, {
+      from: { opacity: 0, transform: 'translateY(-24px) scale(0.96)' },
+      to: { opacity: 1, transform: 'translateY(0px) scale(1)' },
+      config: { mass: 1, tension: 220, friction: 24 },
+      reset: prevDateRef.current !== selectedDate
+    });
+
+    if (!selectedDate) return null;
 
     return (
       <div className="@container relative">
         <Typography.H4 className="text-foreground my-6 text-center md:text-left md:text-2xl">
           <span className="text-tennis-green font-bold">Availability</span> on{' '}
-          {format(date, 'EEEE MMMM d')}
+          {format(selectedDate, 'EEEE MMMM d')}
         </Typography.H4>
 
         {errorMessage && (

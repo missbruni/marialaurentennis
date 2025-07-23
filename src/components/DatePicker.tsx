@@ -10,7 +10,6 @@ import { Button } from './ui/button';
 type DatePickerProps = {
   field: FieldValues;
   helperText?: string;
-  isLoading: boolean;
   numberOfMonths?: number;
   availableDates?: Date[];
   disabled: boolean;

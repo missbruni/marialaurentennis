@@ -5,11 +5,13 @@ import { DialogTitle } from '@/components/ui/dialog';
 interface ConfirmationHeaderProps {
   isBookingFailed: boolean;
   showConfirmedView: boolean;
+  showTimeoutError: boolean;
 }
 
 export function ConfirmationHeader({
   isBookingFailed,
-  showConfirmedView
+  showConfirmedView,
+  showTimeoutError
 }: ConfirmationHeaderProps) {
   if (isBookingFailed) {
     return (
@@ -25,6 +27,15 @@ export function ConfirmationHeader({
       <span className="flex items-center gap-2 text-green-600">
         <CheckCircle2 className="h-6 w-6" />
         <DialogTitle>Booking Confirmed</DialogTitle>
+      </span>
+    );
+  }
+
+  if (showTimeoutError) {
+    return (
+      <span className="text-destructive flex items-center gap-2">
+        <XCircle className="h-6 w-6" />
+        <DialogTitle className="text-destructive">Error Processing Booking</DialogTitle>
       </span>
     );
   }
