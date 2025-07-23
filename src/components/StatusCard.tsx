@@ -45,16 +45,16 @@ export function StatusCard({
   return (
     <Card
       className={cn(
-        'transition-transform shadow-md dark:bg-[#242423]',
-        !disabled && 'hover:translate-y-[-2px] hover:shadow-lg cursor-pointer',
-        disabled && 'opacity-60 cursor-not-allowed',
+        'shadow-md transition-transform dark:bg-[#242423]',
+        !disabled && 'cursor-pointer hover:translate-y-[-2px] hover:shadow-lg',
+        disabled && 'cursor-not-allowed opacity-60',
         className
       )}
       onClick={disabled ? undefined : onClick}
       aria-disabled={disabled}
     >
       <CardContent>
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <Typography.Large>{title}</Typography.Large>
           <div className={cn('rounded-full px-3 py-1 text-sm', getStatusColorClasses(statusColor))}>
             {statusText}
@@ -63,15 +63,15 @@ export function StatusCard({
         <Typography.P className="text-muted-foreground mb-4">{description}</Typography.P>
         {children && <div className="mb-4">{children}</div>}
         {actionText && (
-        <div className="mt-auto">
-          <button
-            className={cn(
-              'text-primary font-medium',
-              !disabled && 'hover:text-primary/80',
-              disabled && 'opacity-50'
-            )}
-            disabled={disabled}
-          >
+          <div className="mt-auto">
+            <button
+              className={cn(
+                'text-primary font-medium',
+                !disabled && 'hover:text-primary/80',
+                disabled && 'opacity-50'
+              )}
+              disabled={disabled}
+            >
               {actionText} →
             </button>
           </div>

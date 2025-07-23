@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Typography } from '@/components/ui/typography';
 import { addDays } from 'date-fns';
 import { useForm } from 'react-hook-form';
-
 import {
   Form,
   FormControl,
@@ -108,7 +107,7 @@ export default function AdminPage() {
 
       {message && (
         <div
-          className={`mb-6 p-4 rounded ${
+          className={`mb-6 rounded p-4 ${
             messageType === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
           }`}
         >
@@ -123,7 +122,7 @@ export default function AdminPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="type"
@@ -224,7 +223,7 @@ export default function AdminPage() {
                   control={form.control}
                   name="location"
                   render={({ field }) => (
-                    <FormItem className="md:col-span-2 w-full">
+                    <FormItem className="w-full md:col-span-2">
                       <FormLabel>Location</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
@@ -246,7 +245,7 @@ export default function AdminPage() {
                   control={form.control}
                   name="createHourlySlots"
                   render={({ field }) => (
-                    <FormItem className="md:col-span-2 flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4 md:col-span-2">
                       <FormControl>
                         <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>

@@ -1,8 +1,11 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Typography } from '@/components/ui/typography';
-import { StatusCard, type StatusChipColor } from '@/components/StatusCard';
+import { StatusCard } from '@/components/StatusCard';
+import { useAdminPreloader } from '@/lib/admin-preloader';
+import type { StatusChipColor } from '@/components/StatusCard';
 
 type DashboardItem = {
   title: string;
@@ -70,9 +73,15 @@ const dashboardItems: DashboardItem[] = [
 ];
 
 export default function AdminPage() {
+  const router = useRouter();
+  const { preloadRouteComponents } = useAdminPreloader();
+
   const handleCardClick = (url: string) => {
-    // You could use router.push here if you want to navigate programmatically
-    window.location.href = url;
+    router.push(url);
+  };
+
+  const handleCardHover = (url: string) => {
+    preloadRouteComponents(url);
   };
 
   return (
@@ -82,18 +91,19 @@ export default function AdminPage() {
         Welcome to the admin dashboard. Here you can view your bookings, availability, and settings.
       </Typography.P>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {dashboardItems.map((item) => (
-          <StatusCard
-            disabled={item.disabled}
-            key={item.title}
-            title={item.title}
-            description={item.description}
-            actionText={item.actionText}
-            statusText={item.statusText}
-            statusColor={item.statusColor}
-            onClick={() => handleCardClick(item.url)}
-          />
+          <div key={item.title} onMouseEnter={() => handleCardHover(item.url)}>
+            <StatusCard
+              disabled={item.disabled}
+              title={item.title}
+              description={item.description}
+              actionText={item.actionText}
+              statusText={item.statusText}
+              statusColor={item.statusColor}
+              onClick={() => handleCardClick(item.url)}
+            />
+          </div>
         ))}
       </div>
     </div>

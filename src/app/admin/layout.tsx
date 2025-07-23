@@ -10,7 +10,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <AuthGuard>
       <SidebarProvider defaultOpen={true} className="min-h-[calc(100vh-72px)]">
         <AppSidebar />
-        <main className="w-full max-h-[calc(100vh-72px)] py-8 px-4 lg:p-8">{children}</main>
+        <main className="max-h-[calc(100vh-72px)] w-full px-4 py-8 lg:p-8">{children}</main>
       </SidebarProvider>
     </AuthGuard>
   );

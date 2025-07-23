@@ -15,6 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '@/components/ui/sidebar';
+import { useAdminPreloader } from '@/lib/admin-preloader';
 
 const items = [
   {
@@ -41,9 +42,15 @@ const items = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { preloadRouteComponents } = useAdminPreloader();
+
+  const preloadPage = (url: string) => {
+    console.log('preloading page', url);
+    preloadRouteComponents(url);
+  };
 
   return (
-    <Sidebar className="max-h-[calc(100vh-72px)] relative border-r-[var(--sidebar-border)]">
+    <Sidebar className="relative max-h-[calc(100vh-72px)] border-r-[var(--sidebar-border)]">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Admin Panel</SidebarGroupLabel>
@@ -51,7 +58,11 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.url}
+                    onMouseEnter={() => preloadPage(item.url)}
+                  >
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
