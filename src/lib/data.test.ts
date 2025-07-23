@@ -8,10 +8,12 @@ import {
 
 // Mock the services
 vi.mock('@/services/availabilities', () => ({
-  getAvailability: vi.fn().mockResolvedValue([
-    { id: 'avail-1', status: 'available' },
-    { id: 'avail-2', status: 'available' }
-  ])
+  getAvailability: vi.fn().mockImplementation(() =>
+    Promise.resolve([
+      { id: 'avail-1', status: 'available' },
+      { id: 'avail-2', status: 'available' }
+    ])
+  )
 }));
 
 vi.mock('@/lib/firebase', () => ({
@@ -23,32 +25,34 @@ vi.mock('firebase/firestore', () => ({
   query: vi.fn(),
   where: vi.fn(),
   orderBy: vi.fn(),
-  getDocs: vi.fn().mockResolvedValue({
-    docs: [
-      {
-        id: 'booking-1',
-        data: () => ({
-          startDateTime: { toDate: () => new Date('2025-01-01T10:00:00Z') },
-          endDateTime: { toDate: () => new Date('2025-01-01T11:00:00Z') },
-          location: 'sundridge',
-          status: 'confirmed',
-          createdAt: { toDate: () => new Date('2025-01-01T09:00:00Z') },
-          userId: 'user-123'
-        })
-      },
-      {
-        id: 'booking-2',
-        data: () => ({
-          startDateTime: { toDate: () => new Date('2025-01-02T10:00:00Z') },
-          endDateTime: { toDate: () => new Date('2025-01-02T11:00:00Z') },
-          location: 'muswell',
-          status: 'confirmed',
-          createdAt: { toDate: () => new Date('2025-01-02T09:00:00Z') },
-          userId: 'user-123'
-        })
-      }
-    ]
-  })
+  getDocs: vi.fn().mockImplementation(() =>
+    Promise.resolve({
+      docs: [
+        {
+          id: 'booking-1',
+          data: () => ({
+            startDateTime: { toDate: () => new Date('2025-01-01T10:00:00Z') },
+            endDateTime: { toDate: () => new Date('2025-01-01T11:00:00Z') },
+            location: 'sundridge',
+            status: 'confirmed',
+            createdAt: { toDate: () => new Date('2025-01-01T09:00:00Z') },
+            userId: 'user-123'
+          })
+        },
+        {
+          id: 'booking-2',
+          data: () => ({
+            startDateTime: { toDate: () => new Date('2025-01-02T10:00:00Z') },
+            endDateTime: { toDate: () => new Date('2025-01-02T11:00:00Z') },
+            location: 'muswell',
+            status: 'confirmed',
+            createdAt: { toDate: () => new Date('2025-01-02T09:00:00Z') },
+            userId: 'user-123'
+          })
+        }
+      ]
+    })
+  )
 }));
 
 describe('Data Module', () => {

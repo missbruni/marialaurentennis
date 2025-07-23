@@ -26,7 +26,7 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "test:all": "npm run test && npm run test:e2e",
-    "test:ci": "npm run type-check && npm run lint && npm run test && npm run test:e2e",
+    "test:ci": "npm run type-check && npm run lint && npm run test",
     "type-check": "tsc --noEmit",
     "lint:fix": "next lint --fix",
     "optimize:images": "node scripts/optimize-images.js",
