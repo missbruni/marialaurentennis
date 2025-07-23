@@ -40,7 +40,7 @@ export function ErrorMessage({ queryError, showTimeoutError, sessionId }: ErrorM
           >
             contact us
           </a>{' '}
-          for assistance. We'll help you resolve this issue.
+          for assistance. We&apos;ll help you resolve this issue.
         </p>
       </div>
       <p className="mt-3 text-sm">

@@ -1,13 +1,12 @@
-import { getAvailability } from '@/services/availabilities';
-import { getDocs, Timestamp, orderBy, query, where, collection } from 'firebase/firestore';
+import { Availability, getAvailability } from '@/services/availabilities';
+import { getDocs, query, where, collection } from 'firebase/firestore';
 import { getFirestore } from '@/lib/firebase';
+import type { Booking } from '@/services/booking';
 
-let availabilitiesCache: any = null;
+let availabilitiesCache: Availability[] | null = null;
 let availabilitiesCacheTime = 0;
 const CACHE_DURATION_5_MINUTES = 5 * 60 * 1000;
-
-let bookingsCache: any = null;
-let bookingsCacheTime = 0;
+const bookingsCache: Record<string, { data: Booking[]; time: number }> = {};
 
 export async function getAvailabilitiesData() {
   const now = Date.now();
@@ -27,35 +26,43 @@ export async function getAvailabilitiesData() {
   }
 }
 
-export async function getBookingsData(userId?: string) {
+export async function getBookingsData(userId?: string): Promise<Booking[]> {
   const now = Date.now();
+  const cacheKey = userId || 'all';
 
-  if (bookingsCache && now - bookingsCacheTime < CACHE_DURATION_5_MINUTES) {
-    return bookingsCache;
+  if (bookingsCache[cacheKey] && now - bookingsCache[cacheKey].time < CACHE_DURATION_5_MINUTES) {
+    return bookingsCache[cacheKey].data;
   }
 
   try {
     const db = await getFirestore();
     const bookingsCollection = collection(db, 'bookings');
 
-    let bookingsQuery = query(bookingsCollection, orderBy('createdAt', 'desc'));
+    let bookingsQuery;
 
     if (userId) {
-      bookingsQuery = query(
-        bookingsCollection,
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
+      bookingsQuery = query(bookingsCollection, where('userId', '==', userId));
+    } else {
+      bookingsQuery = query(bookingsCollection);
     }
 
     const querySnapshot = await getDocs(bookingsQuery);
     const bookings = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data()
-    }));
+    })) as Booking[];
 
-    bookingsCache = bookings;
-    bookingsCacheTime = now;
+    bookings.sort((a, b) => {
+      const aTime = a.createdAt?.toDate?.() || new Date(0);
+      const bTime = b.createdAt?.toDate?.() || new Date(0);
+      return bTime.getTime() - aTime.getTime();
+    });
+
+    bookingsCache[cacheKey] = {
+      data: bookings,
+      time: now
+    };
+
     return bookings;
   } catch (error) {
     console.error('Error fetching bookings:', error);
@@ -63,44 +70,17 @@ export async function getBookingsData(userId?: string) {
   }
 }
 
-export async function* streamAvailabilitiesData() {
-  try {
-    yield { status: 'loading', data: null };
-
-    const data = await getAvailabilitiesData();
-
-    yield { status: 'success', data };
-  } catch (error) {
-    yield { status: 'error', error: error instanceof Error ? error.message : 'Unknown error' };
-  }
-}
-
-export async function* streamBookingsData(userId?: string) {
-  try {
-    yield { status: 'loading', data: null };
-
-    const data = await getBookingsData(userId);
-
-    yield { status: 'success', data };
-  } catch (error) {
-    yield { status: 'error', error: error instanceof Error ? error.message : 'Unknown error' };
-  }
-}
-
-export async function prefetchAvailabilities() {
-  return getAvailabilitiesData();
-}
-
-export async function prefetchBookings(userId?: string) {
-  return getBookingsData(userId);
-}
-
 export function clearAvailabilitiesCache() {
   availabilitiesCache = null;
   availabilitiesCacheTime = 0;
 }
 
-export function clearBookingsCache() {
-  bookingsCache = null;
-  bookingsCacheTime = 0;
+export function clearBookingsCache(userId?: string) {
+  if (userId) {
+    delete bookingsCache[userId];
+  } else {
+    Object.keys(bookingsCache).forEach((key) => {
+      delete bookingsCache[key];
+    });
+  }
 }

@@ -1,6 +1,15 @@
 import { describe, expect, test, vi, beforeEach } from 'vitest';
-import { createAvailabilityAction, createCheckoutSessionAction } from './actions';
+import {
+  createAvailabilityAction,
+  createCheckoutSessionAction,
+  createBookingAction
+} from './actions';
 import { ZodError } from 'zod';
+
+vi.mock('./data', () => ({
+  clearAvailabilitiesCache: vi.fn(),
+  clearBookingsCache: vi.fn()
+}));
 
 vi.mock('@/lib/firebase', () => ({
   getFirestore: vi.fn().mockResolvedValue({})
@@ -94,6 +103,42 @@ describe('Server Actions', () => {
       expect(result.count).toBe(1);
     });
 
+    test('should clear availabilities cache when creating single availability', async () => {
+      const { clearAvailabilitiesCache } = await import('./data');
+
+      const formData = new FormData();
+      formData.append('type', 'private');
+      formData.append('availabilityDate', '2025-12-25T00:00:00.000Z');
+      formData.append('availabilityStartTime', '10:00');
+      formData.append('availabilityEndTime', '11:00');
+      formData.append('players', '1');
+      formData.append('location', 'sundridge');
+      formData.append('price', '40');
+      formData.append('createHourlySlots', 'off');
+
+      await createAvailabilityAction(formData);
+
+      expect(clearAvailabilitiesCache).toHaveBeenCalledTimes(1);
+    });
+
+    test('should clear availabilities cache when creating hourly slots', async () => {
+      const { clearAvailabilitiesCache } = await import('./data');
+
+      const formData = new FormData();
+      formData.append('type', 'private');
+      formData.append('availabilityDate', '2025-12-25T00:00:00.000Z');
+      formData.append('availabilityStartTime', '10:00');
+      formData.append('availabilityEndTime', '12:00');
+      formData.append('players', '1');
+      formData.append('location', 'sundridge');
+      formData.append('price', '40');
+      formData.append('createHourlySlots', 'on');
+
+      await createAvailabilityAction(formData);
+
+      expect(clearAvailabilitiesCache).toHaveBeenCalledTimes(1);
+    });
+
     test('should handle validation errors', async () => {
       const formData = new FormData();
 
@@ -141,10 +186,121 @@ describe('Server Actions', () => {
       expect(result.url).toBe('https://checkout.stripe.com/mock-session');
     });
 
+    test('should clear availabilities cache when creating checkout session', async () => {
+      const { clearAvailabilitiesCache } = await import('./data');
+
+      const mockLesson = {
+        id: 'lesson-123',
+        startDateTime: { seconds: 1234567890, nanoseconds: 123456789 },
+        endDateTime: { seconds: 1234571490, nanoseconds: 123456789 },
+        price: 50,
+        location: 'sundridge',
+        players: 1,
+        type: 'private'
+      };
+
+      const formData = new FormData();
+      formData.append('lesson', JSON.stringify(mockLesson));
+      formData.append('userId', 'user-123');
+      formData.append('userEmail', 'test@example.com');
+
+      await createCheckoutSessionAction(formData);
+
+      expect(clearAvailabilitiesCache).toHaveBeenCalledTimes(1);
+    });
+
     test('should handle validation errors', async () => {
       const formData = new FormData();
 
       await expect(createCheckoutSessionAction(formData)).rejects.toThrow(ZodError);
+    });
+  });
+
+  describe('createBookingAction', () => {
+    test('should create booking successfully', async () => {
+      const mockBooking = {
+        id: 'availability-123',
+        startDateTime: { seconds: 1234567890, nanoseconds: 123456789 },
+        endDateTime: { seconds: 1234571490, nanoseconds: 123456789 },
+        location: 'sundridge'
+      };
+
+      const formData = new FormData();
+      formData.append('booking', JSON.stringify(mockBooking));
+      formData.append('userEmail', 'test@example.com');
+      formData.append('sessionId', 'cs_test_session_123');
+      formData.append('userId', 'user-123');
+
+      const result = await createBookingAction(formData);
+
+      expect(result.success).toBe(true);
+      expect(result.booking?.id).toBe('mock-availability-id');
+    });
+
+    test('should clear user-specific bookings cache when creating booking', async () => {
+      const { clearBookingsCache, clearAvailabilitiesCache } = await import('./data');
+
+      const mockBooking = {
+        id: 'availability-123',
+        startDateTime: { seconds: 1234567890, nanoseconds: 123456789 },
+        endDateTime: { seconds: 1234571490, nanoseconds: 123456789 },
+        location: 'sundridge'
+      };
+
+      const formData = new FormData();
+      formData.append('booking', JSON.stringify(mockBooking));
+      formData.append('userEmail', 'test@example.com');
+      formData.append('sessionId', 'cs_test_session_123');
+      formData.append('userId', 'user-123');
+
+      await createBookingAction(formData);
+
+      expect(clearBookingsCache).toHaveBeenCalledWith('user-123');
+      expect(clearAvailabilitiesCache).toHaveBeenCalledTimes(1);
+    });
+
+    test('should clear both caches when booking has availability ID', async () => {
+      const { clearBookingsCache, clearAvailabilitiesCache } = await import('./data');
+
+      const mockBooking = {
+        id: 'availability-123',
+        startDateTime: { seconds: 1234567890, nanoseconds: 123456789 },
+        endDateTime: { seconds: 1234571490, nanoseconds: 123456789 },
+        location: 'sundridge'
+      };
+
+      const formData = new FormData();
+      formData.append('booking', JSON.stringify(mockBooking));
+      formData.append('userEmail', 'test@example.com');
+      formData.append('sessionId', 'cs_test_session_123');
+      formData.append('userId', 'user-123');
+
+      await createBookingAction(formData);
+
+      expect(clearBookingsCache).toHaveBeenCalledWith('user-123');
+      expect(clearAvailabilitiesCache).toHaveBeenCalledTimes(1);
+    });
+
+    test('should handle booking creation without availability ID', async () => {
+      const { clearBookingsCache, clearAvailabilitiesCache } = await import('./data');
+
+      const mockBooking = {
+        startDateTime: { seconds: 1234567890, nanoseconds: 123456789 },
+        endDateTime: { seconds: 1234571490, nanoseconds: 123456789 },
+        location: 'sundridge'
+      };
+
+      const formData = new FormData();
+      formData.append('booking', JSON.stringify(mockBooking));
+      formData.append('userEmail', 'test@example.com');
+      formData.append('sessionId', 'cs_test_session_123');
+      formData.append('userId', 'user-123');
+
+      const result = await createBookingAction(formData);
+
+      expect(result.success).toBe(true);
+      expect(clearBookingsCache).toHaveBeenCalledWith('user-123');
+      expect(clearAvailabilitiesCache).toHaveBeenCalledTimes(1);
     });
   });
 });

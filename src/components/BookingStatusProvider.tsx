@@ -2,7 +2,6 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
-const FIVE_MINUTES = 5 * 60 * 1000;
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

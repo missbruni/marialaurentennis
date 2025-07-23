@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@/lib/test-utils';
 import AvailableLessons from './AvailableLessons';
-import { Timestamp } from 'firebase/firestore';
+
 import type { Availability } from '@/services/availabilities';
 
 vi.mock('react', async () => {

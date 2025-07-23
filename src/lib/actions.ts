@@ -1,11 +1,11 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+
 import Stripe from 'stripe';
 import { format } from 'date-fns';
 import { formatTime } from '@/lib/date';
-import { Availability } from '../services/availabilities';
+
 import {
   doc,
   getDoc,
@@ -18,6 +18,8 @@ import {
 import { capitalizeWords } from '@/lib/string';
 import { getFirestore } from '@/lib/firebase';
 import { z } from 'zod';
+
+import { clearBookingsCache, clearAvailabilitiesCache } from './data';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2025-03-31.basil'
@@ -116,6 +118,8 @@ export async function createAvailabilityAction(formData: FormData) {
       }
 
       await availabilityBatch.commit();
+
+      clearAvailabilitiesCache();
       revalidatePath('/admin/availability');
       return { success: true, count: availabilityHourSlots };
     } else {
@@ -132,6 +136,8 @@ export async function createAvailabilityAction(formData: FormData) {
 
       const availabilitiesCollection = collection(db, 'availabilities');
       const docRef = await addDoc(availabilitiesCollection, newAvailability);
+
+      clearAvailabilitiesCache();
 
       revalidatePath('/admin/availability');
       return { success: true, id: docRef.id, count: 1 };
@@ -188,6 +194,8 @@ export async function createCheckoutSessionAction(formData: FormData) {
       pendingUntil: Timestamp.fromDate(pendingUntil),
       pendingSessionId: null
     });
+
+    clearAvailabilitiesCache();
 
     const encodedLesson = encodeURIComponent(
       Buffer.from(JSON.stringify(validatedData.lesson)).toString('base64')
@@ -275,6 +283,9 @@ export async function createBookingAction(formData: FormData) {
       const availabilityRef = doc(db, 'availabilities', booking.id);
       await updateDoc(availabilityRef, { status: 'booked', pendingUntil: deleteField() });
     }
+
+    clearBookingsCache(userId);
+    clearAvailabilitiesCache();
 
     revalidatePath('/confirmation');
     return { success: true, booking: { id: docRef.id } };

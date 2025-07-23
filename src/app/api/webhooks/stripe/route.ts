@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { getFirestore } from '../../../../lib/firebase';
 import type { Availability } from '../../../../services/availabilities';
+import { clearBookingsCache, clearAvailabilitiesCache } from '../../../../lib/data';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2025-03-31.basil'
@@ -127,7 +128,6 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Create the booking record
       const bookingsCollection = collection(db, 'bookings');
       const newBooking = {
         startDateTime: lessonData.startDateTime,
@@ -144,18 +144,22 @@ export async function POST(req: NextRequest) {
 
       await addDoc(bookingsCollection, newBooking);
 
-      // Update availability status
       await updateDoc(lessonRef, {
         status: 'booked',
         pendingUntil: deleteField(),
         pendingSessionId: deleteField()
       });
 
+      const userId = session.metadata?.user_id;
+      if (userId) {
+        clearBookingsCache(userId);
+      }
+      clearAvailabilitiesCache();
+
       return NextResponse.json({ received: true });
     } catch (error) {
       console.error('Error processing checkout.session.completed webhook:', error);
 
-      // If there's an error, try to refund the payment
       try {
         if (session?.payment_intent) {
           await stripe.refunds.create({

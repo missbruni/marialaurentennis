@@ -1,9 +1,8 @@
 'use client';
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Typography } from '@/components/ui/typography';
-import Loader from '../../components/Loader';
 import AuthGuard from '../../components/AuthGuard';
 import { BookingCard } from '@/components/BookingCard';
 import { use } from 'react';
@@ -11,8 +10,6 @@ import { getBookingsData } from '@/lib/data';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Booking } from '@/services/booking';
-
-const getBookingsPromise = (userId?: string) => getBookingsData(userId);
 
 // Skeleton component for booking cards
 function BookingsSkeleton() {
@@ -74,7 +71,15 @@ export default function BookingsPage() {
 }
 
 function BookingsWithData({ userId }: { userId: string }) {
-  const bookings = use(getBookingsPromise(userId));
+  // Create a stable promise reference using useMemo
+  const bookingsPromise = useMemo(() => {
+    console.log('🔄 Creating bookings promise for userId:', userId);
+    return getBookingsData(userId);
+  }, [userId]);
+
+  const bookings = use(bookingsPromise);
+
+  console.log('📋 Bookings data received:', bookings?.length || 0, 'bookings');
 
   if (!bookings || bookings.length === 0) {
     return (
