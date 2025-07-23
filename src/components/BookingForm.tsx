@@ -58,6 +58,7 @@ const BookingForm: React.FC = React.memo(() => {
   return (
     <section
       ref={bookingFormRef}
+      data-testid="booking-form-section"
       className="dark:bg-background relative flex min-h-[calc(100vh-72px)] w-full flex-col gap-8 overflow-hidden p-8 md:p-16 lg:p-24"
     >
       <div className="hidden lg:block">
@@ -67,12 +68,18 @@ const BookingForm: React.FC = React.memo(() => {
       <div>
         <div className="relative z-1 flex w-full flex-col gap-4 xl:flex-row">
           <div className="flex-1 p-2">
-            <Typography.H2 className="text-tennis-green mb-5 text-2xl lg:px-3 lg:text-4xl">
+            <Typography.H2
+              data-testid="booking-form-title"
+              className="text-tennis-green mb-5 text-2xl lg:px-3 lg:text-4xl"
+            >
               Improve your game
             </Typography.H2>
 
             <div className="flex flex-col gap-5 md:gap-8 lg:gap-10">
-              <Typography.H1 className="text-foreground rounded-lg text-2xl lg:p-3 lg:text-4xl lg:backdrop-blur-md">
+              <Typography.H1
+                data-testid="booking-form-subtitle"
+                className="text-foreground rounded-lg text-2xl lg:p-3 lg:text-4xl lg:backdrop-blur-md"
+              >
                 Book a session today and take the next step in your tennis journey.
               </Typography.H1>
             </div>
@@ -80,7 +87,10 @@ const BookingForm: React.FC = React.memo(() => {
 
           <div className="flex flex-2 flex-col flex-wrap gap-5 p-2 md:flex-row lg:gap-20">
             <Form {...form}>
-              <div className="flex flex-col gap-2 rounded-lg backdrop-blur-md">
+              <div
+                data-testid="date-picker-container"
+                className="flex flex-col gap-2 rounded-lg backdrop-blur-md"
+              >
                 <Suspense fallback={<Skeleton className="h-10 w-full" />}>
                   <ErrorBoundary
                     fallback={
@@ -101,7 +111,11 @@ const BookingForm: React.FC = React.memo(() => {
             </Form>
 
             {selectedDate && (
-              <div className="relative z-10 flex-1" ref={availableLessonsRef}>
+              <div
+                data-testid="available-lessons-container"
+                className="relative z-10 flex-1"
+                ref={availableLessonsRef}
+              >
                 <Suspense fallback={<AvailableLessonsSkeleton />}>
                   <ErrorBoundary
                     fallback={

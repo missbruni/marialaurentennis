@@ -7,13 +7,21 @@ const ContactForm: React.FC = () => {
   const { contactRef } = useSectionRef();
 
   return (
-    <section ref={contactRef} className="w-full bg-[#040504] text-white">
+    <section
+      ref={contactRef}
+      data-testid="contact-form-section"
+      className="w-full bg-[#040504] text-white"
+    >
       <div className="container mx-auto p-10">
         <div className="flex flex-col items-center text-center">
-          <Typography.H2 className="text-tennis-green">Contact us</Typography.H2>
+          <Typography.H2 data-testid="contact-form-title" className="text-tennis-green">
+            Contact us
+          </Typography.H2>
 
           <div className="mb-8">
-            <Typography.Large className="mb-2">Maria Lauren Wisdom</Typography.Large>
+            <Typography.Large data-testid="contact-form-name" className="mb-2">
+              Maria Lauren Wisdom
+            </Typography.Large>
           </div>
           <div className="flex gap-4">
             <a
@@ -21,7 +29,7 @@ const ContactForm: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Visit Maria Lauren's Instagram"
-              className="hover:opacity-80 transition-opacity"
+              className="transition-opacity hover:opacity-80"
             >
               <InstagramIcon />
             </a>
@@ -30,7 +38,7 @@ const ContactForm: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Visit Maria Lauren's Facebook"
-              className="hover:opacity-80 transition-opacity"
+              className="transition-opacity hover:opacity-80"
             >
               <FacebookIcon />
             </a>
@@ -39,7 +47,7 @@ const ContactForm: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Visit Maria Lauren's Twitter"
-              className="hover:opacity-80 transition-opacity"
+              className="transition-opacity hover:opacity-80"
             >
               <TwitterIcon />
             </a>

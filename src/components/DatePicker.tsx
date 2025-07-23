@@ -68,8 +68,9 @@ const DatePicker: React.FC<DatePickerProps> = React.memo(
     }, [nextAvailableDate, onDateChange, onNextAvailableSlot]);
 
     return (
-      <FormItem className="mx-auto flex flex-col md:mx-0">
+      <FormItem data-testid="date-picker" className="mx-auto flex flex-col md:mx-0">
         <Calendar
+          data-testid="calendar"
           mode="single"
           numberOfMonths={1}
           month={currentMonth}
@@ -104,6 +105,7 @@ const DatePicker: React.FC<DatePickerProps> = React.memo(
           }}
         />
         <Button
+          data-testid="next-available-date-button"
           onClick={onNextAvailableClick}
           disabled={!nextAvailableDate || disabled}
           variant="outline"
