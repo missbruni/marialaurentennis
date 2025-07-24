@@ -123,7 +123,7 @@ jobs:
             DEPLOYMENT_URL="https://marialaurentennis.vercel.app"
           fi
           echo "Running E2E tests against: $DEPLOYMENT_URL"
-          npx playwright test --base-url="$DEPLOYMENT_URL"
+          npx playwright test --base-url "$DEPLOYMENT_URL"
         env:
           # Add any environment variables needed for E2E tests
           NODE_ENV: production
