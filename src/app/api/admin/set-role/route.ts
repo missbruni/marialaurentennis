@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth } from '@/lib/firebase-admin';
+import { getAdminAuth } from '@/lib/firebase-admin';
 
 export async function POST(request: NextRequest) {
   try {
+    const adminAuth = getAdminAuth();
     if (!adminAuth) {
       return NextResponse.json({ error: 'Authentication service unavailable' }, { status: 503 });
     }
