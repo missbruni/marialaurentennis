@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public read access to availabilities collection
+    match /availabilities/{document} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.role == 'admin';
+    }
+    
+    // Allow authenticated users to read their own bookings
+    match /bookings/{document} {
+      allow read: if request.auth != null && 
+        (request.auth.token.role == 'admin' || 
+         resource.data.userId == request.auth.uid);
+      allow write: if request.auth != null && 
+        (request.auth.token.role == 'admin' || 
+         request.resource.data.userId == request.auth.uid);
+    }
+    
+    // Deny all other access by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+} 

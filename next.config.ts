@@ -1,10 +1,10 @@
 import type { NextConfig } from 'next';
 
 const nextConfig = {
+  // External packages for server components
+  serverExternalPackages: ['firebase-admin'],
   // Enable experimental features for Next.js 15
   experimental: {
-    // Enable streaming
-    serverComponentsExternalPackages: ['firebase-admin'],
     // Enable server actions
     serverActions: {
       allowedOrigins: ['localhost:3000', 'localhost:3001']
