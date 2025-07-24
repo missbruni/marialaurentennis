@@ -59,17 +59,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Debug Vercel Configuration
-        run: |
-          echo "Checking Vercel configuration..."
-          echo "ORG_ID length: ${#VERCEL_ORG_ID}"
-          echo "PROJECT_ID length: ${#VERCEL_PROJECT_ID}"
-          echo "ORG_ID starts with: ${VERCEL_ORG_ID:0:10}..."
-          echo "PROJECT_ID starts with: ${VERCEL_PROJECT_ID:0:10}..."
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
@@ -86,18 +75,16 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
 
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        id: deploy
+        run: |
+          # Deploy and capture the URL from stdout
+          # The vercel deploy command outputs the URL to stdout as the last line
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} 2>&1 | tail -1 | tr -d '\n\r')
+          echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "full_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-
-      - name: Get deployment URL
-        id: deployment-url
-        run: |
-          # Extract deployment URL from Vercel output
-          DEPLOYMENT_URL=$(echo "${{ steps.deploy.outputs.preview-url }}" | sed 's/https:\/\///')
-          echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
-          echo "full_url=https://$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
 
       - name: Wait for deployment
         run: |
@@ -130,7 +117,13 @@ jobs:
       - name: Run E2E tests against live environment
         run: |
           # Set the base URL to the live deployment
-          npx playwright test --base-url=https://${{ needs.deploy.outputs.preview-url }}
+          # Use captured URL or fallback to production URL
+          DEPLOYMENT_URL="${{ needs.deploy.outputs.deployment_url }}"
+          if [ -z "$DEPLOYMENT_URL" ]; then
+            DEPLOYMENT_URL="https://marialaurentennis.vercel.app"
+          fi
+          echo "Running E2E tests against: $DEPLOYMENT_URL"
+          npx playwright test --base-url="$DEPLOYMENT_URL"
         env:
           # Add any environment variables needed for E2E tests
           NODE_ENV: production
