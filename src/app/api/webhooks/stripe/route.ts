@@ -13,9 +13,19 @@ import { getFirestore } from '../../../../lib/firebase';
 import type { Availability } from '../../../../services/availabilities';
 import { clearBookingsCache, clearAvailabilitiesCache } from '../../../../lib/data';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2025-06-30.basil'
-});
+let stripeInstance: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!stripeInstance) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('Stripe secret key not configured');
+    }
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-06-30.basil'
+    });
+  }
+  return stripeInstance;
+}
 
 async function createFailedBooking(
   session: Stripe.Checkout.Session,
@@ -52,6 +62,7 @@ export async function POST(req: NextRequest) {
 
   let event;
   try {
+    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
   } catch (err: unknown) {
     const error = err as Error;
@@ -72,6 +83,7 @@ export async function POST(req: NextRequest) {
       const lessonDoc = await getDoc(lessonRef);
 
       if (!lessonDoc.exists()) {
+        const stripe = getStripe();
         await stripe.refunds.create({
           payment_intent: session.payment_intent as string,
           reason: 'requested_by_customer'
@@ -88,6 +100,7 @@ export async function POST(req: NextRequest) {
       const lessonData = lessonDoc.data();
 
       if (lessonData.status === 'booked') {
+        const stripe = getStripe();
         await stripe.refunds.create({
           payment_intent: session.payment_intent as string,
           reason: 'requested_by_customer'
@@ -107,6 +120,7 @@ export async function POST(req: NextRequest) {
         const isSameSession = lessonData.pendingSessionId === session.id;
 
         if (!isSameSession && (!pendingUntil || now < pendingUntil)) {
+          const stripe = getStripe();
           await stripe.refunds.create({
             payment_intent: session.payment_intent as string,
             reason: 'requested_by_customer'
@@ -162,6 +176,7 @@ export async function POST(req: NextRequest) {
 
       try {
         if (session?.payment_intent) {
+          const stripe = getStripe();
           await stripe.refunds.create({
             payment_intent: session.payment_intent as string,
             reason: 'requested_by_customer'
