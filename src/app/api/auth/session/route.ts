@@ -22,6 +22,12 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('Session creation error:', error);
+
+    // Handle Firebase Admin initialization errors
+    if (error instanceof Error && error.message.includes('Firebase Admin not initialized')) {
+      return NextResponse.json({ error: 'Authentication service unavailable' }, { status: 503 });
+    }
+
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
