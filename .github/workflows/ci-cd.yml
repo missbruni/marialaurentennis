@@ -38,8 +38,7 @@ jobs:
       - name: Run unit tests
         run: npm run test
 
-      - name: Build application
-        run: npm run build
+      # Build is handled by Vercel CLI in the deploy job
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
