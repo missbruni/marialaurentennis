@@ -3,6 +3,10 @@ import { adminAuth } from '@/lib/firebase-admin';
 
 export async function POST(request: NextRequest) {
   try {
+    if (!adminAuth) {
+      return NextResponse.json({ error: 'Authentication service unavailable' }, { status: 503 });
+    }
+
     const { uid, role } = await request.json();
 
     const authHeader = request.headers.get('authorization');
