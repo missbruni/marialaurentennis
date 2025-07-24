@@ -4,13 +4,13 @@ export default function LinearProgress() {
   return (
     <div className="w-full overflow-hidden" style={{ height: 4 }}>
       <div
-        className="animate-pulse w-full h-full"
+        className="h-full w-full animate-pulse"
         style={{
           background: `linear-gradient(90deg, transparent, var(--color-tennis-green), transparent)`,
           animation: 'linearProgress 1.5s infinite ease-in-out'
         }}
       />
-      <style jsx>{`
+      <style>{`
         @keyframes linearProgress {
           0% {
             transform: translateX(-100%);

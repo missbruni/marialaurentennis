@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@/lib/test-utils';
+import { render, screen, act } from '@/lib/test-utils';
 import AvailableLessons from './AvailableLessons';
 
 import type { Availability } from '@/services/availabilities';
@@ -163,44 +163,50 @@ describe('AvailableLessons', () => {
     vi.clearAllMocks();
   });
 
-  test('renders available lessons correctly', () => {
-    render(
-      <AvailableLessons
-        selectedDate={mockDate}
-        selectedLocation={mockLocation}
-        nextAvailableSlot={null}
-      />
-    );
+  test('renders available lessons correctly', async () => {
+    await act(async () => {
+      render(
+        <AvailableLessons
+          selectedDate={mockDate}
+          selectedLocation={mockLocation}
+          nextAvailableSlot={null}
+        />
+      );
+    });
 
     expect(screen.getByTestId('lesson-1')).toBeInTheDocument();
     expect(screen.getByTestId('lesson-2')).toBeInTheDocument();
     expect(screen.getByTestId('lesson-3')).toBeInTheDocument();
   });
 
-  test('filters lessons based on nextAvailableSlot for future dates', () => {
+  test('filters lessons based on nextAvailableSlot for future dates', async () => {
     const nextAvailableSlot = new Date('2023-07-15T11:00:00');
-    render(
-      <AvailableLessons
-        selectedDate={mockDate}
-        selectedLocation={mockLocation}
-        nextAvailableSlot={nextAvailableSlot}
-      />
-    );
+    await act(async () => {
+      render(
+        <AvailableLessons
+          selectedDate={mockDate}
+          selectedLocation={mockLocation}
+          nextAvailableSlot={nextAvailableSlot}
+        />
+      );
+    });
 
     expect(screen.queryByTestId('lesson-1')).not.toBeInTheDocument();
     expect(screen.getByTestId('lesson-2')).toBeInTheDocument();
     expect(screen.getByTestId('lesson-3')).toBeInTheDocument();
   });
 
-  test('filters lessons based on current time when nextAvailableSlot is today', () => {
+  test('filters lessons based on current time when nextAvailableSlot is today', async () => {
     const nextAvailableSlot = new Date('2023-07-15T00:00:00');
-    render(
-      <AvailableLessons
-        selectedDate={mockDate}
-        selectedLocation={mockLocation}
-        nextAvailableSlot={nextAvailableSlot}
-      />
-    );
+    await act(async () => {
+      render(
+        <AvailableLessons
+          selectedDate={mockDate}
+          selectedLocation={mockLocation}
+          nextAvailableSlot={nextAvailableSlot}
+        />
+      );
+    });
 
     expect(screen.queryByTestId('lesson-1')).not.toBeInTheDocument();
     expect(screen.getByTestId('lesson-2')).toBeInTheDocument();

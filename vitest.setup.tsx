@@ -42,6 +42,7 @@ vi.mock('firebase/auth', () => {
   const auth = {
     currentUser: null,
     onAuthStateChanged: vi.fn((auth, callback) => {
+      // Call the callback synchronously to avoid timing issues in tests
       callback(null);
       return vi.fn();
     }),

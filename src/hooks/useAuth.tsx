@@ -56,24 +56,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getAuth().then(setAuth);
   }, []);
 
-  const handleUserAuthentication = async (user: User | null) => {
+  const handleUserAuthentication = React.useCallback(async (user: User | null) => {
     if (user) {
       try {
         await createSessionCookie(user);
         const idTokenResult = await user.getIdTokenResult();
         const hasAdminRole = idTokenResult.claims.role === 'admin';
+
         setIsAdmin(hasAdminRole);
+        setUser(user);
+        setLoading(false);
       } catch (error) {
         console.error('Error getting token claims:', error);
         setIsAdmin(false);
+        setUser(user);
+        setLoading(false);
       }
     } else {
       setIsAdmin(false);
+      setUser(user);
+      setLoading(false);
     }
-
-    setUser(user);
-    setLoading(false);
-  };
+  }, []);
 
   const signInWithGoogle = React.useCallback(async () => {
     if (!auth) return;
@@ -85,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Error signing in with Google:', error);
       setLoading(false);
     }
-  }, [auth]);
+  }, [auth, handleUserAuthentication]);
 
   const signInWithFacebook = React.useCallback(async () => {
     if (!auth) return;
@@ -97,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Error signing in with Facebook:', error);
       setLoading(false);
     }
-  }, [auth]);
+  }, [auth, handleUserAuthentication]);
 
   const signInWithEmail = React.useCallback(
     async (email: string, password: string) => {
@@ -110,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
     },
-    [auth]
+    [auth, handleUserAuthentication]
   );
 
   const signUpWithEmail = React.useCallback(
@@ -124,7 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
     },
-    [auth]
+    [auth, handleUserAuthentication]
   );
 
   const logout = React.useCallback(async () => {
@@ -155,18 +159,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, [auth]);
+  }, [auth, handleUserAuthentication]);
 
-  const value = {
-    user,
-    loading,
-    isAdmin,
-    signInWithGoogle,
-    signInWithFacebook,
-    signInWithEmail,
-    signUpWithEmail,
-    logout
-  };
+  const value = React.useMemo(
+    () => ({
+      user,
+      loading,
+      isAdmin,
+      signInWithGoogle,
+      signInWithFacebook,
+      signInWithEmail,
+      signUpWithEmail,
+      logout
+    }),
+    [
+      user,
+      loading,
+      isAdmin,
+      signInWithGoogle,
+      signInWithFacebook,
+      signInWithEmail,
+      signUpWithEmail,
+      logout
+    ]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

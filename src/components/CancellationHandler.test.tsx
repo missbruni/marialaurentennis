@@ -1,9 +1,10 @@
 import { describe, test, expect, vi, beforeEach, type Mock } from 'vitest';
-import { render } from '@/lib/test-utils';
+import { render, waitFor } from '@/lib/test-utils';
 import CancellationHandler from './CancellationHandler';
 import { releaseAvailability } from '@/services/availabilities';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
+import { act } from '@testing-library/react';
 
 vi.mock('@/services/availabilities', () => ({
   releaseAvailability: vi.fn().mockResolvedValue(undefined)
@@ -47,10 +48,12 @@ describe('CancellationHandler', () => {
     } as any);
   });
 
-  test('should not call releaseAvailability when no releaseLesson param exists', () => {
+  test('should not call releaseAvailability when no releaseLesson param exists', async () => {
     mockGet.mockReturnValue(null);
 
-    render(<CancellationHandler />);
+    await act(async () => {
+      render(<CancellationHandler />);
+    });
 
     expect(releaseAvailability).not.toHaveBeenCalled();
     expect(mockInvalidateQueries).not.toHaveBeenCalled();
@@ -61,9 +64,11 @@ describe('CancellationHandler', () => {
     const lessonId = 'test-lesson-id';
     mockGet.mockReturnValue(lessonId);
 
-    render(<CancellationHandler />);
+    await act(async () => {
+      render(<CancellationHandler />);
+    });
 
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(releaseAvailability).toHaveBeenCalledWith(lessonId);
       expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['availabilities'] });
       expect(mockReplace).toHaveBeenCalledWith('/');

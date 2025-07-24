@@ -1,6 +1,6 @@
 import React from 'react';
 import { test, expect, describe, vi } from 'vitest';
-import { render, screen } from '@/lib/test-utils';
+import { renderWithAuth, screen } from '@/lib/test-utils';
 import AdminPage from './page';
 
 // Mock next/navigation
@@ -21,8 +21,8 @@ vi.mock('@/lib/admin-preloader', () => ({
 }));
 
 describe('AdminPage', () => {
-  test('renders admin dashboard with all cards', () => {
-    render(<AdminPage />);
+  test('renders admin dashboard with all cards', async () => {
+    await renderWithAuth(<AdminPage />);
 
     expect(screen.getByText('Admin Dashboard')).toBeInTheDocument();
     expect(screen.getByText(/Welcome to the admin dashboard/)).toBeInTheDocument();
@@ -36,8 +36,8 @@ describe('AdminPage', () => {
     expect(screen.getByText('Clients')).toBeInTheDocument();
   });
 
-  test('shows correct status text for each card', () => {
-    render(<AdminPage />);
+  test('shows correct status text for each card', async () => {
+    await renderWithAuth(<AdminPage />);
 
     // Check status text for each card
     expect(screen.getByText('Set Up')).toBeInTheDocument();
@@ -48,8 +48,8 @@ describe('AdminPage', () => {
     expect(screen.getByText('25 Total')).toBeInTheDocument();
   });
 
-  test('shows correct action text for each card', () => {
-    render(<AdminPage />);
+  test('shows correct action text for each card', async () => {
+    await renderWithAuth(<AdminPage />);
 
     // Check action text for each card
     expect(screen.getByText('Manage availability →')).toBeInTheDocument();
@@ -60,8 +60,8 @@ describe('AdminPage', () => {
     expect(screen.getByText('View clients →')).toBeInTheDocument();
   });
 
-  test('disabled cards have correct styling', () => {
-    render(<AdminPage />);
+  test('disabled cards have correct styling', async () => {
+    await renderWithAuth(<AdminPage />);
 
     // Check that disabled cards have the correct aria-disabled attribute
     const disabledCards = screen

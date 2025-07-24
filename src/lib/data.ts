@@ -53,8 +53,8 @@ export async function getBookingsData(userId?: string): Promise<Booking[]> {
     })) as Booking[];
 
     bookings.sort((a, b) => {
-      const aTime = a.createdAt?.toDate?.() || new Date(0);
-      const bTime = b.createdAt?.toDate?.() || new Date(0);
+      const aTime = a.startDateTime?.toDate?.() || new Date(0);
+      const bTime = b.startDateTime?.toDate?.() || new Date(0);
       return bTime.getTime() - aTime.getTime();
     });
 

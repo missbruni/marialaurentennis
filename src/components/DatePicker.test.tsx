@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@/lib/test-utils';
+import { renderWithAuth, screen } from '@/lib/test-utils';
 import DatePicker from './DatePicker';
 import type { FieldValues } from 'react-hook-form';
 import { format, addDays } from 'date-fns';
@@ -34,8 +34,8 @@ describe('DatePicker', () => {
     vi.clearAllMocks();
   });
 
-  test('renders calendar with correct initial month', () => {
-    render(
+  test('renders calendar with correct initial month', async () => {
+    await renderWithAuth(
       <DatePickerWithFormContext
         field={mockField}
         disabled={false}
@@ -47,8 +47,8 @@ describe('DatePicker', () => {
     expect(screen.getByText(format(today, 'MMMM yyyy'))).toBeInTheDocument();
   });
 
-  test('displays next available date button', () => {
-    render(
+  test('displays next available date button', async () => {
+    await renderWithAuth(
       <DatePickerWithFormContext
         field={mockField}
         disabled={false}
@@ -60,8 +60,8 @@ describe('DatePicker', () => {
     expect(screen.getByText('Next available date')).toBeInTheDocument();
   });
 
-  test('disables next available date button when no dates are available', () => {
-    render(
+  test('disables next available date button when no dates are available', async () => {
+    await renderWithAuth(
       <DatePickerWithFormContext
         field={mockField}
         disabled={false}
@@ -78,7 +78,7 @@ describe('DatePicker', () => {
     const onNextAvailableSlot = vi.fn();
     const user = userEvent.setup();
 
-    render(
+    await renderWithAuth(
       <DatePickerWithFormContext
         field={mockField}
         disabled={false}
@@ -95,8 +95,8 @@ describe('DatePicker', () => {
     expect(mockField.onChange).toHaveBeenCalledWith(tomorrow);
   });
 
-  test('marks available dates with correct styling', () => {
-    render(
+  test('marks available dates with correct styling', async () => {
+    await renderWithAuth(
       <DatePickerWithFormContext
         field={mockField}
         disabled={false}
@@ -111,7 +111,7 @@ describe('DatePicker', () => {
 
   test('calls field.onChange when a date is selected', async () => {
     const user = userEvent.setup();
-    render(
+    await renderWithAuth(
       <DatePickerWithFormContext
         field={mockField}
         disabled={false}
@@ -128,7 +128,7 @@ describe('DatePicker', () => {
 
   test('updates current month when navigating', async () => {
     const user = userEvent.setup();
-    render(
+    await renderWithAuth(
       <DatePickerWithFormContext
         field={mockField}
         disabled={false}
