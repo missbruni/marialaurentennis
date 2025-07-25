@@ -50,6 +50,29 @@ const CheckoutSessionSchema = z.object({
   userEmail: z.string().email().optional()
 });
 
+const SetUserRoleSchema = z.object({
+  uid: z.string().min(1, 'User ID is required'),
+  role: z.enum(['admin', 'user'], {
+    errorMap: () => ({ message: 'Role must be either "admin" or "user"' })
+  })
+});
+
+const CreateBookingSchema = z.object({
+  booking: z.object({
+    startDateTime: z.object({
+      seconds: z.number()
+    }),
+    endDateTime: z.object({
+      seconds: z.number()
+    }),
+    location: z.string(),
+    id: z.string().optional()
+  }),
+  userEmail: z.string().email(),
+  sessionId: z.string(),
+  userId: z.string()
+});
+
 async function _createAvailabilityAction(
   formData: FormData,
   db: Firestore,
@@ -69,12 +92,10 @@ async function _createAvailabilityAction(
   const validatedData = AvailabilityFormSchema.parse(rawData);
 
   try {
-    // Parse the start time
     const [startHours, startMinutes] = validatedData.availabilityStartTime.split(':').map(Number);
     const startDate = new Date(validatedData.availabilityDate);
     startDate.setHours(startHours, startMinutes, 0, 0);
 
-    // Parse the end time
     const [endHours, endMinutes] = validatedData.availabilityEndTime.split(':').map(Number);
     const endDate = new Date(validatedData.availabilityDate);
     endDate.setHours(endHours, endMinutes, 0, 0);
@@ -221,7 +242,7 @@ async function _createCheckoutSessionAction(
               ),
               description
             },
-            unit_amount: validatedData.lesson.price * 100 // Stripe expects amount in pence
+            unit_amount: validatedData.lesson.price * 100
           },
           quantity: 1
         }
@@ -257,31 +278,34 @@ async function _createCheckoutSessionAction(
 }
 
 async function _createBookingAction(formData: FormData, db: Firestore, _user: AuthenticatedUser) {
-  const booking = JSON.parse(formData.get('booking') as string);
-  const userEmail = formData.get('userEmail') as string;
-  const sessionId = formData.get('sessionId') as string;
-  const userId = formData.get('userId') as string;
+  const rawData = {
+    booking: JSON.parse(formData.get('booking') as string),
+    userEmail: formData.get('userEmail') as string,
+    sessionId: formData.get('sessionId') as string,
+    userId: formData.get('userId') as string
+  };
 
   try {
+    const validatedData = CreateBookingSchema.parse(rawData);
     const newBooking = {
-      startDateTime: new Date(booking.startDateTime.seconds * 1000),
-      endDateTime: new Date(booking.endDateTime.seconds * 1000),
-      location: booking.location,
-      userEmail: userEmail,
-      stripeSessionId: sessionId,
+      startDateTime: new Date(validatedData.booking.startDateTime.seconds * 1000),
+      endDateTime: new Date(validatedData.booking.endDateTime.seconds * 1000),
+      location: validatedData.booking.location,
+      userEmail: validatedData.userEmail,
+      stripeSessionId: validatedData.sessionId,
       status: 'confirmed',
       createdAt: new Date(),
-      userId: userId
+      userId: validatedData.userId
     };
 
     const docRef = await db.collection('bookings').add(newBooking);
 
-    if (booking.id) {
-      const availabilityRef = db.collection('availabilities').doc(booking.id);
+    if (validatedData.booking.id) {
+      const availabilityRef = db.collection('availabilities').doc(validatedData.booking.id);
       await availabilityRef.update({ status: 'booked' });
     }
 
-    clearBookingsCache(userId);
+    clearBookingsCache(validatedData.userId);
     clearAvailabilitiesCache();
 
     revalidatePath('/confirmation');
@@ -292,6 +316,34 @@ async function _createBookingAction(formData: FormData, db: Firestore, _user: Au
   }
 }
 
+async function _setUserRoleAction(formData: FormData, db: Firestore, user: AuthenticatedUser) {
+  const rawData = {
+    uid: formData.get('uid') as string,
+    role: formData.get('role') as string
+  };
+
+  try {
+    const validatedData = SetUserRoleSchema.parse(rawData);
+    const { getAdminAuth } = await import('@/lib/firebase-admin');
+    const adminAuth = getAdminAuth();
+
+    if (!adminAuth) {
+      return { success: false, error: 'Authentication service unavailable' };
+    }
+
+    await adminAuth.setCustomUserClaims(validatedData.uid, { role: validatedData.role });
+
+    return { success: true, message: `User role updated to ${validatedData.role}` };
+  } catch (error) {
+    console.error('Error setting user role:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to set user role'
+    };
+  }
+}
+
 export const createBookingAction = withAuth(_createBookingAction, false);
 export const createAvailabilityAction = withAuth(_createAvailabilityAction, true);
 export const createCheckoutSessionAction = withAuth(_createCheckoutSessionAction, false);
+export const setUserRoleAction = withAuth(_setUserRoleAction, true);

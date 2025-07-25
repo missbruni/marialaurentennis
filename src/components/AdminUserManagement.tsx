@@ -1,15 +1,13 @@
 'use client';
 
 import React from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { setUserRoleAction } from '@/lib/actions';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 export default function AdminUserManagement() {
-  const { user } = useAuth();
-
   const [userId, setUserId] = React.useState('');
   const [role, setRole] = React.useState('user');
   const [message, setMessage] = React.useState('');
@@ -25,24 +23,18 @@ export default function AdminUserManagement() {
     setMessage('');
 
     try {
-      const idToken = await user?.getIdToken();
-      const response = await fetch('/api/admin/set-role', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`
-        },
-        body: JSON.stringify({ uid: userId, role })
-      });
+      const formData = new FormData();
+      formData.append('uid', userId);
+      formData.append('role', role);
 
-      const data = await response.json();
+      const result = await setUserRoleAction(formData);
 
-      if (response.ok) {
-        setMessage(`Successfully set role to ${role}.`);
+      if (result.success) {
+        setMessage(result.message || `Successfully set role to ${role}.`);
         setUserId('');
         setRole('user');
       } else {
-        setMessage(`Error: ${data.error}`);
+        setMessage(`Error: ${result.error}`);
       }
     } catch (error) {
       setMessage(`Error: ${error instanceof Error ? error.message : String(error)}`);
@@ -52,14 +44,14 @@ export default function AdminUserManagement() {
   };
 
   return (
-    <Card className="border-1 max-w-4xl border-[var(--sidebar-border)]">
+    <Card className="max-w-4xl border-1 border-[var(--sidebar-border)]">
       <CardHeader>
         <CardTitle>User Role Management</CardTitle>
       </CardHeader>
       <CardContent>
         {message && (
           <div
-            className={`mb-4 p-3 rounded ${message.includes('Error') ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}
+            className={`mb-4 rounded p-3 ${message.includes('Error') ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}
           >
             {message}
           </div>
@@ -67,7 +59,7 @@ export default function AdminUserManagement() {
 
         <div className="space-y-4">
           <div>
-            <label htmlFor="userId" className="block text-sm font-medium mb-1">
+            <label htmlFor="userId" className="mb-1 block text-sm font-medium">
               User ID
             </label>
             <Input
@@ -79,7 +71,7 @@ export default function AdminUserManagement() {
           </div>
 
           <div>
-            <label htmlFor="role" className="block text-sm font-medium mb-1">
+            <label htmlFor="role" className="mb-1 block text-sm font-medium">
               Role
             </label>
             <Select value={role} onValueChange={setRole}>
