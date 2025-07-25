@@ -123,7 +123,35 @@ jobs:
             DEPLOYMENT_URL="https://marialaurentennis.vercel.app"
           fi
           echo "Running E2E tests against: $DEPLOYMENT_URL"
-          npx playwright test --base-url "$DEPLOYMENT_URL"
+
+          # Create a temporary config file with the live base URL
+          cat > playwright.ci.config.ts << EOF
+          import { defineConfig, devices } from '@playwright/test';
+
+          export default defineConfig({
+            testDir: './tests/e2e',
+            fullyParallel: true,
+            forbidOnly: !!process.env.CI,
+            retries: process.env.CI ? 2 : 0,
+            workers: process.env.CI ? 1 : undefined,
+            reporter: 'html',
+            timeout: 60000,
+            use: {
+              baseURL: '$DEPLOYMENT_URL',
+              trace: 'on-first-retry',
+              actionTimeout: 30000
+            },
+            projects: [
+              { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+              { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+              { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+              { name: 'Mobile Chrome', use: { ...devices['Pixel 5'] } },
+              { name: 'Mobile Safari', use: { ...devices['iPhone 12'] } }
+            ]
+          });
+          EOF
+
+          npx playwright test --config=playwright.ci.config.ts
         env:
           # Add any environment variables needed for E2E tests
           NODE_ENV: production
