@@ -1,15 +1,6 @@
 import Stripe from 'stripe';
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  doc,
-  getDoc,
-  updateDoc,
-  deleteField,
-  collection,
-  addDoc,
-  Timestamp
-} from 'firebase/firestore';
-import { getFirestore } from '../../../../lib/firebase';
+import { getAdminFirestore } from '../../../../lib/firebase-admin';
 import type { Availability } from '../../../../services/availabilities';
 import { clearBookingsCache, clearAvailabilitiesCache } from '../../../../lib/data';
 
@@ -32,8 +23,11 @@ async function createFailedBooking(
   lessonData: Partial<Availability>,
   errorReason: string
 ) {
-  const db = await getFirestore();
-  const bookingsCollection = collection(db, 'bookings');
+  const db = getAdminFirestore();
+  if (!db) {
+    throw new Error('Firebase Admin not initialized');
+  }
+
   const newBooking = {
     startDateTime: lessonData.startDateTime,
     endDateTime: lessonData.endDateTime,
@@ -42,14 +36,14 @@ async function createFailedBooking(
     price: lessonData.price,
     status: 'failed',
     stripeId: session.id,
-    createdAt: Timestamp.now(),
+    createdAt: new Date(),
     userId: session.metadata?.user_id || null,
     userEmail: session.metadata?.user_email || null,
     failureReason: errorReason,
     refunded: true
   };
 
-  await addDoc(bookingsCollection, newBooking);
+  await db.collection('bookings').add(newBooking);
 }
 
 export async function POST(req: NextRequest) {
@@ -78,11 +72,15 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      const db = await getFirestore();
-      const lessonRef = doc(db, 'availabilities', lessonId);
-      const lessonDoc = await getDoc(lessonRef);
+      const db = getAdminFirestore();
+      if (!db) {
+        throw new Error('Firebase Admin not initialized');
+      }
 
-      if (!lessonDoc.exists()) {
+      const lessonRef = db.collection('availabilities').doc(lessonId);
+      const lessonDoc = await lessonRef.get();
+
+      if (!lessonDoc.exists) {
         const stripe = getStripe();
         await stripe.refunds.create({
           payment_intent: session.payment_intent as string,
@@ -98,6 +96,21 @@ export async function POST(req: NextRequest) {
       }
 
       const lessonData = lessonDoc.data();
+
+      if (!lessonData) {
+        const stripe = getStripe();
+        await stripe.refunds.create({
+          payment_intent: session.payment_intent as string,
+          reason: 'requested_by_customer'
+        });
+        await createFailedBooking(session, {}, 'Lesson data is missing');
+        return NextResponse.json(
+          {
+            error: 'Lesson data is missing, payment refunded'
+          },
+          { status: 400 }
+        );
+      }
 
       if (lessonData.status === 'booked') {
         const stripe = getStripe();
@@ -115,7 +128,7 @@ export async function POST(req: NextRequest) {
       }
 
       if (lessonData.status === 'pending') {
-        const pendingUntil = lessonData.pendingUntil?.toDate().getTime();
+        const pendingUntil = lessonData.pendingUntil?.toDate?.()?.getTime();
         const now = Date.now();
         const isSameSession = lessonData.pendingSessionId === session.id;
 
@@ -142,7 +155,6 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const bookingsCollection = collection(db, 'bookings');
       const newBooking = {
         startDateTime: lessonData.startDateTime,
         endDateTime: lessonData.endDateTime,
@@ -151,17 +163,17 @@ export async function POST(req: NextRequest) {
         price: lessonData.price,
         status: 'confirmed',
         stripeId: session.id,
-        createdAt: Timestamp.now(),
+        createdAt: new Date(),
         userId: session.metadata?.user_id || null,
         userEmail: session.metadata?.user_email || null
       };
 
-      await addDoc(bookingsCollection, newBooking);
+      await db.collection('bookings').add(newBooking);
 
-      await updateDoc(lessonRef, {
+      await lessonRef.update({
         status: 'booked',
-        pendingUntil: deleteField(),
-        pendingSessionId: deleteField()
+        pendingUntil: null,
+        pendingSessionId: null
       });
 
       const userId = session.metadata?.user_id;

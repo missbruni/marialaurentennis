@@ -28,6 +28,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import SelectDatePicker from '../../../components/SelectDatePicker';
 import { createAvailabilityAction } from '@/lib/actions';
+import { useAuth } from '@/hooks/useAuth';
 
 const AvailabilityFormSchema = z.object({
   type: z.enum(['private', 'group'], {
@@ -46,8 +47,10 @@ const AvailabilityFormSchema = z.object({
 type AvailabilityFormData = z.infer<typeof AvailabilityFormSchema>;
 
 export default function AdminPage() {
-  const [message, setMessage] = React.useState('');
-  const [messageType, setMessageType] = React.useState<'success' | 'error'>('success');
+  const { user } = useAuth();
+  const [message, setMessage] = React.useState<{ text: string; type: 'success' | 'error' } | null>(
+    null
+  );
   const [isLoading, setIsLoading] = React.useState(false);
 
   const defaultValues: AvailabilityFormData = {
@@ -68,6 +71,11 @@ export default function AdminPage() {
   });
 
   const onSubmit = async (data: AvailabilityFormData) => {
+    if (!user) {
+      setMessage({ text: 'You must be logged in to create availability', type: 'error' });
+      return;
+    }
+
     try {
       setIsLoading(true);
 
@@ -85,22 +93,26 @@ export default function AdminPage() {
 
       if (result.success) {
         if (data.createHourlySlots && result.count) {
-          setMessage(`Successfully added ${result.count} hourly availability slots!`);
+          setMessage({
+            text: `Successfully added ${result.count} hourly availability slots!`,
+            type: 'success'
+          });
         } else {
-          setMessage('Availability added successfully!');
+          setMessage({ text: 'Availability added successfully!', type: 'success' });
         }
-        setMessageType('success');
         form.reset(defaultValues);
       } else {
-        setMessage(`Error adding availability: ${result.error || 'Unknown error'}`);
-        setMessageType('error');
+        setMessage({
+          text: `Error adding availability: ${result.error || 'Unknown error'}`,
+          type: 'error'
+        });
       }
     } catch (error) {
       console.error('Error adding availability:', error);
-      setMessage(
-        `Error adding availability: ${error instanceof Error ? error.message : String(error)}`
-      );
-      setMessageType('error');
+      setMessage({
+        text: `Error adding availability: ${error instanceof Error ? error.message : String(error)}`,
+        type: 'error'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -113,10 +125,10 @@ export default function AdminPage() {
       {message && (
         <div
           className={`mb-6 rounded p-4 ${
-            messageType === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
           }`}
         >
-          {message}
+          {message.text}
         </div>
       )}
 

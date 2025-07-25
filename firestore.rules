@@ -4,7 +4,10 @@ service cloud.firestore {
     // Allow public read access to availabilities collection
     match /availabilities/{document} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.token.role == 'admin';
+      allow write: if request.auth != null && 
+        (request.auth.token.role == 'admin' || 
+         (request.resource.data.status in ['pending', 'booked'] && 
+          request.auth != null));
     }
     
     // Allow authenticated users to read their own bookings

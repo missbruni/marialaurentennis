@@ -1,8 +1,10 @@
 import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
 import { getAuth, Auth } from 'firebase-admin/auth';
+import { getFirestore, Firestore } from 'firebase-admin/firestore';
 
 let firebaseAdmin: App | null = null;
 let adminAuth: Auth | null = null;
+let adminFirestore: Firestore | null = null;
 
 function initializeFirebaseAdmin(): App | null {
   if (typeof window !== 'undefined') {
@@ -34,6 +36,7 @@ function initializeFirebaseAdmin(): App | null {
     firebaseAdmin = getApps().length === 0 ? initializeApp(firebaseAdminConfig) : getApps()[0];
 
     adminAuth = getAuth(firebaseAdmin);
+    adminFirestore = getFirestore(firebaseAdmin);
     return firebaseAdmin;
   } catch (error) {
     console.error('Failed to initialize Firebase Admin:', error);
@@ -50,6 +53,13 @@ export function getAdminAuth(): Auth | null {
     initializeFirebaseAdmin();
   }
   return adminAuth;
+}
+
+export function getAdminFirestore(): Firestore | null {
+  if (!adminFirestore) {
+    initializeFirebaseAdmin();
+  }
+  return adminFirestore;
 }
 
 export async function verifySessionCookie(sessionCookie: string) {

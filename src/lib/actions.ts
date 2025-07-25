@@ -4,22 +4,13 @@ import { revalidatePath } from 'next/cache';
 
 import Stripe from 'stripe';
 import { format } from 'date-fns';
-import { formatTime } from '@/lib/date';
 
-import {
-  doc,
-  getDoc,
-  Timestamp,
-  updateDoc,
-  deleteField,
-  collection,
-  addDoc
-} from 'firebase/firestore';
 import { capitalizeWords } from '@/lib/string';
-import { getFirestore } from '@/lib/firebase';
 import { z } from 'zod';
 
 import { clearBookingsCache, clearAvailabilitiesCache } from './data';
+import { withAuth, type AuthenticatedUser } from './auth-utils';
+import type { Firestore } from 'firebase-admin/firestore';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2025-06-30.basil'
@@ -59,7 +50,11 @@ const CheckoutSessionSchema = z.object({
   userEmail: z.string().email().optional()
 });
 
-export async function createAvailabilityAction(formData: FormData) {
+async function _createAvailabilityAction(
+  formData: FormData,
+  db: Firestore,
+  user: AuthenticatedUser
+) {
   const rawData = {
     type: formData.get('type') as string,
     availabilityDate: new Date(formData.get('availabilityDate') as string),
@@ -74,8 +69,6 @@ export async function createAvailabilityAction(formData: FormData) {
   const validatedData = AvailabilityFormSchema.parse(rawData);
 
   try {
-    const db = await getFirestore();
-
     // Parse the start time
     const [startHours, startMinutes] = validatedData.availabilityStartTime.split(':').map(Number);
     const startDate = new Date(validatedData.availabilityDate);
@@ -93,8 +86,7 @@ export async function createAvailabilityAction(formData: FormData) {
         throw new Error('End time must be at least 1 hour after start time for hourly slots');
       }
 
-      const { writeBatch } = await import('firebase/firestore');
-      const availabilityBatch = writeBatch(db);
+      const batch = db.batch();
       let availabilityHourSlots = 0;
 
       for (let i = 0; i < hourDiff; i++) {
@@ -102,40 +94,43 @@ export async function createAvailabilityAction(formData: FormData) {
         const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000);
 
         const newAvailability = {
-          startDateTime: Timestamp.fromDate(slotStart),
-          endDateTime: Timestamp.fromDate(slotEnd),
+          startDateTime: slotStart,
+          endDateTime: slotEnd,
           players: validatedData.players,
           price: validatedData.price,
           location: validatedData.location,
           type: validatedData.type,
           currency: 'GBP',
-          status: 'available'
+          status: 'available',
+          createdBy: user.uid,
+          createdAt: new Date()
         };
 
-        const newDocRef = doc(collection(db, 'availabilities'));
-        availabilityBatch.set(newDocRef, newAvailability);
+        const docRef = db.collection('availabilities').doc();
+        batch.set(docRef, newAvailability);
         availabilityHourSlots++;
       }
 
-      await availabilityBatch.commit();
+      await batch.commit();
 
       clearAvailabilitiesCache();
       revalidatePath('/admin/availability');
       return { success: true, count: availabilityHourSlots };
     } else {
       const newAvailability = {
-        startDateTime: Timestamp.fromDate(startDate),
-        endDateTime: Timestamp.fromDate(endDate),
+        startDateTime: startDate,
+        endDateTime: endDate,
         players: validatedData.players,
         price: validatedData.price,
         location: validatedData.location,
         type: validatedData.type,
         currency: 'GBP',
-        status: 'available'
+        status: 'available',
+        createdBy: user.uid,
+        createdAt: new Date()
       };
 
-      const availabilitiesCollection = collection(db, 'availabilities');
-      const docRef = await addDoc(availabilitiesCollection, newAvailability);
+      const docRef = await db.collection('availabilities').add(newAvailability);
 
       clearAvailabilitiesCache();
 
@@ -151,7 +146,11 @@ export async function createAvailabilityAction(formData: FormData) {
   }
 }
 
-export async function createCheckoutSessionAction(formData: FormData) {
+async function _createCheckoutSessionAction(
+  formData: FormData,
+  db: Firestore,
+  _user: AuthenticatedUser
+) {
   const rawData = {
     lesson: JSON.parse(formData.get('lesson') as string),
     userId: formData.get('userId') || undefined,
@@ -161,37 +160,41 @@ export async function createCheckoutSessionAction(formData: FormData) {
   const validatedData = CheckoutSessionSchema.parse(rawData);
 
   try {
-    const db = await getFirestore();
+    const lessonRef = db.collection('availabilities').doc(validatedData.lesson.id);
+    const lessonDoc = await lessonRef.get();
 
-    const lessonRef = doc(db, 'availabilities', validatedData.lesson.id);
-    const lessonDoc = await getDoc(lessonRef);
-
-    if (!lessonDoc.exists() || lessonDoc.data()?.status !== 'available') {
+    if (!lessonDoc.exists || lessonDoc.data()?.status !== 'available') {
       return { success: false, error: 'Lesson is no longer available' };
     }
 
-    const startDateTime = new Timestamp(
-      validatedData.lesson.startDateTime.seconds,
-      validatedData.lesson.startDateTime.nanoseconds
-    );
-    const endDateTime = new Timestamp(
-      validatedData.lesson.endDateTime.seconds,
-      validatedData.lesson.endDateTime.nanoseconds
-    );
+    const startDateTime = new Date(validatedData.lesson.startDateTime.seconds * 1000);
+    const endDateTime = new Date(validatedData.lesson.endDateTime.seconds * 1000);
 
-    const date = startDateTime.toDate();
+    const date = startDateTime;
     const formattedDate = format(date, 'EEEE, MMMM d yyyy');
-    const formattedStartTime = formatTime(startDateTime);
-    const formattedEndTime = formatTime(endDateTime);
+    const formattedStartTime = startDateTime
+      .toLocaleTimeString('en-GB', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      })
+      .toUpperCase();
+    const formattedEndTime = endDateTime
+      .toLocaleTimeString('en-GB', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      })
+      .toUpperCase();
 
     const description = `
         ${formattedDate} | ${formattedStartTime} - ${formattedEndTime}
     `.trim();
 
     const pendingUntil = new Date(Date.now() + THIRTY_MINUTES);
-    await updateDoc(lessonRef, {
+    await lessonRef.update({
       status: 'pending',
-      pendingUntil: Timestamp.fromDate(pendingUntil),
+      pendingUntil: pendingUntil,
       pendingSessionId: null
     });
 
@@ -237,7 +240,7 @@ export async function createCheckoutSessionAction(formData: FormData) {
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}?releaseLesson=${validatedData.lesson.id}`
     });
 
-    await updateDoc(lessonRef, {
+    await lessonRef.update({
       pendingSessionId: session.id
     });
 
@@ -253,35 +256,29 @@ export async function createCheckoutSessionAction(formData: FormData) {
   }
 }
 
-export async function createBookingAction(formData: FormData) {
+async function _createBookingAction(formData: FormData, db: Firestore, _user: AuthenticatedUser) {
   const booking = JSON.parse(formData.get('booking') as string);
   const userEmail = formData.get('userEmail') as string;
   const sessionId = formData.get('sessionId') as string;
   const userId = formData.get('userId') as string;
 
   try {
-    const db = await getFirestore();
-
     const newBooking = {
-      startDateTime: new Timestamp(
-        booking.startDateTime.seconds,
-        booking.startDateTime.nanoseconds
-      ),
-      endDateTime: new Timestamp(booking.endDateTime.seconds, booking.endDateTime.nanoseconds),
+      startDateTime: new Date(booking.startDateTime.seconds * 1000),
+      endDateTime: new Date(booking.endDateTime.seconds * 1000),
       location: booking.location,
       userEmail: userEmail,
       stripeSessionId: sessionId,
       status: 'confirmed',
-      createdAt: Timestamp.now(),
+      createdAt: new Date(),
       userId: userId
     };
 
-    const bookingsCollection = collection(db, 'bookings');
-    const docRef = await addDoc(bookingsCollection, newBooking);
+    const docRef = await db.collection('bookings').add(newBooking);
 
     if (booking.id) {
-      const availabilityRef = doc(db, 'availabilities', booking.id);
-      await updateDoc(availabilityRef, { status: 'booked', pendingUntil: deleteField() });
+      const availabilityRef = db.collection('availabilities').doc(booking.id);
+      await availabilityRef.update({ status: 'booked' });
     }
 
     clearBookingsCache(userId);
@@ -294,3 +291,7 @@ export async function createBookingAction(formData: FormData) {
     return { success: false, error: 'Failed to create booking' };
   }
 }
+
+export const createBookingAction = withAuth(_createBookingAction, false);
+export const createAvailabilityAction = withAuth(_createAvailabilityAction, true);
+export const createCheckoutSessionAction = withAuth(_createCheckoutSessionAction, false);

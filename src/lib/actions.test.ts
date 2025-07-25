@@ -4,7 +4,6 @@ import {
   createCheckoutSessionAction,
   createBookingAction
 } from './actions';
-import { ZodError } from 'zod';
 
 vi.mock('./data', () => ({
   clearAvailabilitiesCache: vi.fn(),
@@ -13,6 +12,36 @@ vi.mock('./data', () => ({
 
 vi.mock('@/lib/firebase', () => ({
   getFirestore: vi.fn().mockResolvedValue({})
+}));
+
+vi.mock('@/lib/firebase-admin', () => ({
+  getAdminAuth: vi.fn(() => ({
+    verifyIdToken: vi.fn().mockResolvedValue({
+      uid: 'admin-uid',
+      role: 'admin'
+    })
+  })),
+  getAdminFirestore: vi.fn(() => ({
+    batch: vi.fn(() => ({
+      set: vi.fn(),
+      commit: vi.fn()
+    })),
+    collection: vi.fn(() => ({
+      doc: vi.fn(() => ({
+        id: 'mock-doc-id',
+        get: vi.fn().mockResolvedValue({
+          exists: true,
+          data: () => ({ status: 'available' })
+        }),
+        update: vi.fn().mockResolvedValue(undefined)
+      })),
+      add: vi.fn(() => Promise.resolve({ id: 'mock-doc-id' }))
+    }))
+  })),
+  verifySessionCookie: vi.fn().mockResolvedValue({
+    uid: 'admin-uid',
+    role: 'admin'
+  })
 }));
 
 vi.mock('stripe', () => {
@@ -80,6 +109,20 @@ vi.mock('next/navigation', () => ({
   redirect: vi.fn()
 }));
 
+// Mock next/headers
+vi.mock('next/headers', () => ({
+  cookies: vi.fn(() =>
+    Promise.resolve({
+      get: vi.fn((name: string) => {
+        if (name === 'mlt_session') {
+          return { value: 'mock-session-cookie' };
+        }
+        return undefined;
+      })
+    })
+  )
+}));
+
 describe('Server Actions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -100,7 +143,9 @@ describe('Server Actions', () => {
       const result = await createAvailabilityAction(formData);
 
       expect(result.success).toBe(true);
-      expect(result.count).toBe(1);
+      if (result.success) {
+        expect(result.count).toBe(1);
+      }
     });
 
     test('should clear availabilities cache when creating single availability', async () => {
@@ -139,10 +184,26 @@ describe('Server Actions', () => {
       expect(clearAvailabilitiesCache).toHaveBeenCalledTimes(1);
     });
 
-    test('should handle validation errors', async () => {
-      const formData = new FormData();
+    test('should handle authentication errors', async () => {
+      // Mock cookies to return no session
+      const { cookies } = await import('next/headers');
+      vi.mocked(cookies).mockResolvedValueOnce({
+        get: vi.fn(() => undefined)
+      } as any);
 
-      await expect(createAvailabilityAction(formData)).rejects.toThrow(ZodError);
+      const formData = new FormData();
+      formData.append('type', 'private');
+      formData.append('availabilityDate', '2025-12-25T00:00:00.000Z');
+      formData.append('availabilityStartTime', '10:00');
+      formData.append('availabilityEndTime', '11:00');
+      formData.append('players', '1');
+      formData.append('location', 'sundridge');
+      formData.append('price', '40');
+      formData.append('createHourlySlots', 'off');
+
+      const result = await createAvailabilityAction(formData);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Unauthorized: Admin access required');
     });
 
     test('should create hourly slots when requested', async () => {
@@ -159,7 +220,9 @@ describe('Server Actions', () => {
       const result = await createAvailabilityAction(formData);
 
       expect(result.success).toBe(true);
-      expect(result.count).toBe(2); // 2 hours
+      if (result.success) {
+        expect(result.count).toBe(2); // 2 hours
+      }
     });
   });
 
@@ -183,7 +246,9 @@ describe('Server Actions', () => {
       const result = await createCheckoutSessionAction(formData);
 
       expect(result.success).toBe(true);
-      expect(result.url).toBe('https://checkout.stripe.com/mock-session');
+      if (result.success) {
+        expect(result.url).toBe('https://checkout.stripe.com/mock-session');
+      }
     });
 
     test('should clear availabilities cache when creating checkout session', async () => {
@@ -209,10 +274,31 @@ describe('Server Actions', () => {
       expect(clearAvailabilitiesCache).toHaveBeenCalledTimes(1);
     });
 
-    test('should handle validation errors', async () => {
-      const formData = new FormData();
+    test('should handle authentication errors', async () => {
+      // Mock cookies to return no session
+      const { cookies } = await import('next/headers');
+      vi.mocked(cookies).mockResolvedValueOnce({
+        get: vi.fn(() => undefined)
+      } as any);
 
-      await expect(createCheckoutSessionAction(formData)).rejects.toThrow(ZodError);
+      const mockLesson = {
+        id: 'lesson-123',
+        startDateTime: { seconds: 1234567890, nanoseconds: 123456789 },
+        endDateTime: { seconds: 1234571490, nanoseconds: 123456789 },
+        price: 50,
+        location: 'sundridge',
+        players: 1,
+        type: 'private'
+      };
+
+      const formData = new FormData();
+      formData.append('lesson', JSON.stringify(mockLesson));
+      formData.append('userId', 'user-123');
+      formData.append('userEmail', 'test@example.com');
+
+      const result = await createCheckoutSessionAction(formData);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Authentication required');
     });
   });
 
@@ -234,7 +320,9 @@ describe('Server Actions', () => {
       const result = await createBookingAction(formData);
 
       expect(result.success).toBe(true);
-      expect(result.booking?.id).toBe('mock-availability-id');
+      if (result.success) {
+        expect(result.booking?.id).toBe('mock-doc-id');
+      }
     });
 
     test('should clear user-specific bookings cache when creating booking', async () => {
