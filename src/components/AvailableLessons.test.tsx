@@ -5,71 +5,6 @@ import AvailableLessons from './AvailableLessons';
 
 import type { Availability } from '@/services/availabilities';
 
-vi.mock('react', async () => {
-  const actual = await vi.importActual('react');
-  return {
-    ...actual,
-    use: vi.fn((promise) => {
-      if (promise && typeof promise.then === 'function') {
-        return [
-          {
-            id: '1',
-            startDateTime: {
-              toDate: () => new Date('2023-07-15T10:00:00'),
-              seconds: 1689415200,
-              nanoseconds: 0
-            },
-            endDateTime: {
-              toDate: () => new Date('2023-07-15T11:00:00'),
-              seconds: 1689418800,
-              nanoseconds: 0
-            },
-            price: 50,
-            location: 'sundridge',
-            players: 1,
-            type: 'private'
-          },
-          {
-            id: '2',
-            startDateTime: {
-              toDate: () => new Date('2023-07-15T11:30:00'),
-              seconds: 1689420600,
-              nanoseconds: 0
-            },
-            endDateTime: {
-              toDate: () => new Date('2023-07-15T12:30:00'),
-              seconds: 1689424200,
-              nanoseconds: 0
-            },
-            price: 45,
-            location: 'sundridge',
-            players: 1,
-            type: 'group'
-          },
-          {
-            id: '3',
-            startDateTime: {
-              toDate: () => new Date('2023-07-15T13:00:00'),
-              seconds: 1689426000,
-              nanoseconds: 0
-            },
-            endDateTime: {
-              toDate: () => new Date('2023-07-15T14:00:00'),
-              seconds: 1689429600,
-              nanoseconds: 0
-            },
-            price: 50,
-            location: 'sundridge',
-            players: 1,
-            type: 'private'
-          }
-        ];
-      }
-      return promise;
-    })
-  };
-});
-
 // Mock Firebase Firestore with all required exports
 vi.mock('firebase/firestore', () => {
   const TimestampMock = function (seconds: number, nanoseconds: number) {
@@ -152,6 +87,83 @@ vi.mock('./Lesson', () => ({
 describe('AvailableLessons', () => {
   const mockDate = '2023-07-15';
   const mockLocation = 'sundridge';
+  const mockAvailabilities: Availability[] = [
+    {
+      id: '1',
+      startDateTime: {
+        toDate: () => new Date('2023-07-15T10:00:00'),
+        toMillis: () => 1689415200000,
+        isEqual: () => false,
+        toJSON: () => ({ seconds: 1689415200, nanoseconds: 0, type: 'timestamp' }),
+        valueOf: () => '1689415200',
+        seconds: 1689415200,
+        nanoseconds: 0
+      },
+      endDateTime: {
+        toDate: () => new Date('2023-07-15T11:00:00'),
+        toMillis: () => 1689418800000,
+        isEqual: () => false,
+        toJSON: () => ({ seconds: 1689418800, nanoseconds: 0, type: 'timestamp' }),
+        valueOf: () => '1689418800',
+        seconds: 1689418800,
+        nanoseconds: 0
+      },
+      price: 50,
+      location: 'sundridge',
+      players: 1,
+      type: 'private'
+    },
+    {
+      id: '2',
+      startDateTime: {
+        toDate: () => new Date('2023-07-15T11:30:00'),
+        toMillis: () => 1689420600000,
+        isEqual: () => false,
+        toJSON: () => ({ seconds: 1689420600, nanoseconds: 0, type: 'timestamp' }),
+        valueOf: () => '1689420600',
+        seconds: 1689420600,
+        nanoseconds: 0
+      },
+      endDateTime: {
+        toDate: () => new Date('2023-07-15T12:30:00'),
+        toMillis: () => 1689424200000,
+        isEqual: () => false,
+        toJSON: () => ({ seconds: 1689424200, nanoseconds: 0, type: 'timestamp' }),
+        valueOf: () => '1689424200',
+        seconds: 1689424200,
+        nanoseconds: 0
+      },
+      price: 45,
+      location: 'sundridge',
+      players: 1,
+      type: 'group'
+    },
+    {
+      id: '3',
+      startDateTime: {
+        toDate: () => new Date('2023-07-15T13:00:00'),
+        toMillis: () => 1689426000000,
+        isEqual: () => false,
+        toJSON: () => ({ seconds: 1689426000, nanoseconds: 0, type: 'timestamp' }),
+        valueOf: () => '1689426000',
+        seconds: 1689426000,
+        nanoseconds: 0
+      },
+      endDateTime: {
+        toDate: () => new Date('2023-07-15T14:00:00'),
+        toMillis: () => 1689429600000,
+        isEqual: () => false,
+        toJSON: () => ({ seconds: 1689429600, nanoseconds: 0, type: 'timestamp' }),
+        valueOf: () => '1689429600',
+        seconds: 1689429600,
+        nanoseconds: 0
+      },
+      price: 50,
+      location: 'sundridge',
+      players: 1,
+      type: 'private'
+    }
+  ];
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -170,6 +182,7 @@ describe('AvailableLessons', () => {
           selectedDate={mockDate}
           selectedLocation={mockLocation}
           nextAvailableSlot={null}
+          availabilities={mockAvailabilities}
         />
       );
     });
@@ -187,6 +200,7 @@ describe('AvailableLessons', () => {
           selectedDate={mockDate}
           selectedLocation={mockLocation}
           nextAvailableSlot={nextAvailableSlot}
+          availabilities={mockAvailabilities}
         />
       );
     });
@@ -204,6 +218,7 @@ describe('AvailableLessons', () => {
           selectedDate={mockDate}
           selectedLocation={mockLocation}
           nextAvailableSlot={nextAvailableSlot}
+          availabilities={mockAvailabilities}
         />
       );
     });

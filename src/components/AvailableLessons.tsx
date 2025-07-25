@@ -9,16 +9,13 @@ import { useAuth } from '../hooks/useAuth';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { AlertCircleIcon } from 'lucide-react';
 import { createCheckoutSessionAction } from '@/lib/actions';
-import { use } from 'react';
-import { getAvailabilitiesData } from '@/lib/data';
 import { Skeleton } from './ui/skeleton';
-
-const availabilitiesPromise = getAvailabilitiesData();
 
 type AvailableLessonsProps = {
   selectedDate: string;
   selectedLocation: string;
   nextAvailableSlot: Date | null;
+  availabilities: Availability[];
 };
 
 export function AvailableLessonsSkeleton() {
@@ -34,7 +31,7 @@ export function AvailableLessonsSkeleton() {
 }
 
 const AvailableLessons: React.FC<AvailableLessonsProps> = React.memo(
-  ({ selectedDate, selectedLocation, nextAvailableSlot }) => {
+  ({ selectedDate, selectedLocation, nextAvailableSlot, availabilities }) => {
     const { user } = useAuth();
 
     const [isLoading, setIsLoading] = React.useState(false);
@@ -42,7 +39,6 @@ const AvailableLessons: React.FC<AvailableLessonsProps> = React.memo(
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
     const prevDateRef = React.useRef(selectedDate);
-    const availabilities = use(availabilitiesPromise);
 
     const datesByLocation = React.useMemo(() => {
       if (!availabilities || !selectedLocation) return [];

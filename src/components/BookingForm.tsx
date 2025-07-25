@@ -1,17 +1,20 @@
 import React, { Suspense } from 'react';
 import { useForm } from 'react-hook-form';
-import { format } from 'date-fns';
+import { format, parseISO, startOfDay, isAfter, isEqual, isBefore } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
 import AvailableLessons, { AvailableLessonsSkeleton } from './AvailableLessons';
 import { z } from 'zod';
-import { Form } from './ui/form';
+import { Form, FormField } from './ui/form';
+import DatePicker from './DatePicker';
 import TennisBall from './TennisBall';
 import { Typography } from './ui/typography';
 import { useSectionRef } from '@/hooks/useSectionRef';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { Skeleton } from './ui/skeleton';
 import { ErrorBoundary } from './ErrorBoundary';
-import { DatePickerWithData } from './DatePickerWithData';
+import type { Availability } from '@/services/availabilities';
+import { use } from 'react';
+import { getAvailabilitiesData } from '@/lib/data';
 
 const DATE_FORMAT = 'yyyy-MM-dd';
 
@@ -22,6 +25,8 @@ export const BookingFormSchema = z.object({
     })
     .optional()
 });
+
+const availabilitiesPromise = getAvailabilitiesData();
 
 const BookingForm: React.FC = React.memo(() => {
   const { bookingFormRef, availableLessonsRef, scrollToAvailableLessons } = useSectionRef();
@@ -37,6 +42,50 @@ const BookingForm: React.FC = React.memo(() => {
 
   const selectedDate = form.watch('date');
   const selectedLocation = 'sundridge';
+  const availabilities = use(availabilitiesPromise);
+
+  const datesByLocation = React.useMemo(() => {
+    if (!availabilities || !selectedLocation) return [];
+
+    return availabilities.filter((availability: Availability) =>
+      availability.location.toLowerCase().includes(selectedLocation)
+    );
+  }, [availabilities, selectedLocation]);
+
+  const availableUniqueDates = React.useMemo(() => {
+    if (!datesByLocation || datesByLocation.length === 0) return [];
+
+    const uniqueDates = new Set<string>();
+    const now = new Date();
+    const today = startOfDay(now);
+
+    datesByLocation.forEach((availability: Availability) => {
+      const date = startOfDay(availability.startDateTime.toDate());
+      const dateString = format(date, DATE_FORMAT);
+      const isToday = isEqual(date, today);
+
+      if (isBefore(date, today)) return;
+      if (isToday && availability.startDateTime.toDate() <= now) return;
+
+      uniqueDates.add(dateString);
+    });
+
+    return Array.from(uniqueDates).map((dateString) => parseISO(dateString));
+  }, [datesByLocation]);
+
+  const nextAvailableDate = React.useMemo(() => {
+    if (!availableUniqueDates.length) return null;
+    if (!selectedDate) return availableUniqueDates[0];
+
+    const selectedDateStart = startOfDay(selectedDate);
+    const nextDate = availableUniqueDates.find((date) =>
+      isAfter(startOfDay(date), selectedDateStart)
+    );
+
+    if (nextDate) return nextDate;
+
+    return null;
+  }, [availableUniqueDates, selectedDate]);
 
   const handleNextAvailableSlot = React.useCallback(
     (date: Date) => {
@@ -44,6 +93,24 @@ const BookingForm: React.FC = React.memo(() => {
     },
     [form]
   );
+
+  React.useEffect(() => {
+    if (!availableUniqueDates || availableUniqueDates.length === 0) {
+      setNextAvailableSlot(null);
+      return;
+    }
+
+    const today = startOfDay(new Date());
+    const nextAvailable =
+      availableUniqueDates
+        .filter((date) => {
+          const dateToCheck = startOfDay(date);
+          return isAfter(dateToCheck, today) || isEqual(dateToCheck, today);
+        })
+        .sort((a, b) => a.getTime() - b.getTime())[0] || null;
+
+    setNextAvailableSlot(nextAvailable);
+  }, [availableUniqueDates, setNextAvailableSlot]);
 
   const scrollToAvailableLessonsCallback = React.useCallback(() => {
     scrollToAvailableLessons(-100);
@@ -99,11 +166,19 @@ const BookingForm: React.FC = React.memo(() => {
                       </div>
                     }
                   >
-                    <DatePickerWithData
-                      form={form}
-                      selectedLocation={selectedLocation}
-                      handleNextAvailableSlot={handleNextAvailableSlot}
-                      setNextAvailableSlot={setNextAvailableSlot}
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <DatePicker
+                          field={field}
+                          availableDates={availableUniqueDates}
+                          disabled={!selectedLocation}
+                          helperText="Choose a date to see available lessons."
+                          nextAvailableDate={nextAvailableDate}
+                          onNextAvailableSlot={handleNextAvailableSlot}
+                        />
+                      )}
                     />
                   </ErrorBoundary>
                 </Suspense>
@@ -116,21 +191,12 @@ const BookingForm: React.FC = React.memo(() => {
                 className="relative z-10 flex-1"
                 ref={availableLessonsRef}
               >
-                <Suspense fallback={<AvailableLessonsSkeleton />}>
-                  <ErrorBoundary
-                    fallback={
-                      <div className="relative z-10 px-4 text-red-500">
-                        Error loading lessons. Please try again later.
-                      </div>
-                    }
-                  >
-                    <AvailableLessons
-                      selectedDate={selectedDate ? format(selectedDate, DATE_FORMAT) : ''}
-                      selectedLocation={selectedLocation}
-                      nextAvailableSlot={nextAvailableSlot}
-                    />
-                  </ErrorBoundary>
-                </Suspense>
+                <AvailableLessons
+                  selectedDate={selectedDate ? format(selectedDate, DATE_FORMAT) : ''}
+                  selectedLocation={selectedLocation}
+                  nextAvailableSlot={nextAvailableSlot}
+                  availabilities={availabilities}
+                />
               </div>
             )}
           </div>
