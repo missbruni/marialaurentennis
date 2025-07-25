@@ -9,16 +9,8 @@ const CACHE_DURATION_5_MINUTES = 5 * 60 * 1000;
 const bookingsCache: Record<string, { data: Booking[]; time: number }> = {};
 
 export async function getAvailabilitiesData() {
-  const now = Date.now();
-
-  if (availabilitiesCache && now - availabilitiesCacheTime < CACHE_DURATION_5_MINUTES) {
-    return availabilitiesCache;
-  }
-
   try {
     const data = await getAvailability();
-    availabilitiesCache = data;
-    availabilitiesCacheTime = now;
     return data;
   } catch (error) {
     console.error('Error fetching availabilities:', error);

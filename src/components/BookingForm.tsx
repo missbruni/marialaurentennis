@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import { useForm } from 'react-hook-form';
 import { format, parseISO, startOfDay, isAfter, isEqual, isBefore } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
-import AvailableLessons, { AvailableLessonsSkeleton } from './AvailableLessons';
+import AvailableLessons from './AvailableLessons';
 import { z } from 'zod';
 import { Form, FormField } from './ui/form';
 import DatePicker from './DatePicker';
@@ -30,8 +30,10 @@ const availabilitiesPromise = getAvailabilitiesData();
 
 const BookingForm: React.FC = React.memo(() => {
   const { bookingFormRef, availableLessonsRef, scrollToAvailableLessons } = useSectionRef();
-  const [nextAvailableSlot, setNextAvailableSlot] = React.useState<Date | null>(null);
+
   const isMobile = useMediaQuery('(max-width: 768px)');
+
+  const [nextAvailableSlot, setNextAvailableSlot] = React.useState<Date | null>(null);
 
   const form = useForm<z.infer<typeof BookingFormSchema>>({
     resolver: zodResolver(BookingFormSchema),
@@ -40,9 +42,10 @@ const BookingForm: React.FC = React.memo(() => {
     }
   });
 
+  const availabilities = use(availabilitiesPromise);
+
   const selectedDate = form.watch('date');
   const selectedLocation = 'sundridge';
-  const availabilities = use(availabilitiesPromise);
 
   const datesByLocation = React.useMemo(() => {
     if (!availabilities || !selectedLocation) return [];

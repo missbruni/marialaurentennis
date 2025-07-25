@@ -9,7 +9,6 @@ import { useAuth } from '../hooks/useAuth';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { AlertCircleIcon } from 'lucide-react';
 import { createCheckoutSessionAction } from '@/lib/actions';
-import { Skeleton } from './ui/skeleton';
 
 type AvailableLessonsProps = {
   selectedDate: string;
@@ -17,18 +16,6 @@ type AvailableLessonsProps = {
   nextAvailableSlot: Date | null;
   availabilities: Availability[];
 };
-
-export function AvailableLessonsSkeleton() {
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-14 w-full rounded-lg" />
-        ))}
-      </div>
-    </div>
-  );
-}
 
 const AvailableLessons: React.FC<AvailableLessonsProps> = React.memo(
   ({ selectedDate, selectedLocation, nextAvailableSlot, availabilities }) => {

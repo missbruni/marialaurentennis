@@ -66,35 +66,35 @@ const AppBar = () => {
     <>
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
           onClick={() => setMobileMenuOpen(false)}
           aria-hidden="true"
         />
       )}
-      <header className="sticky top-0 z-50 w-full h-18 px-4 md:px-10 dark:bg-[#181818] bg-white border-b-[var(--sidebar-border)] border-b-1">
+      <header className="sticky top-0 z-50 h-18 w-full border-b-1 border-b-[var(--sidebar-border)] bg-white px-4 md:px-10 dark:bg-[#181818]">
         <div className="mx-auto flex h-18 items-center justify-between">
           <div className="flex items-center gap-2">
-            <Link href="/" className="font-bold text-xl text-foreground">
+            <Link href="/" className="text-foreground text-xl font-bold">
               {logoSrc && <Image src={logoSrc} alt="Maria Lauren Tennis" width={70} height={50} />}
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6 text-sm">
+          <nav className="hidden items-center gap-6 text-sm md:flex">
             <Link
               href="/"
-              className="font-medium text-foreground hover:text-primary hover:font-bold transition-all duration-200"
+              className="text-foreground hover:text-primary font-medium transition-all duration-200 hover:font-bold"
             >
               Home
             </Link>
             <button
-              className="font-medium text-foreground hover:text-primary hover:font-bold transition-all duration-200 bg-transparent border-none p-0 cursor-pointer"
+              className="text-foreground hover:text-primary cursor-pointer border-none bg-transparent p-0 font-medium transition-all duration-200 hover:font-bold"
               onClick={handleBookLesson}
             >
               Lessons
             </button>
             <button
-              className="font-medium text-foreground hover:text-primary hover:font-bold transition-all duration-200 bg-transparent border-none p-0 cursor-pointer"
+              className="text-foreground hover:text-primary cursor-pointer border-none bg-transparent p-0 font-medium transition-all duration-200 hover:font-bold"
               onClick={handleContactClick}
             >
               Contact
@@ -102,7 +102,7 @@ const AppBar = () => {
             {isAdmin && (
               <Link
                 href="/admin"
-                className="font-medium text-foreground hover:text-primary hover:font-bold transition-all duration-200"
+                className="text-foreground hover:text-primary font-medium transition-all duration-200 hover:font-bold"
               >
                 Admin
               </Link>
@@ -111,7 +111,7 @@ const AppBar = () => {
 
           <div className="flex items-center gap-4">
             <Button
-              className="hidden md:inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-medium transition-colors hover:bg-primary/90 h-9 px-4"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 hidden h-9 items-center justify-center rounded-md px-4 text-sm font-medium transition-colors md:inline-flex"
               onClick={handleBookLesson}
               aria-label="Book Now"
             >
@@ -124,22 +124,22 @@ const AppBar = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="md:hidden text-foreground"
+                  className="text-foreground md:hidden"
                   aria-label="Toggle menu"
                 >
                   <Menu className="h-6 w-6" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent
-                className="w-screen p-0 mt-2 rounded-t-none rounded-b-xl shadow-lg border-none z-50"
+                className="z-50 mt-2 w-screen rounded-t-none rounded-b-xl border-none p-0 shadow-lg"
                 align="end"
                 sideOffset={0}
               >
                 <div className="flex flex-col py-6">
-                  <nav className="flex flex-col  px-6">
+                  <nav className="flex flex-col px-6">
                     <Link
                       href="/"
-                      className="py-3 text-lg font-medium border-b border-border transition-colors hover:text-primary"
+                      className="border-border hover:text-primary border-b py-3 text-lg font-medium transition-colors"
                       onClick={handleMobileMenuItemClick}
                     >
                       Home
@@ -149,7 +149,7 @@ const AppBar = () => {
                         handleBookLesson();
                         handleMobileMenuItemClick();
                       }}
-                      className="py-3 text-lg font-medium border-b border-border transition-colors hover:text-primary text-left bg-transparent"
+                      className="border-border hover:text-primary border-b bg-transparent py-3 text-left text-lg font-medium transition-colors"
                     >
                       Lessons
                     </button>
@@ -158,21 +158,21 @@ const AppBar = () => {
                         handleContactClick();
                         handleMobileMenuItemClick();
                       }}
-                      className="py-3 text-lg font-medium border-b border-border transition-colors hover:text-primary text-left bg-transparent"
+                      className="border-border hover:text-primary border-b bg-transparent py-3 text-left text-lg font-medium transition-colors"
                     >
                       Contact
                     </button>
                     {isAdmin && (
                       <Link
                         href="/admin"
-                        className="py-3 text-lg font-medium border-b border-border transition-colors hover:text-primary"
+                        className="border-border hover:text-primary border-b py-3 text-lg font-medium transition-colors"
                         onClick={handleMobileMenuItemClick}
                       >
                         Admin
                       </Link>
                     )}
                   </nav>
-                  <div className="mt-4 px-6 space-y-4">
+                  <div className="mt-4 space-y-4 px-6">
                     <Button
                       className="w-full"
                       onClick={() => {

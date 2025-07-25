@@ -60,6 +60,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (user) {
       try {
         await createSessionCookie(user);
+        await user.getIdToken(true);
+
         const idTokenResult = await user.getIdTokenResult();
         const hasAdminRole = idTokenResult.claims.role === 'admin';
 
