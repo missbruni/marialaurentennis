@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getAvailabilitiesData } from '@/lib/data';
 import type { SerializedAvailability } from '@/types/availability';
 import { deserializeAvailabilities } from '@/lib/serialize';
+import React from 'react';
 
 interface UseAvailabilitiesOptions {
   initialData?: SerializedAvailability[];
@@ -21,10 +22,10 @@ export function useAvailabilities(options: UseAvailabilitiesOptions = {}) {
     initialData: options.initialData ? deserializeAvailabilities(options.initialData) : undefined
   });
 
-  const refreshAvailabilities = () => {
+  const refreshAvailabilities = React.useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['availabilities'] });
     refetch();
-  };
+  }, [queryClient, refetch]);
 
   return {
     refreshAvailabilities,

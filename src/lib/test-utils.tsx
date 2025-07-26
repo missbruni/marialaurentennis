@@ -220,6 +220,7 @@ export const createMockAvailability = (
     location?: string;
     players?: number;
     type?: string;
+    status?: string;
   } = {}
 ) => ({
   id,
@@ -228,7 +229,8 @@ export const createMockAvailability = (
   price: options.price ?? 45,
   location: options.location ?? 'sundridge',
   players: options.players ?? 1,
-  type: options.type ?? 'private'
+  type: options.type ?? 'private',
+  status: options.status ?? 'available'
 });
 
 function customRender(ui: React.ReactElement) {

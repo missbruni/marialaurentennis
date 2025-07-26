@@ -120,16 +120,13 @@ vi.mock('lucide-react', async () => {
         Loading...
       </div>
     )
-    // Add any other icons you want to mock here
   };
 });
 
-// Set up MockDate for consistent date testing
 // This ensures all date-related tests use a fixed date to prevent future failures
 const FIXED_DATE = new Date('2023-07-15T10:30:00.000Z');
 MockDate.set(FIXED_DATE);
 
-// Reset MockDate after each test to prevent test pollution
 afterEach(() => {
   MockDate.reset();
 });
