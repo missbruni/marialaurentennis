@@ -129,7 +129,7 @@ describe('EmailPassword', () => {
     await user.click(screen.getByRole('button', { name: 'Sign In' }));
 
     expect(screen.getByText('Signing In...')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Signing In...' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Loading... Signing In...' })).toBeDisabled();
   });
 
   test('displays error message when authentication fails', async () => {

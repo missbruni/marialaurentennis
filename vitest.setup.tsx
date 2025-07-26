@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import { vi, afterEach } from 'vitest';
+import MockDate from 'mockdate';
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
@@ -105,3 +106,30 @@ vi.mock('firebase/app', () => ({
   getApps: vi.fn(() => []),
   getApp: vi.fn(() => ({}))
 }));
+
+// Mock lucide-react globally, passing through all icons except the ones we want to mock
+vi.mock('lucide-react', async () => {
+  const actual = await vi.importActual<any>('lucide-react');
+  return {
+    ...actual,
+    FacebookIcon: (props: any) => <svg data-testid="facebook-icon" {...props} />,
+    InstagramIcon: (props: any) => <svg data-testid="instagram-icon" {...props} />,
+    TwitterIcon: (props: any) => <svg data-testid="twitter-icon" {...props} />,
+    Loader2: (props: any) => (
+      <div data-testid="loader" {...props}>
+        Loading...
+      </div>
+    )
+    // Add any other icons you want to mock here
+  };
+});
+
+// Set up MockDate for consistent date testing
+// This ensures all date-related tests use a fixed date to prevent future failures
+const FIXED_DATE = new Date('2023-07-15T10:30:00.000Z');
+MockDate.set(FIXED_DATE);
+
+// Reset MockDate after each test to prevent test pollution
+afterEach(() => {
+  MockDate.reset();
+});

@@ -1,11 +1,12 @@
 import React from 'react';
-import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderWithAuth, screen } from '@/lib/test-utils';
 import DatePicker from './DatePicker';
 import type { FieldValues } from 'react-hook-form';
 import { format, addDays } from 'date-fns';
 import { FormProvider, useForm } from 'react-hook-form';
 import userEvent from '@testing-library/user-event';
+import { TEST_DATES, setupMockDate, resetMockDate } from '@/lib/test-utils';
 
 const DatePickerWithFormContext = (props: React.ComponentProps<typeof DatePicker>) => {
   const methods = useForm();
@@ -17,7 +18,7 @@ const DatePickerWithFormContext = (props: React.ComponentProps<typeof DatePicker
 };
 
 describe('DatePicker', () => {
-  const today = new Date();
+  const today = TEST_DATES.FIXED_DATE;
   const tomorrow = addDays(today, 1);
   const nextWeek = addDays(today, 7);
 
@@ -31,6 +32,11 @@ describe('DatePicker', () => {
   const mockAvailableDates = [tomorrow, nextWeek, addDays(today, 14)];
 
   beforeEach(() => {
+    setupMockDate(TEST_DATES.FIXED_DATE);
+  });
+
+  afterEach(() => {
+    resetMockDate();
     vi.clearAllMocks();
   });
 
