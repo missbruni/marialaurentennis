@@ -232,7 +232,7 @@ export const createMockAvailability = (
     location?: string;
     players?: number;
     type?: string;
-    status?: string;
+    status?: 'available' | 'pending' | 'booked';
   } = {}
 ) => ({
   id,
