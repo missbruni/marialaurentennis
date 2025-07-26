@@ -154,8 +154,7 @@ describe('useAuth', () => {
     await user.click(screen.getByTestId('login-button'));
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Error signing in with Google:',
-      expect.any(Error)
+      expect.stringContaining('ERROR: Authentication failed: signInWithGoogle')
     );
 
     consoleErrorSpy.mockRestore();
@@ -173,7 +172,9 @@ describe('useAuth', () => {
 
     await user.click(screen.getByTestId('logout-button'));
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith('Error signing out:', expect.any(Error));
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('ERROR: Authentication failed: logout')
+    );
 
     consoleErrorSpy.mockRestore();
   });
@@ -271,7 +272,9 @@ describe('useAuth', () => {
 
     await user.click(screen.getByTestId('login-button'));
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith('Error creating session:', expect.any(Error));
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('ERROR: Authentication failed: createSessionCookie')
+    );
 
     consoleErrorSpy.mockRestore();
   });
@@ -294,7 +297,9 @@ describe('useAuth', () => {
 
     await user.click(screen.getByTestId('login-button'));
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith('Error getting token claims:', expect.any(Error));
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('ERROR: Authentication failed: getTokenClaims')
+    );
 
     consoleErrorSpy.mockRestore();
   });

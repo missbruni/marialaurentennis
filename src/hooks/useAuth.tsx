@@ -10,6 +10,7 @@ import {
 } from 'firebase/auth';
 import React from 'react';
 import { getAuth } from '@/lib/firebase';
+import { logger } from '@/lib/logger';
 
 type AuthEmailPassword = (email: string, password: string) => Promise<void>;
 export type AuthContextType = {
@@ -41,7 +42,15 @@ const createSessionCookie = async (user: User) => {
 
     return true;
   } catch (error) {
-    console.error('Error creating session:', error);
+    logger.authFailure(
+      'createSessionCookie',
+      error instanceof Error ? error : new Error('Unknown error'),
+      {
+        action: 'createSessionCookie',
+        userId: user.uid,
+        userEmail: user.email || undefined
+      }
+    );
     return false;
   }
 };
@@ -69,7 +78,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(user);
         setLoading(false);
       } catch (error) {
-        console.error('Error getting token claims:', error);
+        logger.authFailure(
+          'getTokenClaims',
+          error instanceof Error ? error : new Error('Unknown error'),
+          {
+            action: 'getTokenClaims',
+            userId: user.uid,
+            userEmail: user.email || undefined
+          }
+        );
         setIsAdmin(false);
         setUser(user);
         setLoading(false);
@@ -88,7 +105,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await signInWithPopup(auth, provider);
       await handleUserAuthentication(result.user);
     } catch (error) {
-      console.error('Error signing in with Google:', error);
+      logger.authFailure(
+        'signInWithGoogle',
+        error instanceof Error ? error : new Error('Unknown error'),
+        {
+          action: 'signInWithGoogle'
+        }
+      );
       setLoading(false);
     }
   }, [auth, handleUserAuthentication]);
@@ -100,7 +123,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await signInWithPopup(auth, provider);
       await handleUserAuthentication(result.user);
     } catch (error) {
-      console.error('Error signing in with Facebook:', error);
+      logger.authFailure(
+        'signInWithFacebook',
+        error instanceof Error ? error : new Error('Unknown error'),
+        {
+          action: 'signInWithFacebook'
+        }
+      );
       setLoading(false);
     }
   }, [auth, handleUserAuthentication]);
@@ -112,7 +141,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const result = await signInWithEmailAndPassword(auth, email, password);
         await handleUserAuthentication(result.user);
       } catch (error) {
-        console.error('Error signing in with email/password:', error);
+        logger.authFailure(
+          'signInWithEmail',
+          error instanceof Error ? error : new Error('Unknown error'),
+          {
+            action: 'signInWithEmail',
+            userEmail: email
+          }
+        );
         throw error;
       }
     },
@@ -126,7 +162,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const result = await createUserWithEmailAndPassword(auth, email, password);
         await handleUserAuthentication(result.user);
       } catch (error) {
-        console.error('Error signing up with email/password:', error);
+        logger.authFailure(
+          'signUpWithEmail',
+          error instanceof Error ? error : new Error('Unknown error'),
+          {
+            action: 'signUpWithEmail',
+            userEmail: email
+          }
+        );
         throw error;
       }
     },
@@ -149,9 +192,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsAdmin(false);
       setLoading(false);
     } catch (error) {
-      console.error('Error signing out:', error);
+      logger.authFailure('logout', error instanceof Error ? error : new Error('Unknown error'), {
+        action: 'logout',
+        userId: user?.uid,
+        userEmail: user?.email || undefined
+      });
     }
-  }, [auth]);
+  }, [auth, user?.uid, user?.email]);
 
   React.useEffect(() => {
     if (!auth) return;

@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { verifySessionCookie } from './firebase-admin';
+import { logger } from './logger';
 import type { Firestore } from 'firebase-admin/firestore';
 
 export interface AuthenticatedUser {
@@ -40,7 +41,14 @@ export async function authenticateServerAction(
       email: decodedToken.email
     };
   } catch (error) {
-    console.error('Error authenticating server action:', error);
+    logger.authFailure(
+      'authenticateServerAction',
+      error instanceof Error ? error : new Error('Unknown authentication error'),
+      {
+        action: 'authenticateServerAction',
+        requireAdmin
+      }
+    );
     return null;
   }
 }

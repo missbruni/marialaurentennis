@@ -54,15 +54,13 @@ describe('ErrorBoundary', () => {
     );
 
     expect(console.error).toHaveBeenCalledWith(
-      'ErrorBoundary caught an error:',
-      expect.any(Error),
-      expect.any(Object)
+      expect.stringContaining('ERROR: ErrorBoundary caught an error')
     );
 
     vi.unstubAllEnvs();
   });
 
-  test('does not log error in production mode', () => {
+  test('logs error in production mode with structured format', () => {
     vi.stubEnv('NODE_ENV', 'production');
 
     render(
@@ -71,11 +69,11 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
 
-    expect(console.error).not.toHaveBeenCalledWith(
-      'ErrorBoundary caught an error:',
-      expect.any(Error),
-      expect.any(Object)
+    // Should log with structured format, not the old simple format
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringContaining('ERROR: ErrorBoundary caught an error')
     );
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining('environment=production'));
 
     vi.unstubAllEnvs();
   });

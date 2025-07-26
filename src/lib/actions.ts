@@ -10,6 +10,7 @@ import { z } from 'zod';
 
 import { clearBookingsCache } from './data';
 import { withAuth, type AuthenticatedUser } from './auth-utils';
+import { logger } from './logger';
 import type { Firestore } from 'firebase-admin/firestore';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
@@ -156,10 +157,27 @@ async function _createAvailabilityAction(
       return { success: true, id: docRef.id, count: 1 };
     }
   } catch (error) {
-    console.error('Error creating availability:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    logger.actionFailure(
+      'createAvailability',
+      error instanceof Error ? error : new Error(errorMessage),
+      {
+        userId: user.uid,
+        userEmail: user.email,
+        action: 'createAvailability'
+      },
+      {
+        type: validatedData.type,
+        location: validatedData.location,
+        players: validatedData.players,
+        price: validatedData.price,
+        createHourlySlots: validatedData.createHourlySlots
+      }
+    );
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
+      error: errorMessage
     };
   }
 }
@@ -169,39 +187,19 @@ async function _createCheckoutSessionAction(
   db: Firestore,
   _user: AuthenticatedUser
 ) {
-  console.log('[CHECKOUT_ACTION] Creating checkout session');
-
   const rawData = {
     lesson: JSON.parse(formData.get('lesson') as string),
     userId: formData.get('userId') || undefined,
     userEmail: formData.get('userEmail') || undefined
   };
 
-  console.log('[CHECKOUT_ACTION] Raw form data:', {
-    lessonId: rawData.lesson?.id,
-    userId: rawData.userId,
-    userEmail: rawData.userEmail
-  });
-
   const validatedData = CheckoutSessionSchema.parse(rawData);
-  console.log('[CHECKOUT_ACTION] Data validated successfully');
 
   try {
     const lessonRef = db.collection('availabilities').doc(validatedData.lesson.id);
     const lessonDoc = await lessonRef.get();
 
-    console.log('[CHECKOUT_ACTION] Lesson document check:', {
-      lessonId: validatedData.lesson.id,
-      exists: lessonDoc.exists,
-      status: lessonDoc.data()?.status
-    });
-
     if (!lessonDoc.exists || lessonDoc.data()?.status !== 'available') {
-      console.error('[CHECKOUT_ACTION] Lesson is no longer available:', {
-        lessonId: validatedData.lesson.id,
-        exists: lessonDoc.exists,
-        status: lessonDoc.data()?.status
-      });
       return { success: false, error: 'Lesson is no longer available' };
     }
 
@@ -229,18 +227,7 @@ async function _createCheckoutSessionAction(
         ${formattedDate} | ${formattedStartTime} - ${formattedEndTime}
     `.trim();
 
-    console.log('[CHECKOUT_ACTION] Lesson details:', {
-      lessonId: validatedData.lesson.id,
-      date: formattedDate,
-      time: `${formattedStartTime} - ${formattedEndTime}`,
-      location: validatedData.lesson.location,
-      type: validatedData.lesson.type,
-      price: validatedData.lesson.price
-    });
-
     const pendingUntil = new Date(Date.now() + THIRTY_MINUTES);
-    console.log('[CHECKOUT_ACTION] Setting lesson to pending until:', pendingUntil.toISOString());
-
     await lessonRef.update({
       status: 'pending',
       pendingUntil: pendingUntil,
@@ -254,7 +241,6 @@ async function _createCheckoutSessionAction(
     const expiresAt = Math.floor(Date.now() / 1000) + THIRTY_MINUTES_IN_SECONDS;
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
-    console.log('[CHECKOUT_ACTION] Creating Stripe checkout session');
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       expires_at: expiresAt,
@@ -288,35 +274,39 @@ async function _createCheckoutSessionAction(
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}?releaseLesson=${validatedData.lesson.id}`
     });
 
-    console.log('[CHECKOUT_ACTION] Stripe session created:', {
-      sessionId: session.id,
-      url: session.url,
-      expiresAt: new Date(expiresAt * 1000).toISOString()
-    });
-
-    console.log('[CHECKOUT_ACTION] Updating lesson with pending session ID');
     await lessonRef.update({
       pendingSessionId: session.id
     });
 
     revalidatePath('/');
-    console.log('[CHECKOUT_ACTION] Checkout session creation completed successfully');
     return { success: true, url: session.url };
   } catch (error) {
-    console.error('[CHECKOUT_ACTION] Error creating checkout session:', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-      lessonId: validatedData.lesson.id
-    });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.actionFailure(
+      'createCheckoutSession',
+      error instanceof Error ? error : new Error(errorMessage),
+      {
+        userId: validatedData.userId,
+        userEmail: validatedData.userEmail,
+        action: 'createCheckoutSession',
+        lessonId: validatedData.lesson.id
+      },
+      {
+        lesson: validatedData.lesson,
+        userId: validatedData.userId,
+        userEmail: validatedData.userEmail
+      }
+    );
+
     return {
       success: false,
       error: 'Failed to create checkout session',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: errorMessage
     };
   }
 }
 
-async function _createBookingAction(formData: FormData, _db: Firestore, _user: AuthenticatedUser) {
+async function _createBookingAction(formData: FormData, db: Firestore, _user: AuthenticatedUser) {
   const rawData = {
     booking: JSON.parse(formData.get('booking') as string),
     userEmail: formData.get('userEmail') as string,
@@ -324,8 +314,9 @@ async function _createBookingAction(formData: FormData, _db: Firestore, _user: A
     userId: formData.get('userId') as string
   };
 
+  let validatedData;
   try {
-    const validatedData = CreateBookingSchema.parse(rawData);
+    validatedData = CreateBookingSchema.parse(rawData);
     const newBooking = {
       startDateTime: new Date(validatedData.booking.startDateTime.seconds * 1000),
       endDateTime: new Date(validatedData.booking.endDateTime.seconds * 1000),
@@ -337,10 +328,10 @@ async function _createBookingAction(formData: FormData, _db: Firestore, _user: A
       userId: validatedData.userId
     };
 
-    const docRef = await _db.collection('bookings').add(newBooking);
+    const docRef = await db.collection('bookings').add(newBooking);
 
     if (validatedData.booking.id) {
-      const availabilityRef = _db.collection('availabilities').doc(validatedData.booking.id);
+      const availabilityRef = db.collection('availabilities').doc(validatedData.booking.id);
       await availabilityRef.update({ status: 'booked' });
     }
 
@@ -349,7 +340,26 @@ async function _createBookingAction(formData: FormData, _db: Firestore, _user: A
     revalidatePath('/confirmation');
     return { success: true, booking: { id: docRef.id } };
   } catch (error) {
-    console.error('Error creating booking:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.actionFailure(
+      'createBooking',
+      error instanceof Error ? error : new Error(errorMessage),
+      {
+        userId: validatedData?.userId,
+        userEmail: validatedData?.userEmail,
+        action: 'createBooking',
+        sessionId: validatedData?.sessionId,
+        lessonId: validatedData?.booking.id
+      },
+      {
+        booking: validatedData?.booking,
+        userEmail: validatedData?.userEmail,
+        sessionId: validatedData?.sessionId,
+        userId: validatedData?.userId,
+        rawData
+      }
+    );
+
     return { success: false, error: 'Failed to create booking' };
   }
 }
@@ -373,10 +383,27 @@ async function _setUserRoleAction(formData: FormData, _db: Firestore, _user: Aut
 
     return { success: true, message: `User role updated to ${validatedData.role}` };
   } catch (error) {
-    console.error('Error setting user role:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to set user role';
+    logger.actionFailure(
+      'setUserRole',
+      error instanceof Error ? error : new Error(errorMessage),
+      {
+        userId: _user.uid,
+        userEmail: _user.email,
+        action: 'setUserRole',
+        targetUserId: rawData.uid
+      },
+      {
+        targetUid: rawData.uid,
+        targetRole: rawData.role,
+        adminUserId: _user.uid,
+        adminEmail: _user.email
+      }
+    );
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to set user role'
+      error: errorMessage
     };
   }
 }

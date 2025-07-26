@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { useSearchParams } from 'next/navigation';
 import { DialogDescription, DialogFooter, DialogHeader } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useLessonFromParams } from '@/hooks/useLessonFromParams';
@@ -14,11 +13,10 @@ import { ConfirmationHeader } from './components/ConfirmationHeader';
 interface ConfirmationProps {
   onClose: () => void;
   onBookAnother: () => void;
+  sessionId: string | null;
 }
 
-export default function Confirmation({ onClose, onBookAnother }: ConfirmationProps) {
-  const searchParams = useSearchParams();
-  const sessionId = searchParams.get('sessionId');
+export default function Confirmation({ onClose, onBookAnother, sessionId }: ConfirmationProps) {
   const lesson = useLessonFromParams();
 
   const { newBooking, queryError, showTimeoutError, showConfirmedView } =

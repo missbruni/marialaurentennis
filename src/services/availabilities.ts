@@ -12,6 +12,7 @@ import {
   where
 } from 'firebase/firestore';
 import { getFirestore } from '../lib/firebase';
+import { logger } from '../lib/logger';
 
 export interface Availability {
   id: string;
@@ -53,7 +54,13 @@ export const getAvailability = async (): Promise<Availability[]> => {
       return availability.status === 'available';
     });
   } catch (error) {
-    console.error('Error fetching availabilities:', error);
+    logger.dataFetchFailure(
+      'getAvailability',
+      error instanceof Error ? error : new Error('Unknown error'),
+      {
+        action: 'getAvailability'
+      }
+    );
     throw error;
   }
 };
@@ -131,7 +138,23 @@ export const createAvailability = async (
       return { success: true, id: docRef.id, count: 1 };
     }
   } catch (error) {
-    console.error('Error creating availability:', error);
+    logger.actionFailure(
+      'createAvailability',
+      error instanceof Error ? error : new Error('Unknown error'),
+      {
+        action: 'createAvailability'
+      },
+      {
+        date,
+        startTime,
+        endTime,
+        players,
+        price,
+        location,
+        type,
+        createHourlySlots
+      }
+    );
     throw error;
   }
 };
@@ -159,12 +182,25 @@ const checkPendingAvailabilities = async (availabilities: Availability[]) => {
               pendingUntil: deleteField()
             });
           } catch (error) {
-            console.error(`Error releasing expired availability ${availability.id}:`, error);
+            logger.actionFailure(
+              'releaseExpiredAvailability',
+              error instanceof Error ? error : new Error('Unknown error'),
+              {
+                action: 'releaseExpiredAvailability',
+                availabilityId: availability.id
+              }
+            );
           }
         }
       }
     }
   } catch (error) {
-    console.error('Error checking pending availabilities:', error);
+    logger.dataFetchFailure(
+      'checkPendingAvailabilities',
+      error instanceof Error ? error : new Error('Unknown error'),
+      {
+        action: 'checkPendingAvailabilities'
+      }
+    );
   }
 };

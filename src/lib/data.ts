@@ -1,6 +1,7 @@
 import { getAvailability } from '@/services/availabilities';
 import { getDocs, query, where, collection } from 'firebase/firestore';
 import { getFirestore } from '@/lib/firebase';
+import { logger } from '@/lib/logger';
 import type { Booking } from '@/services/booking';
 
 const CACHE_DURATION_5_MINUTES = 5 * 60 * 1000;
@@ -11,7 +12,13 @@ export async function getAvailabilitiesData() {
     const data = await getAvailability();
     return data;
   } catch (error) {
-    console.error('Error fetching availabilities:', error);
+    logger.dataFetchFailure(
+      'getAvailabilitiesData',
+      error instanceof Error ? error : new Error('Unknown error'),
+      {
+        action: 'getAvailabilitiesData'
+      }
+    );
     throw error;
   }
 }
@@ -55,7 +62,18 @@ export async function getBookingsData(userId?: string): Promise<Booking[]> {
 
     return bookings;
   } catch (error) {
-    console.error('Error fetching bookings:', error);
+    logger.dataFetchFailure(
+      'getBookingsData',
+      error instanceof Error ? error : new Error('Unknown error'),
+      {
+        action: 'getBookingsData',
+        userId
+      },
+      {
+        cacheKey,
+        cacheHit: !!bookingsCache[cacheKey]
+      }
+    );
     throw error;
   }
 }
