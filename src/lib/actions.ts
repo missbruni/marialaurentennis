@@ -169,19 +169,39 @@ async function _createCheckoutSessionAction(
   db: Firestore,
   _user: AuthenticatedUser
 ) {
+  console.log('[CHECKOUT_ACTION] Creating checkout session');
+
   const rawData = {
     lesson: JSON.parse(formData.get('lesson') as string),
     userId: formData.get('userId') || undefined,
     userEmail: formData.get('userEmail') || undefined
   };
 
+  console.log('[CHECKOUT_ACTION] Raw form data:', {
+    lessonId: rawData.lesson?.id,
+    userId: rawData.userId,
+    userEmail: rawData.userEmail
+  });
+
   const validatedData = CheckoutSessionSchema.parse(rawData);
+  console.log('[CHECKOUT_ACTION] Data validated successfully');
 
   try {
     const lessonRef = db.collection('availabilities').doc(validatedData.lesson.id);
     const lessonDoc = await lessonRef.get();
 
+    console.log('[CHECKOUT_ACTION] Lesson document check:', {
+      lessonId: validatedData.lesson.id,
+      exists: lessonDoc.exists,
+      status: lessonDoc.data()?.status
+    });
+
     if (!lessonDoc.exists || lessonDoc.data()?.status !== 'available') {
+      console.error('[CHECKOUT_ACTION] Lesson is no longer available:', {
+        lessonId: validatedData.lesson.id,
+        exists: lessonDoc.exists,
+        status: lessonDoc.data()?.status
+      });
       return { success: false, error: 'Lesson is no longer available' };
     }
 
@@ -209,7 +229,18 @@ async function _createCheckoutSessionAction(
         ${formattedDate} | ${formattedStartTime} - ${formattedEndTime}
     `.trim();
 
+    console.log('[CHECKOUT_ACTION] Lesson details:', {
+      lessonId: validatedData.lesson.id,
+      date: formattedDate,
+      time: `${formattedStartTime} - ${formattedEndTime}`,
+      location: validatedData.lesson.location,
+      type: validatedData.lesson.type,
+      price: validatedData.lesson.price
+    });
+
     const pendingUntil = new Date(Date.now() + THIRTY_MINUTES);
+    console.log('[CHECKOUT_ACTION] Setting lesson to pending until:', pendingUntil.toISOString());
+
     await lessonRef.update({
       status: 'pending',
       pendingUntil: pendingUntil,
@@ -223,6 +254,7 @@ async function _createCheckoutSessionAction(
     const expiresAt = Math.floor(Date.now() / 1000) + THIRTY_MINUTES_IN_SECONDS;
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
+    console.log('[CHECKOUT_ACTION] Creating Stripe checkout session');
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       expires_at: expiresAt,
@@ -256,14 +288,26 @@ async function _createCheckoutSessionAction(
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}?releaseLesson=${validatedData.lesson.id}`
     });
 
+    console.log('[CHECKOUT_ACTION] Stripe session created:', {
+      sessionId: session.id,
+      url: session.url,
+      expiresAt: new Date(expiresAt * 1000).toISOString()
+    });
+
+    console.log('[CHECKOUT_ACTION] Updating lesson with pending session ID');
     await lessonRef.update({
       pendingSessionId: session.id
     });
 
     revalidatePath('/');
+    console.log('[CHECKOUT_ACTION] Checkout session creation completed successfully');
     return { success: true, url: session.url };
   } catch (error) {
-    console.error('Error creating checkout session:', error);
+    console.error('[CHECKOUT_ACTION] Error creating checkout session:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      lessonId: validatedData.lesson.id
+    });
     return {
       success: false,
       error: 'Failed to create checkout session',

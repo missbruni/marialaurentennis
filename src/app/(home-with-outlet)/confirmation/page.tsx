@@ -28,7 +28,20 @@ function ConfirmationWrapper({
     showConfirmedView || showTimeoutError || queryError || newBooking?.status === 'failed';
   const shouldShowCloseButton = hasFinalResult && !isProcessing;
 
+  console.log('[CONFIRMATION_PAGE] ConfirmationWrapper state:', {
+    sessionId,
+    newBooking: newBooking ? { id: newBooking.id, status: newBooking.status } : null,
+    isLoading,
+    showTimeoutError,
+    showConfirmedView,
+    queryError: queryError ? 'error' : null,
+    isProcessing,
+    hasFinalResult,
+    shouldShowCloseButton
+  });
+
   React.useEffect(() => {
+    console.log('[CONFIRMATION_PAGE] Processing state changed:', isProcessing);
     onProcessingStateChange(isProcessing);
   }, [isProcessing, onProcessingStateChange]);
 
@@ -44,18 +57,34 @@ export default function SuccessPage() {
   const [isProcessing, setIsProcessing] = React.useState(false);
 
   const { scrollToBookingForm } = useSectionRef();
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get('sessionId');
+
+  console.log('[CONFIRMATION_PAGE] SuccessPage mounted:', {
+    sessionId,
+    open,
+    isProcessing
+  });
 
   const handleClose = () => {
+    console.log('[CONFIRMATION_PAGE] Closing confirmation dialog');
     setOpen(false);
     window.history.replaceState({}, '', '/');
   };
 
   const handleBookAnother = () => {
+    console.log('[CONFIRMATION_PAGE] User wants to book another lesson');
     handleClose();
     scrollToBookingForm();
   };
 
   const handleOpenChange = (newOpen: boolean) => {
+    console.log('[CONFIRMATION_PAGE] Dialog open state change:', {
+      newOpen,
+      isProcessing,
+      willPreventClose: !newOpen && isProcessing
+    });
+
     // Prevent closing the dialog if processing is happening
     if (!newOpen && isProcessing) {
       return;
