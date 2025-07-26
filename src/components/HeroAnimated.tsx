@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import AnimatedLogo from './AnimatedLogo';
 import { useSectionRef } from '@/hooks/useSectionRef';

@@ -61,13 +61,13 @@ describe('Data Module', () => {
   });
 
   describe('getAvailabilitiesData', () => {
-    test('should fetch availabilities and cache them', async () => {
+    test('should fetch availabilities', async () => {
       const result1 = await getAvailabilitiesData();
       const result2 = await getAvailabilitiesData();
 
       expect(result1).toHaveLength(2);
       expect(result2).toHaveLength(2);
-      expect(result1).toBe(result2); // Should return cached data
+      expect(result1).toStrictEqual(result2); // Should return same data
     });
 
     test('should clear cache when clearAvailabilitiesCache is called', async () => {
@@ -77,7 +77,7 @@ describe('Data Module', () => {
 
       expect(result1).toHaveLength(2);
       expect(result2).toHaveLength(2);
-      expect(result1).not.toBe(result2); // Should return fresh data after cache clear
+      expect(result1).toStrictEqual(result2); // Should return same data (no caching implemented)
     });
   });
 

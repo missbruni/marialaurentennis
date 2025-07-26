@@ -1,4 +1,6 @@
-import React, { Suspense } from 'react';
+'use client';
+
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { format, parseISO, startOfDay, isAfter, isEqual, isBefore } from 'date-fns';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,10 +13,9 @@ import { Typography } from './ui/typography';
 import { useSectionRef } from '@/hooks/useSectionRef';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { Skeleton } from './ui/skeleton';
-import { ErrorBoundary } from './ErrorBoundary';
 import type { Availability } from '@/services/availabilities';
-import { use } from 'react';
-import { getAvailabilitiesData } from '@/lib/data';
+import { useAvailabilities } from '@/hooks/useAvailabilities';
+import { usePathname } from 'next/navigation';
 
 const DATE_FORMAT = 'yyyy-MM-dd';
 
@@ -26,14 +27,14 @@ export const BookingFormSchema = z.object({
     .optional()
 });
 
-const availabilitiesPromise = getAvailabilitiesData();
-
 const BookingForm: React.FC = React.memo(() => {
+  const pathname = usePathname();
   const { bookingFormRef, availableLessonsRef, scrollToAvailableLessons } = useSectionRef();
 
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   const [nextAvailableSlot, setNextAvailableSlot] = React.useState<Date | null>(null);
+  const { refreshAvailabilities, availabilities, isLoading, error } = useAvailabilities();
 
   const form = useForm<z.infer<typeof BookingFormSchema>>({
     resolver: zodResolver(BookingFormSchema),
@@ -41,8 +42,6 @@ const BookingForm: React.FC = React.memo(() => {
       date: undefined
     }
   });
-
-  const availabilities = use(availabilitiesPromise);
 
   const selectedDate = form.watch('date');
   const selectedLocation = 'sundridge';
@@ -125,6 +124,10 @@ const BookingForm: React.FC = React.memo(() => {
     }
   }, [selectedDate, isMobile, scrollToAvailableLessonsCallback]);
 
+  React.useEffect(() => {
+    refreshAvailabilities();
+  }, [pathname, refreshAvailabilities]);
+
   return (
     <section
       ref={bookingFormRef}
@@ -161,30 +164,28 @@ const BookingForm: React.FC = React.memo(() => {
                 data-testid="date-picker-container"
                 className="flex flex-col gap-2 rounded-lg backdrop-blur-md"
               >
-                <Suspense fallback={<Skeleton className="h-10 w-full" />}>
-                  <ErrorBoundary
-                    fallback={
-                      <div className="relative z-10 px-4 text-red-500">
-                        Error loading lessons. Please try again later.
-                      </div>
-                    }
-                  >
-                    <FormField
-                      control={form.control}
-                      name="date"
-                      render={({ field }) => (
-                        <DatePicker
-                          field={field}
-                          availableDates={availableUniqueDates}
-                          disabled={!selectedLocation}
-                          helperText="Choose a date to see available lessons."
-                          nextAvailableDate={nextAvailableDate}
-                          onNextAvailableSlot={handleNextAvailableSlot}
-                        />
-                      )}
-                    />
-                  </ErrorBoundary>
-                </Suspense>
+                {isLoading ? (
+                  <Skeleton className="h-10 w-full" />
+                ) : error ? (
+                  <div className="relative z-10 px-4 text-red-500">
+                    Error loading lessons. Please try again later.
+                  </div>
+                ) : (
+                  <FormField
+                    control={form.control}
+                    name="date"
+                    render={({ field }) => (
+                      <DatePicker
+                        field={field}
+                        availableDates={availableUniqueDates}
+                        disabled={!selectedLocation}
+                        helperText="Choose a date to see available lessons."
+                        nextAvailableDate={nextAvailableDate}
+                        onNextAvailableSlot={handleNextAvailableSlot}
+                      />
+                    )}
+                  />
+                )}
               </div>
             </Form>
 
@@ -198,7 +199,7 @@ const BookingForm: React.FC = React.memo(() => {
                   selectedDate={selectedDate ? format(selectedDate, DATE_FORMAT) : ''}
                   selectedLocation={selectedLocation}
                   nextAvailableSlot={nextAvailableSlot}
-                  availabilities={availabilities}
+                  availabilities={availabilities || []}
                 />
               </div>
             )}

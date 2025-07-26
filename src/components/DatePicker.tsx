@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import type { FieldValues } from 'react-hook-form';
 import { FormItem } from '@/components/ui/form';

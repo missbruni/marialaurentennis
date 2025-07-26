@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 
 import type { FieldValues } from 'react-hook-form';
@@ -101,15 +103,15 @@ const SelectDatePicker: React.FC<SelectDatePickerProps> = ({
   };
 
   const MobileCalendarComponent = (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       <div
         ref={calendarRef}
-        className="overflow-y-auto flex-grow"
+        className="flex-grow overflow-y-auto"
         style={{ scrollBehavior: 'smooth' }}
       >
         {visibleMonths.map((monthDate, index) => (
           <div key={index} className="mb-8">
-            <div className="text-base font-medium text-center mb-2">
+            <div className="mb-2 text-center text-base font-medium">
               {format(monthDate, 'MMMM yyyy')}
             </div>
             <Calendar
@@ -142,7 +144,7 @@ const SelectDatePicker: React.FC<SelectDatePickerProps> = ({
           </div>
         ))}
 
-        <Button variant="outline" className="w-full mb-4" onClick={handleLoadMoreMonths}>
+        <Button variant="outline" className="mb-4 w-full" onClick={handleLoadMoreMonths}>
           Load more dates
         </Button>
       </div>
@@ -160,7 +162,7 @@ const SelectDatePicker: React.FC<SelectDatePickerProps> = ({
               variant="outline"
               onClick={() => setOpen(true)}
               className={cn(
-                'w-full pl-3 text-left font-normal border border-input bg-white dark:bg-transparent',
+                'border-input w-full border bg-white pl-3 text-left font-normal dark:bg-transparent',
                 !field.value && 'text-muted-foreground'
               )}
             >
@@ -173,17 +175,17 @@ const SelectDatePicker: React.FC<SelectDatePickerProps> = ({
             </Button>
           </FormControl>
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="sm:max-w-[425px] p-0 h-[80vh] flex flex-col custom-dialog-close">
+            <DialogContent className="custom-dialog-close flex h-[80vh] flex-col p-0 sm:max-w-[425px]">
               <DialogTitle>
                 <VisuallyHidden>Select a date</VisuallyHidden>
               </DialogTitle>
               <DialogDescription>
                 <VisuallyHidden>Choose from available dates</VisuallyHidden>
               </DialogDescription>
-              <div className="p-4 flex items-center justify-between border-b">
+              <div className="flex items-center justify-between border-b p-4">
                 <h2 className="text-lg font-semibold">Select Date</h2>
               </div>
-              <div className="p-4 flex-grow overflow-hidden flex flex-col">
+              <div className="flex flex-grow flex-col overflow-hidden p-4">
                 {MobileCalendarComponent}
               </div>
             </DialogContent>
@@ -197,7 +199,7 @@ const SelectDatePicker: React.FC<SelectDatePickerProps> = ({
                 disabled={disabled}
                 variant="outline"
                 className={cn(
-                  'w-full pl-3 text-left font-normal border border-input bg-white dark:bg-transparent',
+                  'border-input w-full border bg-white pl-3 text-left font-normal dark:bg-transparent',
                   !field.value && 'text-muted-foreground'
                 )}
               >

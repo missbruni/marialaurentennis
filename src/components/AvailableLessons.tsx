@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { useTrail, animated } from '@react-spring/web';
 import { format, isAfter, isEqual, isToday } from 'date-fns';

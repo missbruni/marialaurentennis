@@ -1,5 +1,3 @@
-'use client';
-
 import Hero from '@/components/Hero';
 import BookingForm from '@/components/BookingForm';
 import React from 'react';

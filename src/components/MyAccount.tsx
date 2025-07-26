@@ -1,3 +1,5 @@
+'use client';
+
 import { User } from 'firebase/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -25,7 +27,7 @@ const MyAccount: React.FC<MyAccountProps> = ({ onLoginClick }) => {
   return user ? (
     <Popover>
       <PopoverTrigger asChild>
-        <Avatar className="object-cover relative w-10 h-10 rounded-full overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
+        <Avatar className="hover:ring-primary/50 relative h-10 w-10 cursor-pointer overflow-hidden rounded-full object-cover transition-all hover:ring-2">
           {user.photoURL ? (
             <AvatarImage
               data-testid="avatar-image"
@@ -43,18 +45,18 @@ const MyAccount: React.FC<MyAccountProps> = ({ onLoginClick }) => {
         <div className="flex flex-col gap-2">
           <div className="px-2 py-1.5">
             <p className="text-sm font-medium">{user.displayName}</p>
-            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+            <p className="text-muted-foreground truncate text-xs">{user.email}</p>
           </div>
           <Button
             variant="ghost"
-            className="cursor-pointer w-full justify-start text-left"
+            className="w-full cursor-pointer justify-start text-left"
             onClick={viewBookings}
           >
             View Bookings
           </Button>
           <Button
             variant="ghost"
-            className="cursor-pointer w-full justify-start text-left"
+            className="w-full cursor-pointer justify-start text-left"
             onClick={logout}
           >
             Logout
@@ -66,7 +68,7 @@ const MyAccount: React.FC<MyAccountProps> = ({ onLoginClick }) => {
     <Button
       size="lg"
       variant="ghost"
-      className="border-1 cursor-pointer duration-200 hidden md:inline-flex items-center justify-center rounded-md transition-colors hover:bg-white/20 text-foreground h-9 px-4"
+      className="text-foreground hidden h-9 cursor-pointer items-center justify-center rounded-md border-1 px-4 transition-colors duration-200 hover:bg-white/20 md:inline-flex"
       onClick={onLoginClick}
       aria-label="Login"
     >
