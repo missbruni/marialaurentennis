@@ -19,7 +19,7 @@ interface ConfirmationProps {
 export default function Confirmation({ onClose, onBookAnother, sessionId }: ConfirmationProps) {
   const lesson = useLessonFromParams();
 
-  const { newBooking, queryError, showTimeoutError, showConfirmedView } =
+  const { newBooking, queryError, showTimeoutError, showConfirmedView, manualRefetch } =
     useBookingStatus(sessionId);
 
   const isBookingFailed = newBooking?.status === 'failed';
@@ -86,6 +86,15 @@ export default function Confirmation({ onClose, onBookAnother, sessionId }: Conf
             variant={isBookingFailed ? 'destructive' : 'default'}
           >
             Done
+          </Button>
+        </DialogFooter>
+      )}
+
+      {/* Debug button - only show in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <DialogFooter className="mt-2">
+          <Button onClick={manualRefetch} variant="outline" size="sm" className="w-full sm:w-auto">
+            🔄 Debug: Manual Refetch
           </Button>
         </DialogFooter>
       )}

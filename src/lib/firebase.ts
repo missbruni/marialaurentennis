@@ -50,10 +50,18 @@ export async function getFirestore(): Promise<Firestore> {
     return firestorePromise;
   }
 
+  console.log('🔍 getFirestore - initializing Firestore');
+
   const firebaseFirestorePromise = import('firebase/firestore');
-  firestorePromise = Promise.all([firebaseFirestorePromise, initializeFirebaseApp()]).then(
-    ([{ getFirestore }, app]) => getFirestore(app)
-  );
+  firestorePromise = Promise.all([firebaseFirestorePromise, initializeFirebaseApp()])
+    .then(([{ getFirestore }, app]) => {
+      console.log('✅ getFirestore - Firestore initialized successfully');
+      return getFirestore(app);
+    })
+    .catch((error) => {
+      console.error('❌ getFirestore - Firestore initialization failed:', error);
+      throw error;
+    });
 
   return firestorePromise;
 }

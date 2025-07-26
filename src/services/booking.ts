@@ -19,8 +19,11 @@ export type Booking = {
 };
 
 export const getUserBookings = async (userId?: string) => {
+  console.log('🔍 getUserBookings called with userId:', userId);
+
   if (!userId) {
     const error = new Error('User not authenticated');
+    console.error('❌ getUserBookings failed - no userId:', error.message);
     logger.authFailure('getUserBookings', error, {
       action: 'getUserBookings'
     });
@@ -28,7 +31,9 @@ export const getUserBookings = async (userId?: string) => {
   }
 
   try {
+    console.log('🔍 getUserBookings - getting Firestore instance');
     const db = await getFirestore();
+    console.log('🔍 getUserBookings - creating query');
     const bookingsCollection = collection(db, 'bookings');
     const bookingsQuery = query(
       bookingsCollection,
@@ -36,12 +41,17 @@ export const getUserBookings = async (userId?: string) => {
       orderBy('startDateTime', 'desc')
     );
 
+    console.log('🔍 getUserBookings - executing query');
     const snapshot = await getDocs(bookingsQuery);
-    return snapshot.docs.map((doc) => ({
+    const bookings = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data()
     })) as Booking[];
+
+    console.log('✅ getUserBookings - found', bookings.length, 'bookings');
+    return bookings;
   } catch (error) {
+    console.error('❌ getUserBookings failed:', error);
     logger.dataFetchFailure(
       'getUserBookings',
       error instanceof Error ? error : new Error('Unknown error'),
@@ -55,8 +65,11 @@ export const getUserBookings = async (userId?: string) => {
 };
 
 export const getBookingBySessionId = async (sessionId: string) => {
+  console.log('🔍 getBookingBySessionId called with sessionId:', sessionId);
+
   if (!sessionId) {
     const error = new Error('Session ID is required');
+    console.error('❌ getBookingBySessionId failed - no sessionId:', error.message);
     logger.dataFetchFailure('getBookingBySessionId', error, {
       action: 'getBookingBySessionId'
     });
@@ -64,19 +77,29 @@ export const getBookingBySessionId = async (sessionId: string) => {
   }
 
   try {
+    console.log('🔍 getBookingBySessionId - getting Firestore instance');
     const db = await getFirestore();
+    console.log('🔍 getBookingBySessionId - creating query');
     const bookingsCollection = collection(db, 'bookings');
     const bookingsQuery = query(bookingsCollection, where('stripeId', '==', sessionId));
 
+    console.log('🔍 getBookingBySessionId - executing query');
     const snapshot = await getDocs(bookingsQuery);
     const bookings = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data()
     })) as Booking[];
 
+    console.log(
+      '✅ getBookingBySessionId - found',
+      bookings.length,
+      'bookings with sessionId:',
+      sessionId
+    );
     // Return the first (and should be only) booking with this session ID
     return bookings[0] || null;
   } catch (error) {
+    console.error('❌ getBookingBySessionId failed:', error);
     logger.dataFetchFailure(
       'getBookingBySessionId',
       error instanceof Error ? error : new Error('Unknown error'),
