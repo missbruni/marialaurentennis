@@ -60,10 +60,6 @@ export async function getBookingsData(userId?: string): Promise<Booking[]> {
   }
 }
 
-export function clearAvailabilitiesCache() {
-  // Cache cleared - no longer using local cache
-}
-
 export function clearBookingsCache(userId?: string) {
   if (userId) {
     delete bookingsCache[userId];

@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminFirestore } from '../../../../lib/firebase-admin';
 import type { Availability } from '../../../../services/availabilities';
-import { clearBookingsCache, clearAvailabilitiesCache } from '../../../../lib/data';
+import { clearBookingsCache } from '../../../../lib/data';
 
 let stripeInstance: Stripe | null = null;
 
@@ -180,7 +180,6 @@ export async function POST(req: NextRequest) {
       if (userId) {
         clearBookingsCache(userId);
       }
-      clearAvailabilitiesCache();
 
       return NextResponse.json({ received: true });
     } catch (error) {

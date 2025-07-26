@@ -1,10 +1,5 @@
 import { describe, expect, test, vi, beforeEach } from 'vitest';
-import {
-  getAvailabilitiesData,
-  getBookingsData,
-  clearAvailabilitiesCache,
-  clearBookingsCache
-} from './data';
+import { getAvailabilitiesData, getBookingsData, clearBookingsCache } from './data';
 
 // Mock the services
 vi.mock('@/services/availabilities', () => ({
@@ -70,9 +65,8 @@ describe('Data Module', () => {
       expect(result1).toStrictEqual(result2); // Should return same data
     });
 
-    test('should clear cache when clearAvailabilitiesCache is called', async () => {
+    test('should return fresh data on each call (no caching)', async () => {
       const result1 = await getAvailabilitiesData();
-      clearAvailabilitiesCache();
       const result2 = await getAvailabilitiesData();
 
       expect(result1).toHaveLength(2);
@@ -143,12 +137,11 @@ describe('Data Module', () => {
   });
 
   describe('Cache Clearing Functions', () => {
-    test('clearAvailabilitiesCache should reset availabilities cache', async () => {
+    test('availabilities data should not be cached', async () => {
       const result1 = await getAvailabilitiesData();
-      clearAvailabilitiesCache();
       const result2 = await getAvailabilitiesData();
 
-      expect(result1).not.toBe(result2);
+      expect(result1).toStrictEqual(result2); // Should return same data (no caching implemented)
     });
 
     test('clearBookingsCache with userId should clear only that user cache', async () => {

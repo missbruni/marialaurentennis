@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import { capitalizeWords } from '@/lib/string';
 import { z } from 'zod';
 
-import { clearBookingsCache, clearAvailabilitiesCache } from './data';
+import { clearBookingsCache } from './data';
 import { withAuth, type AuthenticatedUser } from './auth-utils';
 import type { Firestore } from 'firebase-admin/firestore';
 
@@ -134,7 +134,6 @@ async function _createAvailabilityAction(
 
       await batch.commit();
 
-      clearAvailabilitiesCache();
       revalidatePath('/admin/availability');
       return { success: true, count: availabilityHourSlots };
     } else {
@@ -152,8 +151,6 @@ async function _createAvailabilityAction(
       };
 
       const docRef = await db.collection('availabilities').add(newAvailability);
-
-      clearAvailabilitiesCache();
 
       revalidatePath('/admin/availability');
       return { success: true, id: docRef.id, count: 1 };
@@ -218,8 +215,6 @@ async function _createCheckoutSessionAction(
       pendingUntil: pendingUntil,
       pendingSessionId: null
     });
-
-    clearAvailabilitiesCache();
 
     const encodedLesson = encodeURIComponent(
       Buffer.from(JSON.stringify(validatedData.lesson)).toString('base64')
@@ -306,7 +301,6 @@ async function _createBookingAction(formData: FormData, _db: Firestore, _user: A
     }
 
     clearBookingsCache(validatedData.userId);
-    clearAvailabilitiesCache();
 
     revalidatePath('/confirmation');
     return { success: true, booking: { id: docRef.id } };

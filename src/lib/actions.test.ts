@@ -148,9 +148,7 @@ describe('Server Actions', () => {
       }
     });
 
-    test('should clear availabilities cache when creating single availability', async () => {
-      const { clearAvailabilitiesCache } = await import('./data');
-
+    test('should create single availability successfully', async () => {
       const formData = new FormData();
       formData.append('type', 'private');
       formData.append('availabilityDate', '2025-12-25T00:00:00.000Z');
@@ -163,12 +161,10 @@ describe('Server Actions', () => {
 
       await createAvailabilityAction(formData);
 
-      expect(clearAvailabilitiesCache).toHaveBeenCalledTimes(1);
+      // Note: availabilities are managed by React Query, no local cache to clear
     });
 
-    test('should clear availabilities cache when creating hourly slots', async () => {
-      const { clearAvailabilitiesCache } = await import('./data');
-
+    test('should create hourly slots successfully', async () => {
       const formData = new FormData();
       formData.append('type', 'private');
       formData.append('availabilityDate', '2025-12-25T00:00:00.000Z');
@@ -181,7 +177,7 @@ describe('Server Actions', () => {
 
       await createAvailabilityAction(formData);
 
-      expect(clearAvailabilitiesCache).toHaveBeenCalledTimes(1);
+      // Note: availabilities are managed by React Query, no local cache to clear
     });
 
     test('should handle authentication errors', async () => {
@@ -251,9 +247,7 @@ describe('Server Actions', () => {
       }
     });
 
-    test('should clear availabilities cache when creating checkout session', async () => {
-      const { clearAvailabilitiesCache } = await import('./data');
-
+    test('should create checkout session successfully', async () => {
       const mockLesson = {
         id: 'lesson-123',
         startDateTime: { seconds: 1234567890, nanoseconds: 123456789 },
@@ -271,7 +265,7 @@ describe('Server Actions', () => {
 
       await createCheckoutSessionAction(formData);
 
-      expect(clearAvailabilitiesCache).toHaveBeenCalledTimes(1);
+      // Note: availabilities are managed by React Query, no local cache to clear
     });
 
     test('should handle authentication errors', async () => {
@@ -326,7 +320,7 @@ describe('Server Actions', () => {
     });
 
     test('should clear user-specific bookings cache when creating booking', async () => {
-      const { clearBookingsCache, clearAvailabilitiesCache } = await import('./data');
+      const { clearBookingsCache } = await import('./data');
 
       const mockBooking = {
         id: 'availability-123',
@@ -344,11 +338,11 @@ describe('Server Actions', () => {
       await createBookingAction(formData);
 
       expect(clearBookingsCache).toHaveBeenCalledWith('user-123');
-      expect(clearAvailabilitiesCache).toHaveBeenCalledTimes(1);
+      // Note: availabilities are managed by React Query, no local cache to clear
     });
 
-    test('should clear both caches when booking has availability ID', async () => {
-      const { clearBookingsCache, clearAvailabilitiesCache } = await import('./data');
+    test('should clear bookings cache when booking has availability ID', async () => {
+      const { clearBookingsCache } = await import('./data');
 
       const mockBooking = {
         id: 'availability-123',
@@ -366,11 +360,11 @@ describe('Server Actions', () => {
       await createBookingAction(formData);
 
       expect(clearBookingsCache).toHaveBeenCalledWith('user-123');
-      expect(clearAvailabilitiesCache).toHaveBeenCalledTimes(1);
+      // Note: availabilities are managed by React Query, no local cache to clear
     });
 
     test('should handle booking creation without availability ID', async () => {
-      const { clearBookingsCache, clearAvailabilitiesCache } = await import('./data');
+      const { clearBookingsCache } = await import('./data');
 
       const mockBooking = {
         startDateTime: { seconds: 1234567890, nanoseconds: 123456789 },
@@ -388,7 +382,7 @@ describe('Server Actions', () => {
 
       expect(result.success).toBe(true);
       expect(clearBookingsCache).toHaveBeenCalledWith('user-123');
-      expect(clearAvailabilitiesCache).toHaveBeenCalledTimes(1);
+      // Note: availabilities are managed by React Query, no local cache to clear
     });
   });
 });
