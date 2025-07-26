@@ -26,7 +26,7 @@ vi.mock('./ui/avatar', () => ({
     </div>
   ),
   AvatarImage: ({ src, alt, ...props }: any) => (
-    <img data-testid="avatar-image" src={src} alt={alt} {...props} />
+    <div data-testid="avatar-image" data-src={src} data-alt={alt} {...props} />
   )
 }));
 

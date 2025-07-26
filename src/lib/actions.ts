@@ -277,7 +277,7 @@ async function _createCheckoutSessionAction(
   }
 }
 
-async function _createBookingAction(formData: FormData, db: Firestore, _user: AuthenticatedUser) {
+async function _createBookingAction(formData: FormData, _db: Firestore, _user: AuthenticatedUser) {
   const rawData = {
     booking: JSON.parse(formData.get('booking') as string),
     userEmail: formData.get('userEmail') as string,
@@ -298,10 +298,10 @@ async function _createBookingAction(formData: FormData, db: Firestore, _user: Au
       userId: validatedData.userId
     };
 
-    const docRef = await db.collection('bookings').add(newBooking);
+    const docRef = await _db.collection('bookings').add(newBooking);
 
     if (validatedData.booking.id) {
-      const availabilityRef = db.collection('availabilities').doc(validatedData.booking.id);
+      const availabilityRef = _db.collection('availabilities').doc(validatedData.booking.id);
       await availabilityRef.update({ status: 'booked' });
     }
 

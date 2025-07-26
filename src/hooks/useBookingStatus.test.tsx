@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, waitFor, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useBookingStatus } from './useBookingStatus';
 
@@ -131,7 +131,7 @@ describe('useBookingStatus', () => {
 
     mockGetUserBookings.mockResolvedValue([mockBooking]);
 
-    const { result } = renderHook(() => useBookingStatus('cs_test_session_123'), { wrapper });
+    renderHook(() => useBookingStatus('cs_test_session_123'), { wrapper });
 
     expect(true).toBe(true);
   });

@@ -22,7 +22,19 @@ export type MediaQueryType = keyof typeof MEDIA_QUERIES;
 
 let mockMatchMedia: ReturnType<typeof vi.fn>;
 let currentMediaQueryState: Record<string, boolean> = {};
-let mediaQueryListCache: Record<string, any> = {};
+let mediaQueryListCache: Record<
+  string,
+  {
+    matches: boolean;
+    media: string;
+    onchange: null;
+    addListener: ReturnType<typeof vi.fn>;
+    removeListener: ReturnType<typeof vi.fn>;
+    addEventListener: ReturnType<typeof vi.fn>;
+    removeEventListener: ReturnType<typeof vi.fn>;
+    dispatchEvent: ReturnType<typeof vi.fn>;
+  }
+> = {};
 
 /**
  * Set up media query mocking for tests
@@ -77,7 +89,7 @@ export const updateMediaQuery = (query: string, matches: boolean) => {
     if (mockMediaQueryList.addEventListener.mock.calls.length > 0) {
       const changeEvent = new Event('change');
       mockMediaQueryList.addEventListener.mock.calls.forEach(
-        ([event, callback]: [string, Function]) => {
+        ([event, callback]: [string, (event: MediaQueryListEvent) => void]) => {
           if (event === 'change') {
             // Create a proper MediaQueryListEvent
             const mediaQueryListEvent = {
@@ -279,7 +291,7 @@ export { render as renderWithoutWrapper } from '@testing-library/react';
 // Also export a synchronous version for backward compatibility
 export const renderSync = (ui: React.ReactElement) => {
   const user = userEvent.setup();
-  let result: any;
+  let result!: ReturnType<typeof render>;
 
   act(() => {
     result = render(ui, {

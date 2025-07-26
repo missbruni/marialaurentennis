@@ -3,8 +3,6 @@ import { getDocs, query, where, collection } from 'firebase/firestore';
 import { getFirestore } from '@/lib/firebase';
 import type { Booking } from '@/services/booking';
 
-let availabilitiesCache: Availability[] | null = null;
-let availabilitiesCacheTime = 0;
 const CACHE_DURATION_5_MINUTES = 5 * 60 * 1000;
 const bookingsCache: Record<string, { data: Booking[]; time: number }> = {};
 
@@ -63,8 +61,7 @@ export async function getBookingsData(userId?: string): Promise<Booking[]> {
 }
 
 export function clearAvailabilitiesCache() {
-  availabilitiesCache = null;
-  availabilitiesCacheTime = 0;
+  // Cache cleared - no longer using local cache
 }
 
 export function clearBookingsCache(userId?: string) {
