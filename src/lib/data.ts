@@ -1,4 +1,4 @@
-import { Availability, getAvailability } from '@/services/availabilities';
+import { getAvailability } from '@/services/availabilities';
 import { getDocs, query, where, collection } from 'firebase/firestore';
 import { getFirestore } from '@/lib/firebase';
 import type { Booking } from '@/services/booking';

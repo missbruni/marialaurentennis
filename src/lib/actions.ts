@@ -316,7 +316,7 @@ async function _createBookingAction(formData: FormData, _db: Firestore, _user: A
   }
 }
 
-async function _setUserRoleAction(formData: FormData, db: Firestore, user: AuthenticatedUser) {
+async function _setUserRoleAction(formData: FormData, _db: Firestore, _user: AuthenticatedUser) {
   const rawData = {
     uid: formData.get('uid') as string,
     role: formData.get('role') as string

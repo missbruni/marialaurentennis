@@ -182,10 +182,10 @@ describe('MyAccount', () => {
     expect(screen.getByTestId('avatar')).toBeInTheDocument();
     expect(screen.getByTestId('avatar-image')).toBeInTheDocument();
     expect(screen.getByTestId('avatar-image')).toHaveAttribute(
-      'src',
+      'data-src',
       'https://example.com/photo.jpg'
     );
-    expect(screen.getByTestId('avatar-image')).toHaveAttribute('alt', "Test User's profile");
+    expect(screen.getByTestId('avatar-image')).toHaveAttribute('data-alt', "Test User's profile");
   });
 
   test('uses email initial when display name is not available', () => {
